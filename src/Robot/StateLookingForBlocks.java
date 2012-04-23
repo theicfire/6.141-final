@@ -27,7 +27,7 @@ public class StateLookingForBlocks extends RobotState {
 	   
 	           switch (state) {
 		           case INIT:
-		               if (this.robot.vision.canSeeBlock()) {
+		               if (this.robot.visionCanSeeBlock) {
 		                   exitState = new StateInitial(this.robot);
 		                   break loop;
 		               }
@@ -41,7 +41,7 @@ public class StateLookingForBlocks extends RobotState {
 		               state = State.MOVING;
 		               break;
 		           case MOVING:
-		               if (this.robot.vision.canSeeBlock()) {
+		               if (this.robot.visionCanSeeBlock) {
 		                   exitState = new StateInitial(this.robot);
 		                   break loop;
 		               } else if (robot.waypointDriver.doneMovement()) {

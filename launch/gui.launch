@@ -5,6 +5,7 @@
   </machine>
 
   <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.ConstructionGUI" machine="workstation">
+  <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="Challenge Vision.VisionMain" machine="workstation">
   </node> 	  
 
 </launch>
