@@ -1,0 +1,168 @@
+#Comment line
+
+map {
+
+    bottom_left { -0.6096 -0.4953 }
+    top_right { 2.4384 4.1466 }
+    robot_start { 0.0 0.0 }
+    robot_goal { 2.0574 0.0000 }
+
+    #Fiducials will contain a position,
+    #a top_color, a bottom_color, a top_radius, and a bottom_radius
+    #This should probably be broken down further into a fiducial being
+    #composed of two Ball objects...at some point
+
+    fiducials {
+    	num_fiducials 7
+	    0 {
+	        position { -0.6125 4.1375 } 
+		    top_color green
+		    bottom_color blue
+		    top_radius 0.055 #in meters
+		    bottom_radius 0.055 #in meters
+	    }
+	
+	    1 {
+	        position { 0.5 4.125 }
+		    top_color blue
+		    bottom_color yellow
+		    top_radius 0.055
+		    bottom_radius 0.055
+	    }
+	
+	    2 {
+	        position { 2.4125 3.325 }
+		    top_color green
+		    bottom_color orange
+		    top_radius 0.055
+		    bottom_radius 0.055
+	    }
+	
+	    3 {
+	        position { 1.3875 -0.475 }
+		    top_color red
+		    bottom_color green
+		    top_radius 0.055
+		    bottom_radius 0.055
+	    }
+	    
+	    4 {
+	        position { -0.5125 0.65 }
+		    top_color yellow
+		    bottom_color red
+		    top_radius 0.055
+		    bottom_radius 0.055
+	    }
+	    
+	    5 {
+	       position { 1.45 1.425 }
+	           top_color blue
+		   bottom_color red
+		   top_radius 0.055
+		   bottom_radius 0.055
+	    }
+
+	    6 {
+	       position { 0.8625 1.225 }
+	           top_color orange
+		   bottom_color blue
+		   top_radius 0.055
+		   bottom_radius 0.055
+	    }
+    }
+
+    #ConstructionObject information.  Note: some of the intended landing sites may be
+    #outside of the bounding box
+
+    construction_objects {
+    	num_construction_objects 6
+        0 {
+            position { 0.0 1.22 } # Around first obstacle
+        }
+        1 {
+            position { 0.32 2.875 } # Near Diagonal Obstacles
+        }
+        2 {
+            position { 2.262 -0.304 } #Hard: In the corner.  Moved out 7cm,7cm
+        }
+        3 {
+            position { 0.581 2.343 } # One of the further blocks
+        }
+        4 {
+            position { 2.30 2.595 } # Double block
+            size 2
+        }
+        5 {
+            position { -0.232 3.494 } # Around concave obstacle
+        }
+    }
+
+	#Recall that obstacle points must be specified in CCW order
+	
+    obstacles {
+    	num_obstacles 8
+		0 {
+	        num_points 4
+		    0 { -0.6096 0.4191 }
+		    1 { -0.6096 0.6350 }
+		    2 { 0.2032 0.6350  }
+		    3 { 0.2032 0.4191 }
+		}
+	
+		1 {
+	        num_points 4
+		    0 { -0.6096 0.4191  }
+		    1 { -0.6096 1.2192  }
+		    2 { -0.6096 2.1336  }
+		    3 {  0.0254 1.8923  }
+		}
+
+		2 {
+	        num_points 4
+		    0 { 0.8763 1.2192  }
+		    1 { 1.4478 1.4351  }
+		    2 { 1.4859 1.3335  }
+		    3 { 0.9144 1.1240  }
+		}
+
+		3 { 
+	        num_points 4
+		    0 { 1.0033 1.8351  }
+		    1 { 1.0668 1.9304  }
+		    2 { 1.4986 1.4986  }
+		    3 { 1.4478 1.4351  }
+		}
+
+		4 { 
+	        num_points 4
+		    0 { 0.7938 1.2510  }
+		    1 { 0.9271 1.8415  }
+		    2 { 1.0033 1.8351  }
+		    3 { 0.8763 1.2192  }
+		}
+
+		5 {
+	        num_points 4
+		    0 { 0.3048 2.9464 }
+		    1 { 0.3048 4.1466 }
+		    2 { 0.5143 4.1466  }
+		    3 { 0.5143 2.9464  }
+		}
+
+		6 {
+	        num_points 4
+		    0 { 1.2192 3.3528 }
+		    1 { 1.2192 3.5687 }
+		    2 { 2.4384 3.5687 }
+		    3 { 2.4384 3.3528 }
+		}
+
+		7 {
+	        num_points 4
+		    0 { 1.4097 0.7620  }
+		    1 { 1.6383 0.7620 }
+		    2 { 1.6383 -0.4953  }
+		    3 { 1.4097 -0.4953 }
+		}
+	}
+}

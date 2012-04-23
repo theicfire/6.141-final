@@ -1,0 +1,13 @@
+<launch>
+  <machine name="workstation" address="workstation">
+     <env name="ROS_MASTER_URI" value="http://workstation:11311" />
+     <env name="ROS_HOSTNAME" value="workstation" />
+  </machine>
+
+  <node name="map" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.GrandChallengeMap" machine="workstation">
+
+  	<param name="mapFileName" value="/home/rss-student/labs/Challenge/src/challenge_2012.txt" />  
+
+  </node> 
+
+</launch>

@@ -1,0 +1,28 @@
+<package>
+  <description brief="Challenge">
+
+     Challenge
+
+  </description>
+  <author>rss-staff</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/Challenge</url>
+  <depend package="rosjava"/>
+  <depend package="rss_msgs"/>
+  <depend package="lab4"/>
+  <depend package="lab5"/>
+  <depend package="lab6"/>
+  <depend package="lab7"/>
+  <depend package="lab5_msgs"/>
+  <depend package="lab6_msgs"/>
+  <depend package="Challenge_msgs"/>
+
+  <export>
+    <rosjava-src location="src"/>
+    <rosjava-pathelement location="target/" groupId="org.ros" artifactId="Challenge" version="0.0" built="true" />
+  </export>
+
+</package>
+
+
