@@ -25,7 +25,7 @@ import LocalNavigation.SonarGUI;
  *   
  * @author vona
  **/
-public class MapGUI extends SonarGUI implements NodeMain{
+public class MapGUI extends SonarGUI implements NodeMain {
 
   /**
    * <p>The application name.</p>

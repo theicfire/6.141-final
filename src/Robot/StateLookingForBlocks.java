@@ -12,7 +12,7 @@ public class StateLookingForBlocks extends RobotState {
 	enum State {
 		INIT, MOVING
 	}
-
+	
 	@Override
 	public void perform() {
 		// for safety!
@@ -36,7 +36,7 @@ public class StateLookingForBlocks extends RobotState {
 				// we haven't explored
 				// or we can pick the location of a mapped block not retrieved
 				// yet
-				// or we can pick a place that is closeby randomly
+				// or we can pick a place that is close by randomly
 				waypoint = robot.navigationMain.pickNewPoint();
 
 				state = State.MOVING;
@@ -45,15 +45,13 @@ public class StateLookingForBlocks extends RobotState {
 				if (this.robot.visionCanSeeBlock) {
 					exitState = new StateInitial(this.robot);
 					break loop;
-				} else if (robot.waypointDriver.doneMovement()) {
-					this.robot.waypointDriver.stopMoving();
-					state = State.INIT;
 				} else { // cantSeeBlock and notDoneMoving
 					this.robot.waypointDriver.driveToPoint(waypoint);
+					this.robot.waypointDriver.stopMoving();
+					state = State.INIT;
 				}
 				break;
 			}
-
 		}
 
 		this.robot.waypointDriver.stopMoving();

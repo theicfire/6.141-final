@@ -118,7 +118,7 @@ public class VisionMain implements NodeMain {
 			// log.info("bri" + dest.getPixel(50, 50).getBrightness());
 			Image otherSrc = new Image(src.data, (int) src.width,
 					(int) src.height);
-			log.info("bt + " + bt);
+			//log.info("bt + " + bt);
 			bt.apply(otherSrc, dest);
 
 			// for (int i = 50; i < 55; i++) {

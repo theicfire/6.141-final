@@ -41,9 +41,15 @@ public class NavigationMain {
 	private static ColorMsg COLOR_MSG_YELLOW;
 	private static ColorMsg COLOR_MSG_PINK;
 
-	private NavigationMain initColors = new NavigationMain(true);
+	public NavigationMain(Node node) {
+		globalNode = node;
+		log = node.getLog();
+		log.info("~~~~~~~~~~starting");
 
-	private NavigationMain(boolean extra) {
+		log.info("~~~~~~~~~~resolving map file name");
+		ParameterTree paramTree = node.newParameterTree();
+		log.info("~~~~~~~~~~creating paramTree");
+
 		COLOR_MSG_RED = new ColorMsg();
 		COLOR_MSG_RED.r = 255;
 		COLOR_MSG_RED.g = 0;
@@ -60,17 +66,7 @@ public class NavigationMain {
 		COLOR_MSG_PINK.r = 255;
 		COLOR_MSG_PINK.g = 0;
 		COLOR_MSG_PINK.b = 255;
-	}
-
-	public NavigationMain(Node node) {
-		globalNode = node;
-		log = node.getLog();
-		log.info("~~~~~~~~~~starting");
-
-		log.info("~~~~~~~~~~resolving map file name");
-		ParameterTree paramTree = node.newParameterTree();
-		log.info("~~~~~~~~~~creating paramTree");
-
+		
 		// String mapFileName =
 		// paramTree.getString(node.resolveName("~/mapFileName"));
 
@@ -127,6 +123,8 @@ public class NavigationMain {
 			// polyPub.getNumberOfSubscribers());
 			// polyPub = node.newPublisher("gui/Poly", "lab6_msgs/GUIPolyMsg");
 		}
+		
+		displayConfigSpace();
 
 	}
 
