@@ -30,7 +30,7 @@ public class VisibilityGraph {
 	
 	public Map<Point2D.Double,List<Point2D.Double>> getGraph() {
 		log.info("getting graph");
-		ArrayList<PolygonObstacle> configObstacles = cspace.getObstacles();
+		PolygonObstacle[] configObstacles = cspace.getObstacles();
 		Map<Point2D.Double,List<Point2D.Double>> ret = new HashMap<Point2D.Double,List<Point2D.Double>>();
 		// TODO include start and end
 //		PolygonObstacle startPoly = new PolygonObstacle();
@@ -118,7 +118,7 @@ public class VisibilityGraph {
 	 * See if the given edge is inside other polygons
 	 * poly1 corresponds to edge.getP1(), poly2...
 	 */
-	public boolean edgeOpenSpace(Line2D edge, ArrayList<PolygonObstacle> configObstacles, PolygonObstacle poly1, PolygonObstacle poly2) {
+	public boolean edgeOpenSpace(Line2D edge, PolygonObstacle[] configObstacles, PolygonObstacle poly1, PolygonObstacle poly2) {
 		// neither of the points on the edges should not be in other polygons
 		for (PolygonObstacle poly3 : configObstacles) {
 			// if a different polygon has this point, forget about this point totally
@@ -139,7 +139,7 @@ public class VisibilityGraph {
 	/*
 	 * Tests if a line intersects any polygon
 	 */
-	public static boolean edgeIntersects(Line2D edge, ArrayList<PolygonObstacle> configObstacles) {
+	public static boolean edgeIntersects(Line2D edge, PolygonObstacle[] configObstacles) {
 //		log.info("checking intersect");
 		double epsilon = .01;
 		for (PolygonObstacle poly3 : configObstacles) {

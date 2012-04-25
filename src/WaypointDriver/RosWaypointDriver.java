@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.ros.message.rss_msgs.MotionMsg;
-import org.ros.message.rss_msgs.OdometryMsg;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
 
@@ -73,27 +72,18 @@ public class RosWaypointDriver {
 		}
 	}
 
-	public void handle(OdometryMsg arg0) {
-		// TODO Auto-generated method stub
-		log.info("RosWaypointDriver: odometry says " + arg0);
-	}
-
 	/**
 	 * Blocking method which drives the robot to a target point using
 	 * proportional control.
 	 * 
-	 * @param vert The destination point
+	 * @param vert
+	 *            The destination point
 	 */
 	public void driveToPoint(Double vert) {
 		// TODO Auto-generated method stub
 		log.info("GO FIND " + vert);
 
-		Point2D.Double start = null;
-
-		if (start == null) {
-			start = vert;
-			return;
-		}
+		Point2D.Double start = odom.getPosition();
 
 		// AngleController ac = new AngleController(odom);
 		// ac.setGain(0.5);

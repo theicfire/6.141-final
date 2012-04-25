@@ -6,7 +6,7 @@
   -->
 
 <!-- ****************************** logic ****************************** -->
-  <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="Challenge Navigation.MapGUI" machine="workstation"></node>
+  <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.ConstructionGUI" machine="workstation"></node>
   <node name="mainmain" pkg="rosjava_bootstrap" type="run.py" args="Challenge Planner.Main" machine="workstation"></node>
 
 <!-- ****************************** video ****************************** -->

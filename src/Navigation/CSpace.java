@@ -7,19 +7,19 @@ import java.util.List;
 
 public class CSpace {
 	// java.util.List<PolygonObstacle> realObstacles, double robotRadius
-	private List<PolygonObstacle> worldSpaceObstacles;
+	private PolygonObstacle[] worldSpaceObstacles;
 	private double robotRadius;
 	private PolygonObstacle robot; // robot in robotSpace
 	private Point2D.Double robotReferencePoint;
 	
-	public CSpace(List<PolygonObstacle> realObstacles, double robotRadius) {
+	public CSpace(PolygonObstacle[] realObstacles, double robotRadius) {
 		this.worldSpaceObstacles = realObstacles;
 		this.robotRadius = robotRadius;
 		this.robot = null;
 		this.robotReferencePoint = null;
 	}
 
-	public CSpace(List<PolygonObstacle> realObstacles, PolygonObstacle robot, Point2D.Double robotReferencePoint) {
+	public CSpace(PolygonObstacle[] realObstacles, PolygonObstacle robot, Point2D.Double robotReferencePoint) {
 		this.worldSpaceObstacles = realObstacles;
 		this.robotRadius = 0;
 		this.robot = robot;
@@ -27,7 +27,7 @@ public class CSpace {
 		this.robotReferencePoint = new Point2D.Double(robotReferencePoint.x,robotReferencePoint.y);
 	}
 	
-	protected ArrayList<PolygonObstacle> getObstacles() {
+	protected PolygonObstacle[] getObstacles() {
 		ArrayList<PolygonObstacle> ret = new ArrayList<PolygonObstacle>();
 
 		if (robot == null) {
@@ -41,7 +41,7 @@ public class CSpace {
 				ret.add(GeomUtils.convexHull(sum));
 			}
 		}
-		return ret;
+		return ret.toArray(new PolygonObstacle[ret.size()]);
 	}
 
 	PolygonObstacle reflectPolygonAboutPoint(PolygonObstacle poly, Point2D.Double point) {

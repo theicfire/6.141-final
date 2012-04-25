@@ -22,6 +22,10 @@ import org.ros.node.Node;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
 
+import Challenge.ConstructionGUI;
+import Challenge.ConstructionObject;
+import Challenge.GrandChallengeMap;
+
 public class NavigationMain {
 
 	private Publisher<Object> pointPub;
@@ -33,7 +37,7 @@ public class NavigationMain {
 	private Node globalNode;
 	private Log log;
 
-	private PolygonMap map;
+	private GrandChallengeMap map;
 	Map<Point2D.Double, List<Point2D.Double>> visGraph;
 
 	private static ColorMsg COLOR_MSG_RED;
@@ -75,7 +79,7 @@ public class NavigationMain {
 		// "/home/rss-student/RSS-I-group/lab6/src/global-nav-maze-2011-basic.map";
 		// String mapFileName =
 		// "/home/rss-student/RSS-I-group/lab6/src/global-nav-maze-2011-med.map";
-		String mapFileName = "/home/rss-student/RSS-I-group/lab6/src/global-nav-maze-2011-hard.map";
+		String mapFileName = "/home/rss-student/RSS-I-group/Challenge/src/challenge_2012.txt";
 		// String mapFileName =
 		// "/home/rss-student/RSS-I-group/lab6/src/global-nav-maze.map";
 		// String mapFileName =
@@ -84,13 +88,14 @@ public class NavigationMain {
 		// "/home/rss-student/RSS-I-group/lab6/src/practice-maze-02.map";
 
 		log.info("~~~~~~~~~~map file name resolved to: " + mapFileName);
-		map = new PolygonMap();
-		map.makeLogger(node);
+		map = new GrandChallengeMap();
+//		map.makeLogger(node);
 
 		log.info("~~~~~~~~~~parsing map file: " + mapFileName);
 		// parse file
 		try {
-			map.parse(new File(mapFileName));
+//			map.parse(new File(mapFileName));
+			map = GrandChallengeMap.parseFile(mapFileName);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			log.info("~~~~~~~~~~error parsing map file, IOException: "
@@ -143,11 +148,12 @@ public class NavigationMain {
 		erasePub.publish(new GUIEraseMsg());
 
 		GUIRectMsg rectMsg = new GUIRectMsg();
-		MapGUI.fillRectMsg(rectMsg, map.getWorldRect(), null, false);
+		log.info("world rect is " + map.getWorldRect());
+		ConstructionGUI.fillRectMsg(rectMsg, map.getWorldRect(), null, false);
 		rectPub.publish(rectMsg);
 
 		// plot the non config space stuff
-		List<PolygonObstacle> wsPolyObstacles = map.getObstacles(); // world
+		PolygonObstacle[] polygons = map.getPolygonObstacles(); // world
 																	// space
 																	// obstacles
 		// plotObstacles(polyObstacles, "red");
@@ -157,17 +163,17 @@ public class NavigationMain {
 		// -robotSquareSideLength,-robotSquareSideLength,robotSquareSideLength,robotSquareSideLength);
 
 		CSpace cspace;
-		cspace = new CSpace(wsPolyObstacles, robotSquareSideLength);
+		cspace = new CSpace(polygons, robotSquareSideLength);
 		// CSpace cspace = new CSpace(wsPolyObstacles, createOldSquareRobot(),
 		// new Point2D.Double(0.0,0.0));
 		// Rectangle2D.Double rsRobotRect =
 		// this.createOverEstimatedSquareRobot();
 		Rectangle2D.Double rsRobotRect = this.createCorrectSquareRobot();
 		PolygonObstacle robotPoly = this.rectToPoly(rsRobotRect);
-		cspace = new CSpace(wsPolyObstacles, robotPoly, new Point2D.Double(0.0,
+		cspace = new CSpace(polygons, robotPoly, new Point2D.Double(0.0,
 				0.0));
 
-		ArrayList<PolygonObstacle> configObstacles = cspace.getObstacles();
+		PolygonObstacle[] configObstacles = cspace.getObstacles();
 		plotObstacles(configObstacles, COLOR_MSG_YELLOW);
 
 		Rectangle2D.Double wsWorldRect = map.getWorldRect();
@@ -195,12 +201,14 @@ public class NavigationMain {
 		// cWorldRect.addVertex(new Point2D.Double(h.x, h.y + h.height));
 		// cWorldRect.close();
 
-		VisibilityGraph vis = new VisibilityGraph(map.getRobotStart(),
-				map.getRobotGoal(), cWorldRect, cspace, globalNode);
+		Point2D.Double ROBOT_START = new Point2D.Double(0, 0);
+		Point2D.Double ROBOT_END = new Point2D.Double(1, 1);
+		VisibilityGraph vis = new VisibilityGraph(ROBOT_START,
+				ROBOT_END, cWorldRect, cspace, globalNode);
 
 		// plot the cspace rect
 		plotObstacle(cWorldRect, COLOR_MSG_PINK);
-		plotObstacles(wsPolyObstacles, COLOR_MSG_GREEN);
+		plotObstacles(polygons, COLOR_MSG_GREEN);
 
 		// plot the visibility graph
 		visGraph = vis.getGraph();
@@ -238,7 +246,7 @@ public class NavigationMain {
 		}
 
 		List<Point2D.Double> shortestPath = DijkstraGood.getMyDijkstra(
-				visGraph, map.getRobotStart(), map.getRobotGoal(), log);
+				visGraph, ROBOT_START, ROBOT_END, log);
 		// List<Point2D.Double> shortestPath = new ArrayList<Point2D.Double>();
 		// shortestPath.add(map.getRobotStart());
 		// shortestPath.add(new Point2D.Double(.9, 0));
@@ -375,7 +383,7 @@ public class NavigationMain {
 		return result;
 	}
 
-	public void plotObstacles(List<PolygonObstacle> polys, ColorMsg color) {
+	public void plotObstacles(PolygonObstacle[] polys, ColorMsg color) {
 		for (PolygonObstacle obstacle : polys) {
 			plotObstacle(obstacle, color);
 		}
@@ -384,7 +392,7 @@ public class NavigationMain {
 	public void plotObstacle(PolygonObstacle obstacle, ColorMsg color) {
 		GUIPolyMsg polyMsg = new GUIPolyMsg();
 		polyMsg = new GUIPolyMsg();
-		MapGUI.fillPolyMsg(polyMsg, obstacle, MapGUI.makeRandomColor());
+		ConstructionGUI.fillPolyMsg(polyMsg, obstacle, ConstructionGUI.makeRandomColor());
 		polyMsg.c = color;
 		polyPub.publish(polyMsg);
 	}
@@ -395,7 +403,7 @@ public class NavigationMain {
 		log.info("!!!!!update map!!");
 		log.info("!!!!!update map!!");
 		// Color color = new Color(0, 255, 0);
-		// mapGui.addRect(10.0, 10.0, 10.0, 10.0, true, color);
+		// ConstructionGUI.addRect(10.0, 10.0, 10.0, 10.0, true, color);
 
 		while (rectPub.getNumberOfSubscribers() == 0) {
 			; // wait for rectPub to have the gui as a listener
