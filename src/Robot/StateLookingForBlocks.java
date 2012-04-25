@@ -14,48 +14,49 @@ public class StateLookingForBlocks extends RobotState {
 	}
 
 	@Override
-	   public void perform() {
-	       // for safety!
-	       robot.waypointDriver.stopMoving();
-	       
-	       Point2D.Double waypoint = null;
-	       State state = State.INIT;
-	       StateInitial exitState;
+	public void perform() {
+		// for safety!
+		robot.waypointDriver.stopMoving();
 
-	       loop:
-	       while (true) {
-	   
-	           switch (state) {
-		           case INIT:
-		               if (this.robot.visionCanSeeBlock) {
-		                   exitState = new StateInitial(this.robot);
-		                   break loop;
-		               }
-		               
-		               // can pick a place depending on known information
-		               // if we haven't explored a certain location, then pick a place we haven't explored
-		               // or we can pick the location of a mapped block not retrieved yet
-		               // or we can pick a place that is closeby randomly
-		               waypoint = robot.navigationMain.pickNewPoint();
-		               
-		               state = State.MOVING;
-		               break;
-		           case MOVING:
-		               if (this.robot.visionCanSeeBlock) {
-		                   exitState = new StateInitial(this.robot);
-		                   break loop;
-		               } else if (robot.waypointDriver.doneMovement()) {
-		                   this.robot.waypointDriver.stopMoving();
-		                   state = State.INIT;
-		               } else { // cantSeeBlock and notDoneMoving
-		                   this.robot.waypointDriver.driveToPoint(waypoint);
-		               }
-		               break;
-	           }
-	           
-	       }
-	       
-	       this.robot.waypointDriver.stopMoving();
-	       this.robot.setStateObject(exitState);
-	   }
+		Point2D.Double waypoint = null;
+		State state = State.INIT;
+		StateInitial exitState;
+
+		loop: while (true) {
+
+			switch (state) {
+			case INIT:
+				if (this.robot.visionCanSeeBlock) {
+					exitState = new StateInitial(this.robot);
+					break loop;
+				}
+
+				// can pick a place depending on known information
+				// if we haven't explored a certain location, then pick a place
+				// we haven't explored
+				// or we can pick the location of a mapped block not retrieved
+				// yet
+				// or we can pick a place that is closeby randomly
+				waypoint = robot.navigationMain.pickNewPoint();
+
+				state = State.MOVING;
+				break;
+			case MOVING:
+				if (this.robot.visionCanSeeBlock) {
+					exitState = new StateInitial(this.robot);
+					break loop;
+				} else if (robot.waypointDriver.doneMovement()) {
+					this.robot.waypointDriver.stopMoving();
+					state = State.INIT;
+				} else { // cantSeeBlock and notDoneMoving
+					this.robot.waypointDriver.driveToPoint(waypoint);
+				}
+				break;
+			}
+
+		}
+
+		this.robot.waypointDriver.stopMoving();
+		this.robot.setStateObject(exitState);
+	}
 }

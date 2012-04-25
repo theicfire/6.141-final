@@ -49,13 +49,9 @@ public class VisionMain implements NodeMain {
 		log = node.getLog();
 		globalNode = node;
 
-		vidPub = node.newPublisher("/rss/blobVideo", "sensor_msgs/Image");
-		Subscriber<org.ros.message.sensor_msgs.Image> rawVidSub = node.newSubscriber("rss/video", "sensor_msgs/Image");
-		rawVidSub.addMessageListener(new InterpRawVid());
-		rawVidSub = node.newSubscriber("rss/video", "sensor_msgs/Image");
-		blobDetectedPub = node.newPublisher("/rss/VisionMain", "rss_msgs/VisionMsg");
 
 		log.info("added video sub");
+//		bt = new BlobTracking(IMAGE_WIDTH, IMAGE_HEIGHT, log);
 		bt = new BlobTracking(IMAGE_WIDTH, IMAGE_HEIGHT, log);
 		bt.targetHueLevel = target_hue_level;//(Solution)
 		bt.hueThreshold = hue_threshold;//(Solution)
@@ -71,10 +67,23 @@ public class VisionMain implements NodeMain {
 		bt.rotationVelocityMax = rotation_velocity_max;//(Solution)
 		bt.useGaussianBlur = use_gaussian_blur;//(Solution)
 		
+		vidPub = node.newPublisher("/rss/blobVideo", "sensor_msgs/Image");
+		Subscriber<org.ros.message.sensor_msgs.Image> rawVidSub = node.newSubscriber("rss/video", "sensor_msgs/Image");
+		rawVidSub.addMessageListener(new InterpRawVid());
+		rawVidSub = node.newSubscriber("rss/video", "sensor_msgs/Image");
+		blobDetectedPub = node.newPublisher("/rss/VisionMain", "rss_msgs/VisionMsg");
+
 		while (true) {
 			VisionMsg vm = new VisionMsg();
 			vm.detectedBlock = targetDetected;
 			this.blobDetectedPub.publish(vm);
+			
+			try {
+				Thread.sleep(30);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -109,6 +118,7 @@ public class VisionMain implements NodeMain {
 			// log.info("bri" + dest.getPixel(50, 50).getBrightness());
 			Image otherSrc = new Image(src.data, (int) src.width,
 					(int) src.height);
+			log.info("bt + " + bt);
 			bt.apply(otherSrc, dest);
 
 			// for (int i = 50; i < 55; i++) {

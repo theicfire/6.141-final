@@ -25,7 +25,7 @@ public class StateInitial extends RobotState {
 
 	@Override
 	public void perform() {	
-		this.robot.setStateObject(null);
+		this.robot.setStateObject(new StateLookingForBlocks(this.robot));
 	}
 
 }
