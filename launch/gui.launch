@@ -1,11 +1,17 @@
 <launch>
-  <machine name="workstation" address="workstation">
-     <env name="ROS_MASTER_URI" value="http://workstation:11311" />
-     <env name="ROS_HOSTNAME" value="workstation" />
-  </machine>
-
-  <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.ConstructionGUI" machine="workstation">
-  <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="Challenge Vision.VisionMain" machine="workstation">
-  </node> 	  
+  <include file="$(find lab4)/launch/config.launch" />
+<!--
+  <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.ConstructionGUI"          machine="workstation">
+  </node>     
+  -->
+  <node name="rep" pkg="image_transport" type="republish" args="compressed in:=/gscam/image_raw raw out:=/rss/video" machine="workstation"/>
+  <node name="view" pkg="image_view" type="image_view" args="image:=/rss/video" machine="workstation" />
+  <node name="blobview" pkg="image_view" type="image_view" args="image:=/rss/blobVideo" machine="workstation" />
+  <node name="pub" pkg="rosjava_bootstrap" type="run.py" args="uorc_publisher Publisher" machine="netbook" />
+  <node name="odo" pkg="rosjava_bootstrap" type="run.py" args="odometry odometry.Odometry" machine="netbook" /> 
+  <node name="vid" pkg="gscam" type="gscam" machine="netbook" /> 
+  <node name="lis" pkg="rosjava_bootstrap" type="run.py" args="uorc_listener Listener" machine="netbook" /> 
+  <node name="vision" pkg="rosjava_bootstrap" type="run.py" args="Challenge VisualServoSolution.VisionMain"          machine="workstation">
+  </node>     
 
 </launch>

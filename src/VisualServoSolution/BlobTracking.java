@@ -94,14 +94,7 @@ public class BlobTracking {
 	 **/ // (Solution)
 	protected void blobPresent(int[] threshIm, int[] connIm, int[] blobIm) { // (Solution)
 		// (Solution)
-		try {
-		connComp.doLabel(threshIm, connIm, width, height); // (Solution)
-		} catch (Exception e) {
-			log.info("OH NO; EXCEPTION!!!");
-			log.info(e.getStackTrace());
-			log.info("labeling; sizes are " + threshIm.length + " " + connIm.length);
-			log.info("and width/height are " + width + " " + height);
-		}
+		connComp.doLabel(threshIm, connIm, width, height, log); // (Solution)
 		// (Solution)
 		int colorMax = connComp.getColorMax(); // (Solution)
 		int countMax = connComp.getCountMax(); // (Solution)
@@ -262,13 +255,7 @@ public class BlobTracking {
 		for (int y = 0; y < height; y++) { //(Solution)
 			for (int x = 0; x < width; x++) { //(Solution)
 				
-				Pixel pix = image.getPixel(0, 0);
-//				try {
-//					pix = image.getPixel(x, y);  // (Solution)
-//				} catch(Exception e) {
-//					log.info("exception on " + x + " " + y + 
-//							" width, height " + image.getWidth() + " " + image.getHeight());
-//				}
+				Pixel pix = image.getPixel(x, y);  // (Solution)
 				if (x > 3.0 * width / 8.0 && x < 5.0 * width / 8.0 //(Solution)
 						&& y > 3.0 * height / 8.0 && y < 5.0 * height / 8.0) { //(Solution)
 					totalHue += pix.getHue(); //(Solution)
@@ -404,8 +391,8 @@ public class BlobTracking {
 				} // (Solution)
 			} // (Solution)
 			// (Solution)
-//			Histogram.getHistogram(src, dest, true); // (Solution)			
-			markBlob(src, dest); // (Solution)
+			Histogram.getHistogram(src, dest, true); // (Solution)			
+//			markBlob(src, dest); // (Solution)
 			// (Solution)
 		} // (Solution)
 		// End Student Code

@@ -6,6 +6,8 @@ import java.util.*;
 import java.io.*;
 import java.lang.Math.*;
 
+import org.apache.commons.logging.Log;
+
 /**
  *Edsinger: from http://homepages.inf.ed.ac.uk/rbf/HIPR2/flatjavasrc/ImageLabel.java
  *ImageLabel is an algorithm that applies Connected Component Labeling
@@ -100,7 +102,7 @@ public class ConnectedComponents {
    *@return A pixel array containing the labelled image
    */
   //NB For images  0,0 is the top left corner.
-  public int[] doLabel(int[] src1_1d, int[] dest_1d, int width, int height) {
+  public int[] doLabel(int[] src1_1d, int[] dest_1d, int width, int height, Log log) {
 
     int nextlabel = 1;
     int nbs[] = new int[4];
@@ -227,6 +229,8 @@ public class ConnectedComponents {
 
     countMax = 0;
     for (int i = 0; i < src1_1d.length; i++) {
+    	log.info("inside is " + i);
+    	log.info("inside is " + dest_1d[i]);
       result = condensed[labels[dest_1d[i]]];
       labelCnt[result]++;
       if (countMax < labelCnt[result] && result != 0) {

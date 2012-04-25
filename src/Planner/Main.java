@@ -32,7 +32,7 @@ public class Main implements NodeMain {
 
 		while (true) {
 			// make states represent atomic actions
-			robot.getRobotState().perform();
+//			robot.getRobotState().perform();
 		}
 	}
 

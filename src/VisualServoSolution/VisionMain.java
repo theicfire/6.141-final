@@ -42,26 +42,18 @@ public class VisionMain implements NodeMain {
 	private boolean use_gaussian_blur = true;// (Solution)
 	public double angle;
 
-	public VisionMain(Node arg0) {
-		globalNode = arg0;
-	}
 
 	@Override
 	public void onStart(Node node) {
 		// TODO Auto-generated method stub
 		log = node.getLog();
+		globalNode = node;
 
 		vidPub = node.newPublisher("/rss/blobVideo", "sensor_msgs/Image");
+		Subscriber<org.ros.message.sensor_msgs.Image> rawVidSub = node.newSubscriber("rss/video", "sensor_msgs/Image");
 		rawVidSub.addMessageListener(new InterpRawVid());
 		rawVidSub = node.newSubscriber("rss/video", "sensor_msgs/Image");
 		blobDetectedPub = node.newPublisher("/rss/VisionMain", "rss_msgs/VisionMsg");
-
-
-		// TODO MOVE NEXT TO OTHER WHILE LOOP
-		while (vidPub.getNumberOfSubscribers() <= 0) {
-			// block
-			log.info("waiting for sbs");
-		}
 
 		log.info("added video sub");
 		bt = new BlobTracking(IMAGE_WIDTH, IMAGE_HEIGHT, log);
