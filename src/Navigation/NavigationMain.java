@@ -1,9 +1,7 @@
 package Navigation;
 
 import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Double;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -23,7 +21,6 @@ import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
 
 import Challenge.ConstructionGUI;
-import Challenge.ConstructionObject;
 import Challenge.GrandChallengeMap;
 
 public class NavigationMain {
@@ -44,7 +41,7 @@ public class NavigationMain {
 	private static ColorMsg COLOR_MSG_GREEN;
 	private static ColorMsg COLOR_MSG_YELLOW;
 	private static ColorMsg COLOR_MSG_PINK;
-
+	
 	public NavigationMain(Node node) {
 		globalNode = node;
 		log = node.getLog();

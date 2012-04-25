@@ -8,6 +8,7 @@
 <!-- ****************************** logic ****************************** -->
   <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.ConstructionGUI" machine="workstation"></node>
   <node name="mainmain" pkg="rosjava_bootstrap" type="run.py" args="Challenge Planner.Main" machine="workstation"></node>
+  <node name="roswaypoint" pkg="rosjava_bootstrap" type="run.py" args="Challenge WaypointDriver.RosWaypointDriver" machine="workstation"></node>
 
 <!-- ****************************** video ****************************** -->
   <node name="rep" pkg="image_transport" type="republish" args="compressed in:=/gscam/image_raw raw out:=/rss/video" machine="workstation"/>

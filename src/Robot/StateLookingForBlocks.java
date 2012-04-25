@@ -2,8 +2,12 @@ package Robot;
 
 import java.awt.geom.Point2D;
 
-public class StateLookingForBlocks extends RobotState {
+import org.ros.message.MessageListener;
+import org.ros.message.rss_msgs.OdometryMsg;
 
+public class StateLookingForBlocks extends RobotState {
+	private boolean destComplete;
+	
 	public StateLookingForBlocks(Robot ri) {
 		super(ri);
 		// TODO Auto-generated constructor stub
@@ -16,7 +20,7 @@ public class StateLookingForBlocks extends RobotState {
 	@Override
 	public void perform() {
 		// for safety!
-		robot.waypointDriver.stopMoving();
+		//robot.waypointDriver.stopMoving();
 
 		Point2D.Double waypoint = null;
 		State state = State.INIT;
@@ -26,7 +30,7 @@ public class StateLookingForBlocks extends RobotState {
 
 			switch (state) {
 			case INIT:
-				if (this.robot.visionCanSeeBlock) {
+				if (this.robot.canSeeBlock()) {
 					exitState = new StateInitial(this.robot);
 					break loop;
 				}
@@ -42,19 +46,25 @@ public class StateLookingForBlocks extends RobotState {
 				state = State.MOVING;
 				break;
 			case MOVING:
-				if (this.robot.visionCanSeeBlock) {
+				if (this.robot.canSeeBlock()) {
 					exitState = new StateInitial(this.robot);
 					break loop;
-				} else { // cantSeeBlock and notDoneMoving
-					this.robot.waypointDriver.driveToPoint(waypoint);
-					this.robot.waypointDriver.stopMoving();
+				} else if (this.robot.doneMoving()) {
+//					TODO stopMoving; security measure
 					state = State.INIT;
+				} else { // cantSeeBlock and notDoneMoving
+					this.robot.goToLocation(waypoint);
+					//this.robot.waypointDriver.stopMoving();
+//					state = State.INIT;
 				}
 				break;
 			}
 		}
 
-		this.robot.waypointDriver.stopMoving();
+		// TODO INSERT STOP MOVING
+//		this.robot.waypointDriver.stopMoving();
 		this.robot.setStateObject(exitState);
 	}
+	
+
 }

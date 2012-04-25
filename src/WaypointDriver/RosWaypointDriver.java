@@ -5,9 +5,15 @@ import java.awt.geom.Point2D.Double;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
+import org.ros.message.MessageListener;
+import org.ros.message.rss_msgs.BreakBeamMsg;
 import org.ros.message.rss_msgs.MotionMsg;
+import org.ros.message.rss_msgs.OdometryMsg;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
+import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 import Controller.AngleController;
 import Controller.PositionController;
@@ -19,7 +25,7 @@ import Controller.PositionController.VelocityPair;
  * @author rss-student
  * 
  */
-public class RosWaypointDriver {
+public class RosWaypointDriver implements NodeMain {
 	// parameters
 	final double PROPORTIONAL_GAIN = 1.5;
 	final double INTEGRAL_GAIN = 9999.0;
@@ -33,7 +39,29 @@ public class RosWaypointDriver {
 	private Odometer odom;
 	long lastTime = 0;
 
-	public RosWaypointDriver(Node node) {
+	Publisher<BreakBeamMsg> pubComplete; 
+	Subscriber<OdometryMsg> destSub;
+
+	@Override
+	public void onStart(Node arg0) {
+		// TODO Auto-generated method stub
+		StartRosWaypointDriver(arg0);
+
+		pubComplete = arg0.newPublisher("rss/waypointcomplete", "rss_msgs/BreakBeamMsg");
+		destSub = arg0.newSubscriber(
+				"rss/waypointcommand", "rss_msgs/OdometryMsg");
+		destSub.addMessageListener(new DestCommandMessageListener());
+	}
+
+	public class DestCommandMessageListener implements
+			MessageListener<org.ros.message.rss_msgs.OdometryMsg> {
+		public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg om) {
+			driveToPoint(new Point2D.Double(om.x, om.y));
+		}
+	}
+
+	
+	public void StartRosWaypointDriver(Node node) {
 		this.globalNode = node;
 		this.log = node.getLog();
 		movePub = node.newPublisher("command/Motors", "rss_msgs/MotionMsg");
@@ -138,6 +166,12 @@ public class RosWaypointDriver {
 		this.sendMotorMessage(0.0, 0.0);
 
 		log.info("DONE FINDING " + vert);
+		
+		// Say that you are done to the world
+		BreakBeamMsg doneMsg = new BreakBeamMsg();
+		doneMsg.beamBroken = true;
+		pubComplete.publish(doneMsg);
+		
 		start = vert;
 	}
 
@@ -149,6 +183,24 @@ public class RosWaypointDriver {
 	public boolean doneMovement() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void onShutdown(Node arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onShutdownComplete(Node arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public GraphName getDefaultNodeName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

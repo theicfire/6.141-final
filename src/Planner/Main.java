@@ -2,8 +2,11 @@ package Planner;
 
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
+import org.ros.message.rss_msgs.BreakBeamMsg;
+import org.ros.message.rss_msgs.OdometryMsg;
 import org.ros.message.rss_msgs.VisionMsg;
 import org.ros.node.NodeMain;
+import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
 import Navigation.NavigationMain;
@@ -25,8 +28,9 @@ public class Main implements NodeMain {
 		// start thread for bump sensors
 		Subscriber<VisionMsg> vs = node.newSubscriber("rss/VisionMain",
 				"rss_msgs/VisionMsg");
-		Robot robot = new Robot(new NavigationMain(node),
-				new RosWaypointDriver(node), vs);
+		Subscriber<BreakBeamMsg> doneMove = node.newSubscriber("rss/waypointcomplete", "rss_msgs/BreakBeamMsg");
+		Publisher<OdometryMsg> om = node.newPublisher("rss/waypointcommand", "rss_msgs/OdometryMsg");
+		Robot robot = new Robot(new NavigationMain(node), om, vs, doneMove);
 		StateInitial startState = new StateInitial(robot);
 		robot.setStateObject(startState);
 
