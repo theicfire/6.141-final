@@ -20,19 +20,16 @@ public class StateLookingForBlocks extends RobotState {
 	@Override
 	public void perform() {
 		// for safety!
-		//robot.waypointDriver.stopMoving();
+		robot.stopMoving();
 
 		Point2D.Double waypoint = null;
 		State state = State.INIT;
-		StateInitial exitState;
-
-		loop: while (true) {
-
+		while (true) {
 			switch (state) {
 			case INIT:
-				if (this.robot.canSeeBlock()) {
-					exitState = new StateInitial(this.robot);
-					break loop;
+				if (robot.canSeeBlock()) {
+					robot.setStateObject(new StateInitial(robot));
+					return;
 				}
 
 				// can pick a place depending on known information
@@ -42,28 +39,28 @@ public class StateLookingForBlocks extends RobotState {
 				// yet
 				// or we can pick a place that is close by randomly
 				waypoint = robot.navigationMain.pickNewPoint();
-
+				robot.goToLocation(waypoint);
 				state = State.MOVING;
 				break;
 			case MOVING:
-				if (this.robot.canSeeBlock()) {
-					exitState = new StateInitial(this.robot);
-					break loop;
-				} else if (this.robot.doneMoving()) {
+				if (robot.canSeeBlock()) {
+					robot.log.info("Robot can see block; stopping and going to initial state");
+					robot.stopMoving();
+					robot.setStateObject(new StateMovingToBlock(robot));
+					return;
+				} else if (robot.doneMoving()) {
 //					TODO stopMoving; security measure
+					robot.log.info("Done moving");
+					robot.sendMotorMessage(0, 0);
 					state = State.INIT;
 				} else { // cantSeeBlock and notDoneMoving
-					this.robot.goToLocation(waypoint);
+					// We have already sent a message
 					//this.robot.waypointDriver.stopMoving();
 //					state = State.INIT;
 				}
 				break;
 			}
 		}
-
-		// TODO INSERT STOP MOVING
-//		this.robot.waypointDriver.stopMoving();
-		this.robot.setStateObject(exitState);
 	}
 	
 

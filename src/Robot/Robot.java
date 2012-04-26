@@ -2,12 +2,15 @@ package Robot;
 
 import java.awt.geom.Point2D;
 
+import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
 import org.ros.message.rss_msgs.BreakBeamMsg;
+import org.ros.message.rss_msgs.MotionMsg;
 import org.ros.message.rss_msgs.OdometryMsg;
 import org.ros.message.rss_msgs.VisionMsg;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+import org.ros.node.Node;
 
 import Grasping.Arm;
 import Navigation.NavigationMain;
@@ -27,15 +30,26 @@ public class Robot {
 	private boolean visionCanSeeBlock;
 	private boolean doneMoving;
 	private Publisher<OdometryMsg> waypointCommandPub;
+	private Publisher<MotionMsg> movePub;
+	private Publisher<BreakBeamMsg> stopPub;
+	public Log log;
 	
-	public Robot(NavigationMain navigationMain, Publisher<OdometryMsg> waypointNav, Subscriber<VisionMsg> visionSub,
-			Subscriber<BreakBeamMsg> doneMovingSub) {
-		this.navigationMain = navigationMain;
-		this.visionSub = visionSub;
-		this.doneMovingSub = doneMovingSub;
+	public Robot(Node node) {
+		this.log = node.getLog();
+		this.navigationMain = new NavigationMain(node);
+		this.visionSub = node.newSubscriber("rss/VisionMain", "rss_msgs/VisionMsg");
+		this.doneMovingSub = node.newSubscriber("rss/waypointcomplete", "rss_msgs/BreakBeamMsg");
+		this.waypointCommandPub = node.newPublisher("rss/waypointcommand", "rss_msgs/OdometryMsg");
+		this.stopPub = node.newPublisher("rss/stopcommand", "rss_msgs/BreakBeamMsg");
+		this.movePub = node.newPublisher("command/Motors", "rss_msgs/MotionMsg");
+		
+		log.info("Waiting for movePub");
+		while (movePub.getNumberOfSubscribers() == 0) {
+			// block
+		}
+		log.info("Done waiting for movePub");
 		this.visionSub.addMessageListener(new VisionMessageListener());
 		this.doneMovingSub.addMessageListener(new DoneMovingListener());
-		this.waypointCommandPub = waypointNav;
 	}
 	
 	public class VisionMessageListener implements
@@ -48,11 +62,13 @@ public class Robot {
 	public class DoneMovingListener implements
 			MessageListener<org.ros.message.rss_msgs.BreakBeamMsg> {
 		public void onNewMessage(org.ros.message.rss_msgs.BreakBeamMsg bb) {
+			log.info("Done moving message received");
 			doneMoving = bb.beamBroken; // probably always true
 		}
 	}
 	
 	public void setStateObject(RobotState newRobotState) {
+		log.info("Setting new state" + newRobotState.getClass());
 		robotState = newRobotState;
 	}
 
@@ -64,15 +80,30 @@ public class Robot {
 		return doneMoving;
 	}
 	
+	public void stopMoving() {
+		BreakBeamMsg stop = new BreakBeamMsg();
+		stop.beamBroken = true;
+		stopPub.publish(stop);
+	}
+	
 	public boolean canSeeBlock() {
 		return visionCanSeeBlock;
 	}
 	
 	public void goToLocation(Point2D.Double loc) {
+		log.info("go to location" + loc);
 		OdometryMsg dest = new OdometryMsg();
 		dest.x = loc.x;
 		dest.y = loc.y;
 		waypointCommandPub.publish(dest);
 		doneMoving = false;
+	}
+	
+	public void sendMotorMessage(double translationalVelocity, double rotationalVelocity) {
+		log.info("sendMotorMessage" + translationalVelocity + " " + rotationalVelocity);
+		MotionMsg stopMsg = new MotionMsg();
+		stopMsg.rotationalVelocity = rotationalVelocity;
+		stopMsg.translationalVelocity = translationalVelocity;
+		movePub.publish(stopMsg);
 	}
 }

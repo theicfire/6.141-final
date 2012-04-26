@@ -38,33 +38,46 @@ public class RosWaypointDriver implements NodeMain {
 	private Publisher<MotionMsg> movePub;
 	private Odometer odom;
 	long lastTime = 0;
+	
+	boolean forceStop = false; // comes from a message; stops movement
 
 	Publisher<BreakBeamMsg> pubComplete; 
 	Subscriber<OdometryMsg> destSub;
+	Subscriber<BreakBeamMsg> stopSub;
 
 	@Override
-	public void onStart(Node arg0) {
+	public void onStart(Node node) {
 		// TODO Auto-generated method stub
-		StartRosWaypointDriver(arg0);
+		StartRosWaypointDriver(node);
 
-		pubComplete = arg0.newPublisher("rss/waypointcomplete", "rss_msgs/BreakBeamMsg");
-		destSub = arg0.newSubscriber(
-				"rss/waypointcommand", "rss_msgs/OdometryMsg");
+		movePub = node.newPublisher("command/Motors", "rss_msgs/MotionMsg");
+		pubComplete = node.newPublisher("rss/waypointcomplete", "rss_msgs/BreakBeamMsg");
+		destSub = node.newSubscriber("rss/waypointcommand", "rss_msgs/OdometryMsg");
 		destSub.addMessageListener(new DestCommandMessageListener());
+		stopSub = node.newSubscriber("rss/stopcommand", "rss_msgs/BreakBeamMsg");
+		stopSub.addMessageListener(new StopListener());
 	}
 
 	public class DestCommandMessageListener implements
 			MessageListener<org.ros.message.rss_msgs.OdometryMsg> {
 		public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg om) {
+			forceStop = false;
 			driveToPoint(new Point2D.Double(om.x, om.y));
 		}
 	}
 
+	public class StopListener implements
+			MessageListener<org.ros.message.rss_msgs.BreakBeamMsg> {
+		public void onNewMessage(org.ros.message.rss_msgs.BreakBeamMsg bb) {
+			// stop driving
+			forceStop = true;
+		}
+	}
 	
 	public void StartRosWaypointDriver(Node node) {
 		this.globalNode = node;
 		this.log = node.getLog();
-		movePub = node.newPublisher("command/Motors", "rss_msgs/MotionMsg");
+		
 		odom = new Odometer(globalNode);
 	}
 
@@ -146,7 +159,7 @@ public class RosWaypointDriver implements NodeMain {
 		PositionController p = new PositionController(PROPORTIONAL_GAIN,
 				INTEGRAL_GAIN, new Point2D.Double(start.x, start.y),
 				new Point2D.Double(vert.x, vert.y), odom, log);
-		while (true) {
+		while (!forceStop) {
 			VelocityPair step = p.controlStep();
 
 			boolean enoughTimeHasPassed = System.currentTimeMillis() - lastTime > ENOUGH_TIME;
@@ -163,6 +176,7 @@ public class RosWaypointDriver implements NodeMain {
 				break;
 			}
 		}
+		
 		this.sendMotorMessage(0.0, 0.0);
 
 		log.info("DONE FINDING " + vert);
