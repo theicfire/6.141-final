@@ -5,9 +5,9 @@ public abstract class ProportionalController {
 	private double gain;
 	private double desiredOutput;
 
-	public ProportionalController() {
-		setGain(0);
-		setDesiredOutput(0);
+	public ProportionalController(double gain, double desired) {
+		setGain(gain);
+		setDesiredOutput(desiredOutput);
 	}
 	
 	public abstract double difference();

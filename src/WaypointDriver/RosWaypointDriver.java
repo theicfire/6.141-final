@@ -43,6 +43,7 @@ public class RosWaypointDriver implements NodeMain {
 
 	Publisher<BreakBeamMsg> pubComplete; 
 	Subscriber<OdometryMsg> destSub;
+	Subscriber<OdometryMsg> angleSub;
 	Subscriber<BreakBeamMsg> stopSub;
 
 	@Override
@@ -54,6 +55,8 @@ public class RosWaypointDriver implements NodeMain {
 		pubComplete = node.newPublisher("rss/waypointcomplete", "rss_msgs/BreakBeamMsg");
 		destSub = node.newSubscriber("rss/waypointcommand", "rss_msgs/OdometryMsg");
 		destSub.addMessageListener(new DestCommandMessageListener());
+		destSub = node.newSubscriber("rss/anglecommand", "rss_msgs/OdometryMsg");
+		angleSub.addMessageListener(new AngleCommandMessageListener());
 		stopSub = node.newSubscriber("rss/stopcommand", "rss_msgs/BreakBeamMsg");
 		stopSub.addMessageListener(new StopListener());
 	}
@@ -63,6 +66,13 @@ public class RosWaypointDriver implements NodeMain {
 		public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg om) {
 			forceStop = false;
 			driveToPoint(new Point2D.Double(om.x, om.y));
+		}
+	}
+	
+	public class AngleCommandMessageListener implements
+			MessageListener<org.ros.message.rss_msgs.OdometryMsg> {
+		public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg om) {
+			rotateToPoint(new Point2D.Double(om.x, om.y));
 		}
 	}
 
@@ -114,18 +124,10 @@ public class RosWaypointDriver implements NodeMain {
 	}
 
 	/**
-	 * Blocking method which drives the robot to a target point using
-	 * proportional control.
-	 * 
+	 * Blocking method that rotates the robot to point to a specified point
 	 * @param vert
-	 *            The destination point
 	 */
-	public void driveToPoint(Double vert) {
-		// TODO Auto-generated method stub
-		log.info("GO FIND " + vert);
-
-		Point2D.Double start = odom.getPosition();
-
+	public void rotateToPoint(Double vert) {
 		// AngleController ac = new AngleController(odom);
 		// ac.setGain(0.5);
 		// ac.setDesiredOutput(Math.atan2(vert.y - odom.odomXY[1], vert.x
@@ -156,6 +158,21 @@ public class RosWaypointDriver implements NodeMain {
 		}
 
 		this.stopMoving();
+	}
+	/**
+	 * Blocking method which drives the robot to a target point using
+	 * proportional control.
+	 * 
+	 * @param vert
+	 *            The destination point
+	 */
+	public void driveToPoint(Double vert) {
+		// TODO Auto-generated method stub
+		log.info("GO FIND " + vert);
+
+		Point2D.Double start = odom.getPosition();
+		rotateToPoint(vert);
+		
 		PositionController p = new PositionController(PROPORTIONAL_GAIN,
 				INTEGRAL_GAIN, new Point2D.Double(start.x, start.y),
 				new Point2D.Double(vert.x, vert.y), odom, log);

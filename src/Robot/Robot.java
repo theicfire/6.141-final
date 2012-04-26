@@ -1,6 +1,7 @@
 package Robot;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
 
 import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
@@ -27,9 +28,10 @@ public class Robot {
 	private Subscriber<VisionMsg> visionSub;
 	private Subscriber<BreakBeamMsg> doneMovingSub;
 	
-	private boolean visionCanSeeBlock;
+	private VisionMsg visionMsg;
 	private boolean doneMoving;
 	private Publisher<OdometryMsg> waypointCommandPub;
+	private Publisher<OdometryMsg> angleCommandPub;
 	private Publisher<MotionMsg> movePub;
 	private Publisher<BreakBeamMsg> stopPub;
 	public Log log;
@@ -40,6 +42,7 @@ public class Robot {
 		this.visionSub = node.newSubscriber("rss/VisionMain", "rss_msgs/VisionMsg");
 		this.doneMovingSub = node.newSubscriber("rss/waypointcomplete", "rss_msgs/BreakBeamMsg");
 		this.waypointCommandPub = node.newPublisher("rss/waypointcommand", "rss_msgs/OdometryMsg");
+		this.angleCommandPub = node.newPublisher("rss/anglecommand", "rss_msgs/OdometryMsg");
 		this.stopPub = node.newPublisher("rss/stopcommand", "rss_msgs/BreakBeamMsg");
 		this.movePub = node.newPublisher("command/Motors", "rss_msgs/MotionMsg");
 		
@@ -55,7 +58,7 @@ public class Robot {
 	public class VisionMessageListener implements
 	MessageListener<org.ros.message.rss_msgs.VisionMsg>  {
 		public void onNewMessage(org.ros.message.rss_msgs.VisionMsg vm) {
-			visionCanSeeBlock = vm.detectedBlock;
+			visionMsg = vm;
 		}
 	}
 	
@@ -87,7 +90,21 @@ public class Robot {
 	}
 	
 	public boolean canSeeBlock() {
-		return visionCanSeeBlock;
+		return visionMsg.detectedBlock;
+	}
+	
+	public double getBlockTheta() {
+		if (canSeeBlock()) {
+			return visionMsg.theta;
+		}
+		return -1;
+	}
+	
+	public double getBlockDistance() {
+		if (canSeeBlock()) {
+			return visionMsg.distance;
+		}
+		return -1;
 	}
 	
 	public void goToLocation(Point2D.Double loc) {
@@ -97,6 +114,21 @@ public class Robot {
 		dest.y = loc.y;
 		waypointCommandPub.publish(dest);
 		doneMoving = false;
+	}
+	
+	public void rotateToLocation(Point2D.Double loc) {
+		log.info("go to location" + loc);
+		OdometryMsg dest = new OdometryMsg();
+		dest.x = loc.x;
+		dest.y = loc.y;
+		angleCommandPub.publish(dest);
+		doneMoving = false;
+	}
+	
+	public void rotateToTheta(double theta) {
+		// make an arbitrary point that is theta away
+		Point2D.Double p = new Point2D.Double(Math.cos(theta), Math.sin(theta)); // TODO sign ok?
+		rotateToLocation(p);
 	}
 	
 	public void sendMotorMessage(double translationalVelocity, double rotationalVelocity) {

@@ -28,7 +28,6 @@ public class StateMovingToBlock extends RobotState {
 		// for safety!
 		robot.stopMoving();
 
-		Point2D.Double waypoint = null;
 		State state = State.INIT;
 
 		while (true) {

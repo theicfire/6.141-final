@@ -46,7 +46,8 @@ public class StateLookingForBlocks extends RobotState {
 				if (robot.canSeeBlock()) {
 					robot.log.info("Robot can see block; stopping and going to initial state");
 					robot.stopMoving();
-					robot.setStateObject(new StateMovingToBlock(robot));
+//					robot.setStateObject(new StateMovingToBlock(robot, waypoint));
+					robot.setStateObject(new StateInitial(robot));
 					return;
 				} else if (robot.doneMoving()) {
 //					TODO stopMoving; security measure

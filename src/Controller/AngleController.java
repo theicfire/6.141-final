@@ -6,7 +6,8 @@ public class AngleController extends ProportionalController {
 
 	Odometer odom;
 	
-	public AngleController(Odometer odom) {
+	public AngleController(double gain, double desired, Odometer odom) {
+		super(gain, desired);
 		this.odom = odom;
 	}
 
