@@ -27,64 +27,60 @@ public class StatePickingUpBlock extends RobotState {
 	}
 
 	enum State {
-		ROTATING,
-		APPROACHING_BLOCK,
-		MOVING_ARM,
-		STORING_BLOCK,
-		CHECK_HOLDING_PEN
+		APPROACHING_BLOCK, MOVING_ARM, STORING_BLOCK, CHECK_HOLDING_PEN
 	}
+
 	@Override
-	public void perform() {	
-		
-//		AngleController pc = new AngleController(1, 0, robot.);
-//	       pc.setDesired(0);
-	       
-	       State state = State.ROTATING;
-	       boolean done = false;
-           
-	       robot.arm.prepareToPickup(); // blocking
-	       
-           while (!done) {
-	           switch (state) {
-	           case APPROACHING_BLOCK: {
-	                   robot.stopMoving();
-	                   state = State.MOVING_ARM;
-	               }	              
-	               break;
-	           case MOVING_ARM:
-	               if (robot.vision.canSeeBlock() == false) {
-	                   robot.arm = new Arm(); // reset
-	                   // blocking arm controller movement
-	                   robot.armDriver.doMovement(robot.arm);
-//	                   robot.failedToPickBlock(b);
-//	                   exitState =
-//	                       iDontKnowWhatShouldBeTheStateIfWeFail;
-	                   done = true;
-	               } else if (robot.vision.canSeeBlock() == true) {
-	            	   robot.arm.step();
-	            	   // blocking arm controller movement
-	            	   robot.armDriver.doMovement(robot.arm);
-	               }
-	               break;
+	public void perform() {
 
-	           case STORING_BLOCK:
-	               
-	               // do arm movements here
-	               
-	               break;
-	               
-	           case CHECK_HOLDING_PEN:
-	               // wait a little bit for the block to be acknowledged
-	               // this state shouldn't really be necessary though...
-	               
-	               break;
-	               
-	           
-	           }
+		State state = State.APPROACHING_BLOCK;
+		boolean done = false;
 
-	       }
-	       
-	   }
+		// robot.arm.prepareToPickup();
+
+		while (!done) {
+			switch (state) {
+			case APPROACHING_BLOCK: {
+				robot.stopMoving();
+				state = State.MOVING_ARM;
+				break;
+			}
+			case MOVING_ARM: {
+				if (robot.vision.canSeeBlock() == false) {
+					robot.arm = new Arm(); // reset
+					// blocking arm controller movement
+					robot.armDriver.doMovement(robot.arm);
+					// robot.failedToPickBlock(b);
+					// exitState =
+					// iDontKnowWhatShouldBeTheStateIfWeFail;
+					done = true;
+				} else if (robot.vision.canSeeBlock() == true) {
+					robot.arm.openGripper();
+					robot.arm.lowerArm();
+					// blocking arm controller movement, TODO replace with
+					// non-blocking
+					robot.armDriver.doMovement(robot.arm);
+					state = State.STORING_BLOCK;
+				}
+				break;
+			}
+			case STORING_BLOCK: {
+				robot.arm.closeGripper();
+				// blocking arm controller movement
+				robot.armDriver.doMovement(robot.arm);
+				// do arm movements here
+				robot.arm.raiseArm();
+				break;
+			}
+			case CHECK_HOLDING_PEN: {
+				// wait a little bit for the block to be acknowledged
+				// this state shouldn't really be necessary though...
+
+				break;
+			}
+			} // end switch
+		} // end while
+
 		// state transition
 		this.robot.setStateObject(new StateLookingForBlocks(this.robot));
 
