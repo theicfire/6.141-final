@@ -92,7 +92,7 @@ public class Arm implements ArmGymnastics {
 	 * Returns true if we are done stepping; otherwise false
 	 */
 	@Override
-	public boolean move() {
+	public boolean step() {
 		// TODO Auto-generated method stub
 //		lastAngle = (lastAngle + 1) % 360;
 //		joints.getWrist().setTheta(lastAngle / 180 * Math.PI);

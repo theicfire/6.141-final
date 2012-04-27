@@ -40,7 +40,7 @@ public class RosArmDriver {
 
 	private static Log log;
 	
-	public RosArmDriver(Node node, double gripperMinAngle, double gripperMaxAngle) {
+	public RosArmDriver(Node node) {
 		log = node.getLog();
 		armPub = node.newPublisher("command/Arm", "rss_msgs/ArmMsg");
 		
@@ -65,7 +65,7 @@ public class RosArmDriver {
 
 	public void doMovement(Arm toArm) {
 		// set the desired theta of the joints
-		while (toArm.move()) {
+		while (toArm.step()) {
 			// just keep calling step
 			log.info("driver: moving arm");
 			sendArmPWM(toArm);

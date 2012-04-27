@@ -1,46 +1,47 @@
 package Robot;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
 
+import Controller.PositionController;
+import Controller.Utility;
 import Robot.StateLookingForBlocks.State;
 
 /**
- * Move towards any point (hopefully a point where a block exists) 
- * 	and stop when you are within x meters of it (doesn't have to be perfect). 
+ * Move towards any point (hopefully a point where a block exists) and stop when
+ * you are within x meters of it (doesn't have to be perfect).
+ * 
  * @author rss-student
- *
+ * 
  */
 public class StateMovingToBlock extends RobotState {
 
-	private Point2D.Double blockLoc;
-	public StateMovingToBlock(Robot ri, Point2D.Double blockLoc) {
+	private final double STANDOFF_DISTANCE = 0.1;
+
+	public StateMovingToBlock(Robot ri) {
 		super(ri);
-		this.blockLoc = blockLoc;
-		// TODO Auto-generated constructor stub
 	}
 
 	enum State {
 		INIT
 	}
-	
+
 	@Override
 	public void perform() {
-		// for safety!
-		robot.stopMoving();
-
+		robot.stopMoving(); //safety
 		State state = State.INIT;
 
 		while (true) {
 			switch (state) {
-			case INIT:
-				boolean robotNear = false; // TODO
-				if (robotNear) {
+			case INIT:	
+				if (Utility.getMagnitude(robot.getCurrentLocation(), robot.getBlockLocation()) < STANDOFF_DISTANCE) {
 					robot.setStateObject(new StatePickingUpBlock(robot));
 					return;
+				} else {
+					robot.driveToLocation(robot.getBlockLocation());
+					Utility.sleepForASecond();
+					break;
 				}
-
-				robot.goToLocation(blockLoc);
-				break;
 			}
 		}
 	}

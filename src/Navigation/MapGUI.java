@@ -359,7 +359,7 @@ public class MapGUI extends SonarGUI implements NodeMain{
 
       if ( polys.add(new Poly(vertices, closed, filled, polyColor)) ) {
 
-	  System.err.println("added poly with " + vertices.size() + " verts");
+	  //System.err.println("added poly with " + vertices.size() + " verts");
 	  for (Point2D.Double vertex : vertices)
 	      System.err.println("  " + vertex);
       }

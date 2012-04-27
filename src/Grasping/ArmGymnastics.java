@@ -10,5 +10,5 @@ public interface ArmGymnastics {
 	public void openGripper();
 	
 	// blocking command
-	public boolean move();
+	public boolean step();
 }

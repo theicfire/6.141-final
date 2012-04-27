@@ -18,7 +18,7 @@ public class Odometer {
 	
 	Subscriber<OdometryMsg> odomSub;
 	
-	Odometer(Node node) {
+	public Odometer(Node node) {
 		this.totalTicks = new double[2];
 		this.totalTicks[0] = this.totalTicks[1] = 0.0;
 		this.odomXY = new double[2];

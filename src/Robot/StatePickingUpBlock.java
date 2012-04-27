@@ -18,6 +18,7 @@ import org.ros.message.lab6_msgs.GUIRectMsg;
 import org.ros.node.parameter.ParameterTree;
 
 import Controller.AngleController;
+import Grasping.Arm;
 
 public class StatePickingUpBlock extends RobotState {
 
@@ -34,83 +35,59 @@ public class StatePickingUpBlock extends RobotState {
 	}
 	@Override
 	public void perform() {	
-//		this.robot.setStateObject(new StateLookingForBlocks(this.robot));
 		
-//		AngleController pc = new AngleController(1, 0, robot.odom);
+//		AngleController pc = new AngleController(1, 0, robot.);
 //	       pc.setDesired(0);
 	       
-//	       State state = State.ROTATING;
-//	       boolean done = false;
-//
-//	       while (!done) {
-//	           switch (state) {
-//	           case ROTATING:
-////	               if (cantSeeBlock || cantReachBlock ) {
-//	        	   if (false) {
-////	                   robot.failedToPickBlock(b);
-////	                   exitState =
-////	                       iDontKnowWhatShouldBeTheStateIfWeFail;
-////	                   done = true;
-////	               } else if (alreadyFacingBlock) {
-////	                   state = State.APPROACHING_BLOCK;
-//	               } else {
-//	            	   Point2D.Double p = new Point2D.Double(0, 0); // TODO
-//	            	   robot.rotateToLocation(p);
-//	               }
-//	               break;
-//	           case APPROACHING_BLOCK:
-//
-//	               if (cantSeeBlock || cantReachBlock ) {
-//	                   robot.failedToPickBlock(b);
-//	                   exitState =
-//	                       iDontKnowWhatShouldBeTheStateIfWeFail;
-//	                   done = true;
-//	               } else if (noLongerFacingBlock) {
-//	                   stopMoving;
-//	                   state = State.ROTATING;
-//	               } else if (atRightDistanceToBlock) {
-//	                   stopMoving();
-//	                   robot.arm.prepareToPickup(); // blocking
-//	                   state = State.MOVING_ARM;
-//	               }
-//	               
-//	               // move towards the pose
-//	               // from robot will perform the grab
-//	               
-//	               
-//	               break;
-//	           case MOVING_ARM:
-//	               if (cantSeeBlock || cantReachBlock) {
-//	                   robot.resetArm();
-//	                   robot.failedToPickBlock(b);
-//	                   exitState =
-//	                       iDontKnowWhatShouldBeTheStateIfWeFail;
-//	                   done = true;
-//	               } else if (armNotDoneMoving) {
-//	               // we perhaps need to use a controller here
-//	                   angles = armController.Step();
-//	                   arm.SetAngles(angles);
-//	               }
-//	               break;
-//
-//	           case STORING_BLOCK:
-//	               
-//	               // do arm movements here
-//	               
-//	               break;
-//	               
-//	           case CHECK_HOLDING_PEN:
-//	               // wait a little bit for the block to be acknowledged
-//	               // this state shouldn't really be necessary though...
-//	               
-//	               break;
-//	               
-//	           
-//	           }
-//
-//	       }
+	       State state = State.ROTATING;
+	       boolean done = false;
+           
+	       robot.arm.prepareToPickup(); // blocking
 	       
-//	   }
+           while (!done) {
+	           switch (state) {
+	           case APPROACHING_BLOCK: {
+	                   robot.stopMoving();
+	                   state = State.MOVING_ARM;
+	               }	              
+	               break;
+	           case MOVING_ARM:
+	               if (robot.vision.canSeeBlock() == false) {
+	                   robot.arm = new Arm(); // reset
+	                   // blocking arm controller movement
+	                   robot.armDriver.doMovement(robot.arm);
+//	                   robot.failedToPickBlock(b);
+//	                   exitState =
+//	                       iDontKnowWhatShouldBeTheStateIfWeFail;
+	                   done = true;
+	               } else if (robot.vision.canSeeBlock() == true) {
+	            	   robot.arm.step();
+	            	   // blocking arm controller movement
+	            	   robot.armDriver.doMovement(robot.arm);
+	               }
+	               break;
+
+	           case STORING_BLOCK:
+	               
+	               // do arm movements here
+	               
+	               break;
+	               
+	           case CHECK_HOLDING_PEN:
+	               // wait a little bit for the block to be acknowledged
+	               // this state shouldn't really be necessary though...
+	               
+	               break;
+	               
+	           
+	           }
+
+	       }
+	       
+	   }
+		// state transition
+		this.robot.setStateObject(new StateLookingForBlocks(this.robot));
+
 	}
 
 }

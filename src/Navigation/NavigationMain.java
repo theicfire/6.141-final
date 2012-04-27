@@ -1,6 +1,7 @@
 package Navigation;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.text.ParseException;
@@ -425,6 +426,11 @@ public class NavigationMain {
 		// TODO Auto-generated method stub
 		int n = (int) (Math.random() * visGraph.keySet().size());
 		return (Point2D.Double) visGraph.keySet().toArray()[n];
+	}
+
+	public Double getCurrentLocation() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

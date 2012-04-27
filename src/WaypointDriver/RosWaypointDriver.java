@@ -53,10 +53,13 @@ public class RosWaypointDriver implements NodeMain {
 
 		movePub = node.newPublisher("command/Motors", "rss_msgs/MotionMsg");
 		pubComplete = node.newPublisher("rss/waypointcomplete", "rss_msgs/BreakBeamMsg");
+		
 		destSub = node.newSubscriber("rss/waypointcommand", "rss_msgs/OdometryMsg");
 		destSub.addMessageListener(new DestCommandMessageListener());
-		destSub = node.newSubscriber("rss/anglecommand", "rss_msgs/OdometryMsg");
+		
+		angleSub = node.newSubscriber("rss/anglecommand", "rss_msgs/OdometryMsg");
 		angleSub.addMessageListener(new AngleCommandMessageListener());
+		
 		stopSub = node.newSubscriber("rss/stopcommand", "rss_msgs/BreakBeamMsg");
 		stopSub.addMessageListener(new StopListener());
 	}

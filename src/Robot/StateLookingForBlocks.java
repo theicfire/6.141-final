@@ -7,7 +7,7 @@ import org.ros.message.rss_msgs.OdometryMsg;
 
 public class StateLookingForBlocks extends RobotState {
 	private boolean destComplete;
-	
+
 	public StateLookingForBlocks(Robot ri) {
 		super(ri);
 		// TODO Auto-generated constructor stub
@@ -16,7 +16,7 @@ public class StateLookingForBlocks extends RobotState {
 	enum State {
 		INIT, MOVING
 	}
-	
+
 	@Override
 	public void perform() {
 		// for safety!
@@ -27,7 +27,7 @@ public class StateLookingForBlocks extends RobotState {
 		while (true) {
 			switch (state) {
 			case INIT:
-				if (robot.canSeeBlock()) {
+				if (robot.vision.canSeeBlock()) {
 					robot.setStateObject(new StateInitial(robot));
 					return;
 				}
@@ -39,30 +39,29 @@ public class StateLookingForBlocks extends RobotState {
 				// yet
 				// or we can pick a place that is close by randomly
 				waypoint = robot.navigationMain.pickNewPoint();
-				robot.goToLocation(waypoint);
+				robot.driveToLocation(waypoint);
 				state = State.MOVING;
 				break;
 			case MOVING:
-				if (robot.canSeeBlock()) {
-					robot.log.info("Robot can see block; stopping and going to initial state");
+				if (robot.vision.canSeeBlock()) {
+					robot.log.info("Robot can see block; stopping and going to StateMovingToBlock");
 					robot.stopMoving();
-//					robot.setStateObject(new StateMovingToBlock(robot, waypoint));
-					robot.setStateObject(new StateInitial(robot));
+					// TODO clearly long; we should get the block location from the vision system
+					robot.setStateObject(new StateMovingToBlock(robot));
 					return;
 				} else if (robot.doneMoving()) {
-//					TODO stopMoving; security measure
+					// TODO stopMoving; security measure
 					robot.log.info("Done moving");
-					robot.sendMotorMessage(0, 0);
+					robot.stopMoving();
 					state = State.INIT;
 				} else { // cantSeeBlock and notDoneMoving
 					// We have already sent a message
-					//this.robot.waypointDriver.stopMoving();
-//					state = State.INIT;
+					// this.robot.waypointDriver.stopMoving();
+					// state = State.INIT;
 				}
 				break;
 			}
 		}
 	}
-	
 
 }
