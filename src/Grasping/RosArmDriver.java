@@ -76,7 +76,7 @@ public class RosArmDriver {
 				e.printStackTrace();
 			}
 		}
-		log.info("driver: arm movement");
+		log.info("driver: arm movement complete");
 	}
 
 	public class ArmListener implements MessageListener<ArmMsg> {

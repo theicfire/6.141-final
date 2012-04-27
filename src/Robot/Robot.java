@@ -19,7 +19,6 @@ import Grasping.RosArmDriver;
 import Navigation.NavigationMain;
 import VisualServoSolution.VisionMsgWrapper;
 import WaypointDriver.Odometer;
-import WaypointDriver.OdometryListener;
 
 public class Robot {
 	Arm arm;
@@ -63,7 +62,7 @@ public class Robot {
 		this.odom = new Odometer(node);
 
 		log.info("Waiting for movePub");
-		while (movePub.getNumberOfSubscribers() == 0) {
+		while (waypointCommandPub.getNumberOfSubscribers() == 0) {
 			// block
 		}
 		log.info("Done waiting for movePub");

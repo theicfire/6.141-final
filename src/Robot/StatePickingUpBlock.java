@@ -48,6 +48,8 @@ public class StatePickingUpBlock extends RobotState {
 			case MOVING_ARM: {
 				if (robot.vision.canSeeBlock() == false) {
 					robot.arm = new Arm(); // reset
+					robot.arm.raiseArm();
+					robot.arm.closeGripper();
 					// blocking arm controller movement
 					robot.armDriver.doMovement(robot.arm);
 					// robot.failedToPickBlock(b);
