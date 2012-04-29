@@ -10,14 +10,7 @@ public class Main implements NodeMain {
 
 	// ENTRY POINT IS HERE
 	@Override
-	public void onStart(Node node) {
-		Planner p = new Planner();
-
-		// start thread for vision
-		// start thread for sonars
-		// start thread for odometer? maybe not
-		// start thread for bump sensors
-		
+	public void onStart(Node node) {		
 		Robot robot = new Robot(node);
 		StateInitial startState = new StateInitial(robot);
 		robot.setStateObject(startState);

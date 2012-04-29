@@ -25,8 +25,13 @@ public class VisionMain implements NodeMain {
 	private static final int IMAGE_WIDTH = 160;
 	private static final int IMAGE_HEIGHT = 120;
 
-	private double target_hue_level = 0.66; // (Solution)
-	private double hue_threshold = 0.03; // (Solution)
+//	private double target_hue_level = 0.66; // (Solution)
+//	private double hue_threshold = 0.03; // (Solution)
+//	private double saturation_level = 0.8; // (Solution)
+	
+
+	private double target_hue_level = 0.60; // (Solution)
+	private double hue_threshold = 0.04; // (Solution)
 	private double saturation_level = 0.8; // (Solution)
 	// // Units are fraction of total number of pixels detected in blob //
 	// (Solution)
@@ -76,6 +81,9 @@ public class VisionMain implements NodeMain {
 		while (true) {
 			VisionMsg vm = new VisionMsg();
 			vm.detectedBlock = targetDetected;
+			vm.distance = range;
+			// important!!
+			vm.theta = -angle;
 			this.blobDetectedPub.publish(vm);
 			
 			try {
@@ -113,19 +121,19 @@ public class VisionMain implements NodeMain {
 			// TODO Auto-generated method stub
 
 			Image dest = new Image(src.data, (int) src.width, (int) src.height);
-			// log.info("hue" + dest.getPixel(50, 50).getHue());
-			// log.info("sat" + dest.getPixel(50, 50).getSaturation());
-			// log.info("bri" + dest.getPixel(50, 50).getBrightness());
+//			log.info("hue" + dest.getPixel(50, 50).getHue());
+//			log.info("sat" + dest.getPixel(50, 50).getSaturation());
+//			log.info("bri" + dest.getPixel(50, 50).getBrightness());
 			Image otherSrc = new Image(src.data, (int) src.width,
 					(int) src.height);
 			//log.info("bt + " + bt);
 			bt.apply(otherSrc, dest);
 
-			// for (int i = 50; i < 55; i++) {
-			// for (int j = 50; j < 55; j++) {
-			// dest.setPixel(i, j, new Image.Pixel(255, 0, 0));
-			// }
-			// }
+//			for (int i = 50; i < 55; i++) {
+//				for (int j = 50; j < 55; j++) {
+//					dest.setPixel(i, j, new Image.Pixel(255, 0, 0));
+//				}
+//			}
 
 			targetDetected = bt.targetDetected;
 			centroidX = bt.centroidX;
@@ -133,7 +141,7 @@ public class VisionMain implements NodeMain {
 			range = bt.targetRange;
 			angle = (0.0171693 + 0.00987868 * centroidX) - Math.PI / 4;
 
-			// log.info("range, angle" + range + ", " + angle);
+//			log.info("range, angle" + range + ", " + angle);
 
 			org.ros.message.sensor_msgs.Image pubImage = new org.ros.message.sensor_msgs.Image();
 			pubImage.width = IMAGE_WIDTH;

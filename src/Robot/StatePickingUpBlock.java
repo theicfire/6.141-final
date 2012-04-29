@@ -18,6 +18,7 @@ import org.ros.message.lab6_msgs.GUIRectMsg;
 import org.ros.node.parameter.ParameterTree;
 
 import Controller.AngleController;
+import Controller.Utility;
 import Grasping.Arm;
 
 public class StatePickingUpBlock extends RobotState {
@@ -32,7 +33,8 @@ public class StatePickingUpBlock extends RobotState {
 
 	@Override
 	public void perform() {
-
+		robot.stopMoving();
+		
 		State state = State.APPROACHING_BLOCK;
 		boolean done = false;
 
@@ -46,32 +48,47 @@ public class StatePickingUpBlock extends RobotState {
 				break;
 			}
 			case MOVING_ARM: {
-				if (robot.vision.canSeeBlock() == false) {
-					robot.arm = new Arm(); // reset
-					robot.arm.raiseArm();
-					robot.arm.closeGripper();
-					// blocking arm controller movement
-					robot.armDriver.doMovement(robot.arm);
+				if (! robot.vision.canSeeBlock()) {
+					// TODO TODO TODO
+//					robot.arm = new Arm(); // reset
+//					robot.arm.closeGripper();
+//					robot.armDriver.doMovement(robot.arm);
+//					// TODO verify breakbeam is in place
+//					robot.arm.raiseArm();
+//
+//					// blocking arm controller movement
+//					robot.armDriver.doMovement(robot.arm);
+//					robot.log.info("don't see block, putting arm up");
 					// robot.failedToPickBlock(b);
 					// exitState =
 					// iDontKnowWhatShouldBeTheStateIfWeFail;
 					done = true;
-				} else if (robot.vision.canSeeBlock() == true) {
+				} else if (robot.vision.canSeeBlock()) {
+					robot.log.info("see block - lowering arm");
+					Utility.sleepFor5Seconds();
 					robot.arm.openGripper();
 					robot.arm.lowerArm();
 					// blocking arm controller movement, TODO replace with
 					// non-blocking
 					robot.armDriver.doMovement(robot.arm);
 					state = State.STORING_BLOCK;
+					robot.log.info("arm lowered");
+					Utility.sleepFor5Seconds();
 				}
 				break;
 			}
 			case STORING_BLOCK: {
+				robot.log.info("storing block");
+	
 				robot.arm.closeGripper();
-				// blocking arm controller movement
 				robot.armDriver.doMovement(robot.arm);
-				// do arm movements here
 				robot.arm.raiseArm();
+				robot.armDriver.doMovement(robot.arm);
+				robot.arm.openGripper();
+				robot.armDriver.doMovement(robot.arm);
+
+				robot.log.info("done storing block");
+				done = true;
 				break;
 			}
 			case CHECK_HOLDING_PEN: {

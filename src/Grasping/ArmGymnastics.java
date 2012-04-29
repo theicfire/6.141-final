@@ -1,5 +1,7 @@
 package Grasping;
 
+import org.apache.commons.logging.Log;
+
 public interface ArmGymnastics {
 	// non blocking
 	public void lowerArm();

@@ -33,11 +33,6 @@ public class ArmJoint extends InverseKinematics.Joint {
 	}
 
 	public boolean setTheta(double theta) {
-		// TODO put somewhere else...
-//		if (Math.abs(desiredPWM - curPWM) > 200) {
-//			throw new RuntimeException("Too much movement in one turn - " + Math.abs(desiredPWM - curPWM));
-//		}
-//		
 		double outputPWM = (PWM_thetaPIBy2 - PWM_theta0) * (theta / (Math.PI / 2.0)) + MIN_PWM;
 		
 		if (outputPWM > MAX_PWM) {
@@ -46,6 +41,9 @@ public class ArmJoint extends InverseKinematics.Joint {
 			throw new RuntimeException("non-physical angle setting for joint");
 		}
 		desiredPWM = (int)outputPWM;
+		if (Math.abs(desiredPWM - curPWM) > 200) {
+			throw new RuntimeException("Too much movement in one turn: " + Math.abs(desiredPWM - curPWM));
+		}
 		return true;
 	}
 	

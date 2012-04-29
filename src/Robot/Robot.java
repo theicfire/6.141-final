@@ -134,12 +134,12 @@ public class Robot {
 		return this.odom.getPosition();
 	}
 
-	public Double getBlockLocation() {
-		Double us = this.odom.getPosition();
-		return new Double(us.x + this.vision.getBlockDistance()
-				* Math.cos(this.vision.getBlockTheta()), us.y
-				+ this.vision.getBlockDistance()
-				* Math.sin(this.vision.getBlockTheta()));
+	public void driveForward(double atAngle) {
+		// TODO Auto-generated method stub
+		OdometryMsg om = new OdometryMsg();
+		om.type = "forward";
+		om.theta = atAngle;
+		this.waypointCommandPub.publish(om);
 	}
 
 	// NO MORE METHODS HERE!!!! NO MORE METHODS HERE!!!!

@@ -7,7 +7,7 @@ public class Utility {
 		return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 	}
 
-	public static void sleepForASecond() {
+	public static void sleepFor20ms() {
 		try {
 			Thread.sleep(20);
 		} catch (InterruptedException e) {
@@ -15,7 +15,25 @@ public class Utility {
 			e.printStackTrace();
 		}
 	}
+	
+	public static void sleepFor250ms() {
+		try {
+			Thread.sleep(250);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
+	public static void sleepFor5Seconds() {
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public class Pose {
 		private double _x, _y, _theta;
 
@@ -49,5 +67,6 @@ public class Utility {
 			this._x = _x;
 		}
 	}
+
 
 }

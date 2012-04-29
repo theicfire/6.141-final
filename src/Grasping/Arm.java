@@ -3,6 +3,8 @@ package Grasping;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+
 import Grasping.ArmJoint;
 
 public class Arm implements ArmGymnastics {
@@ -19,7 +21,8 @@ public class Arm implements ArmGymnastics {
 		final double SHOULDER_LENGTH = .25;
 		final double ELBOW_LENGTH = .18;
 		shoulder = new ArmJoint(SHOULDER_LENGTH, 0, 550, 2000, 1200, 1975);
-		elbow = new ArmJoint(ELBOW_LENGTH, 0, 1350, 1650, 1250, 2100);
+		// last two numbers (pwm_theta0, pwm_thetaPiBy2) are wrong for elbow
+		elbow = new ArmJoint(ELBOW_LENGTH, 0, 1080, 1280, 1250, 2100);
 		wrist = new ArmJoint(1.0, 0, 520, 910, 520, 910);
 	
 		joints = new ArrayList<ArmJoint>();
@@ -67,24 +70,23 @@ public class Arm implements ArmGymnastics {
 	
 	@Override
 	public void openGripper() {
-		wrist.setDesiredPWM((int)(wrist.MAX_PWM * 0.75));
+		wrist.setDesiredPWM((int)(wrist.MAX_PWM * 0.9));
 	}
 
 	@Override
 	public void lowerArm() {
-		elbow.setDesiredPWM(elbow.MAX_PWM);
+		elbow.setDesiredPWM(elbow.MIN_PWM);
 		shoulder.setDesiredPWM(shoulder.MIN_PWM);
 	}
 
 	@Override
 	public void raiseArm() {
-		elbow.setDesiredPWM(elbow.MIN_PWM);
+		elbow.setDesiredPWM(elbow.MAX_PWM);
 		shoulder.setDesiredPWM(shoulder.MAX_PWM);
 	}
 
 	@Override
 	public void setGripAngle(double radians) {
-		// TODO Auto-generated method stub
 		wrist.setTheta(radians);
 	}
 
@@ -93,7 +95,6 @@ public class Arm implements ArmGymnastics {
 	 */
 	@Override
 	public boolean step() {
-		// TODO Auto-generated method stub
 //		lastAngle = (lastAngle + 1) % 360;
 //		joints.getWrist().setTheta(lastAngle / 180 * Math.PI);
 //		joints.getShoulder().setTheta(lastAngle / 180 * Math.PI);
@@ -130,8 +131,6 @@ public class Arm implements ArmGymnastics {
 			return true;
 		}
 		return false;
-	}
-
-	
+	}	
 	
 }

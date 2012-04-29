@@ -49,8 +49,8 @@ public class NavigationMain {
 		log.info("~~~~~~~~~~starting");
 
 		log.info("~~~~~~~~~~resolving map file name");
-		ParameterTree paramTree = node.newParameterTree();
-		log.info("~~~~~~~~~~creating paramTree");
+//		ParameterTree paramTree = node.newParameterTree();
+//		log.info("~~~~~~~~~~creating paramTree");
 
 		COLOR_MSG_RED = new ColorMsg();
 		COLOR_MSG_RED.r = 255;
@@ -423,14 +423,8 @@ public class NavigationMain {
 	}
 
 	public Point2D.Double pickNewPoint() {
-		// TODO Auto-generated method stub
 		int n = (int) (Math.random() * visGraph.keySet().size());
 		return (Point2D.Double) visGraph.keySet().toArray()[n];
-	}
-
-	public Double getCurrentLocation() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

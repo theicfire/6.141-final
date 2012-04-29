@@ -28,8 +28,10 @@ public class StateLookingForBlocks extends RobotState {
 			switch (state) {
 			case INIT:
 				if (robot.vision.canSeeBlock()) {
-					robot.setStateObject(new StateInitial(robot));
-					return;
+					state = State.MOVING;
+					break;
+//					robot.setStateObject(new StateInitial(robot));
+//					return;
 				}
 
 				// can pick a place depending on known information

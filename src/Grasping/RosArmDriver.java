@@ -56,23 +56,22 @@ public class RosArmDriver {
 		log.info("Arm is ready");
 	}
 
-	private void sendArmPWM(Arm toArm) {
+	public void sendArmPWM(Arm toArm) {
 		ArmMsg msg = new ArmMsg();
 		msg.pwms = toArm.getPwms();
-		log.info("publishing " + Arrays.toString(msg.pwms));
+		log.info("arm publishing " + Arrays.toString(msg.pwms));
 		armPub.publish(msg);
 	}
 
 	public void doMovement(Arm toArm) {
 		// set the desired theta of the joints
-		while (toArm.step()) {
+		while (! toArm.step()) {
 			// just keep calling step
 			log.info("driver: moving arm");
 			sendArmPWM(toArm);
 			try {
 				Thread.sleep(250);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

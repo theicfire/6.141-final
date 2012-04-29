@@ -68,7 +68,13 @@ public class RosWaypointDriver implements NodeMain {
 			MessageListener<org.ros.message.rss_msgs.OdometryMsg> {
 		public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg om) {
 			forceStop = false;
-			driveToPoint(new Point2D.Double(om.x, om.y));
+			if (om.type.startsWith("forward")) {
+				log.info("MOVE FORWARD BY THETA: " + om.theta);
+				sendMotorMessage(0.3, om.theta);
+			}
+			else {
+				driveToPoint(new Point2D.Double(om.x, om.y));
+			}
 		}
 	}
 	
@@ -84,6 +90,7 @@ public class RosWaypointDriver implements NodeMain {
 		public void onNewMessage(org.ros.message.rss_msgs.BreakBeamMsg bb) {
 			// stop driving
 			forceStop = true;
+			stopMoving();
 		}
 	}
 	
