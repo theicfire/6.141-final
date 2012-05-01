@@ -43,7 +43,7 @@ public class StatePickingUpBlock extends RobotState {
 		
 		// update position of the odometry
 		// something like 
-		robot.odom.updatePosition((new Utility()).new Pose(Planner.getCurrentBlockPoint(), 0));
+		robot.odom.updatePosition((new Utility()).new Pose(Planner.getCurrentBlockPoint(), robot.odom.getTheta()));
 
 		while (!done) {
 			switch (state) {

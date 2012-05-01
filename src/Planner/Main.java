@@ -15,6 +15,7 @@ public class Main implements NodeMain {
 		StateInitial startState = new StateInitial(robot);
 		robot.setStateObject(startState);
 
+		robot.log.info("Start performing");
 		while (true) {
 			// make states represent atomic actions
 			robot.getRobotState().perform();

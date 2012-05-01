@@ -3,6 +3,13 @@ package Planner;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
+import Challenge.ConstructionGUI;
+import Challenge.ConstructionObject;
+import Challenge.Fiducial;
+import Challenge.GrandChallengeMap;
+import Navigation.PolygonMap;
+import Navigation.PolygonObstacle;
+
 public class Planner {
 
 	public static int blockIndex = 0;
@@ -25,9 +32,22 @@ public class Planner {
 
 	public static void nextBlock() {
 		initPoints();
-		// TODO Auto-generated method stub
 		blockIndex += 1;
 		blockIndex = blockIndex % tmpPoints.size();
+	}
+	
+	public static Point2D findClosestThing() {
+		for (ConstructionObject c : GrandChallengeMap.constructionObjects) {
+			c.getPosition();
+			// do something here
+		}
+		for (PolygonObstacle c : GrandChallengeMap.obstacles) {
+			// pass
+		}
+		for (Fiducial f : GrandChallengeMap.fiducials) {
+			// pass
+		}
+		return null;
 	}
 
 }

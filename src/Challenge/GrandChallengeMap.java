@@ -43,15 +43,15 @@ public class GrandChallengeMap implements NodeMain {
     /**
      * <p> array of ConstructionObjects parsed from the file</p>
      */
-    private ConstructionObject[] constructionObjects;
+    public static ConstructionObject[] constructionObjects;
     /**
      * <p> array of fiducials parsed from the file</p>
      */
-    private Fiducial[] fiducials;
+    public static Fiducial[] fiducials;
     /**
      * <p> array of obstacles parsed from the file</p>
      */
-    private PolygonObstacle[] obstacles;
+    public static PolygonObstacle[] obstacles;
     /**
      * <p> bounding box rectangle of the world.</p>
      */

@@ -9,6 +9,10 @@ public class Utility {
 	public static double getMagnitude(Point2D.Double a, Point2D.Double b) {
 		return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 	}
+	
+	public static double getAngle(Point2D.Double a, Point2D.Double b) {
+		return Math.atan2(b.y - a.y, b.x - a.x);
+	}
 
 	public static void sleepFor20ms() {
 		try {
@@ -75,6 +79,10 @@ public class Utility {
 		public void setX(double _x) {
 			this._x = _x;
 		}
+		
+		public Double getPoint() {
+			return new Double(this._x, this._y);
+		}
 
 		public OdometryMsg getOdomMsg() {
 			OdometryMsg om = new OdometryMsg();
@@ -83,6 +91,13 @@ public class Utility {
 			om.theta = getTheta();
 			return om;
 		}
+
+		@Override
+		public String toString() {
+			return "Pose [_x=" + _x + ", _y=" + _y + ", _theta=" + _theta + "]";
+		}
+		
+		
 	}
 
 	public static double inRangeNegPiToPi(double radians) {
@@ -96,6 +111,16 @@ public class Utility {
 			} while (radians < -Math.PI);
 		}
 		return radians;
+	}
+	
+	public class Pair<E1,E2> {
+		  public final E1 first;
+		  public final E2 second;
+
+		  public Pair(E1 first, E2 second) {
+		    this.first = first;
+		    this.second = second;
+		  }
 	}
 
 }

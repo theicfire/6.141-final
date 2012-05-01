@@ -66,8 +66,9 @@ public class Robot {
 			// block
 		}
 		log.info("Done waiting for waypointCommand");
+		log.info("~~~~DONE ALL WAITING IN ROBOT~~~~");
 		
-		this.odom = new Localizer(node);
+		this.odom = new Localizer(node, true);
 		this.vision = new VisionMsgWrapper();
 		this.visionSub.addMessageListener(new VisionMessageListener());
 		this.doneMovingSub.addMessageListener(new DoneMovingListener());

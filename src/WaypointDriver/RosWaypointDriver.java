@@ -118,7 +118,7 @@ public class RosWaypointDriver implements NodeMain {
 		this.globalNode = node;
 		this.log = node.getLog();
 		
-		odom = new Localizer(globalNode);
+		odom = new Localizer(globalNode, false);
 	}
 
 	void robotMoveAlongPath(List<Point2D.Double> verts) {

@@ -65,6 +65,7 @@ public class BlobTracking {
 	public double targetRange = 0.0; // set in blobFix()
 	public double targetBearing = 0.0; // set in blobFix()
 	public Log log;
+	private static int countExceptions = 0;
 
 	/**
 	 * <p>Create a BlobTracking object</p>
@@ -95,12 +96,17 @@ public class BlobTracking {
 	protected void blobPresent(int[] threshIm, int[] connIm, int[] blobIm) { // (Solution)
 		// (Solution)
 		try {
-		connComp.doLabel(threshIm, connIm, width, height); // (Solution)
+			connComp.doLabel(threshIm, connIm, width, height); // (Solution)
 		} catch (Exception e) {
-			log.info("OH NO; EXCEPTION!!!");
-			log.info(e.getStackTrace());
-			log.info("labeling; sizes are " + threshIm.length + " " + connIm.length);
-			log.info("and width/height are " + width + " " + height);
+			if (countExceptions == 0) {
+				log.info("OH NO; EXCEPTION!!!");
+				log.info(e.getStackTrace());
+				log.info("labeling; sizes are " + threshIm.length + " " + connIm.length);
+				log.info("and width/height are " + width + " " + height);
+				countExceptions += 1;
+			}
+			
+			
 		}
 		// (Solution)
 		int colorMax = connComp.getColorMax(); // (Solution)

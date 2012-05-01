@@ -31,7 +31,6 @@ public class StateLookingForBlocks extends RobotState {
 		// for safety!
 		robot.stopMoving();
 
-		Point2D.Double waypoint = null;
 		State state = State.INIT;
 		while (true) {
 			switch (state) {
@@ -51,9 +50,8 @@ public class StateLookingForBlocks extends RobotState {
 				// or we can pick a place that is close by randomly
 //				waypoint = robot.navigationMain.pickNewPoint();
 //				waypoint = tmpPoints.get(tmpCount);
-				waypoint = Planner.getCurrentBlockPoint();
 		
-				robot.driveToLocation(waypoint);
+				robot.driveToLocation(Planner.getCurrentBlockPoint());
 				state = State.MOVING;
 				break;
 			case MOVING:
