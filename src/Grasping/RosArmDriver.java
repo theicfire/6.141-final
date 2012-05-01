@@ -74,7 +74,7 @@ public class RosArmDriver {
 			log.info("driver: moving arm");
 			sendArmPWM(toArm);
 			try {
-				Thread.sleep(250);
+				Thread.sleep(75);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

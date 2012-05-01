@@ -28,7 +28,6 @@ public class NavigationMain {
 
 	private Publisher<Object> pointPub;
 	private Publisher<Object> segPub;
-	private Publisher<Object> movePub;
 	private Publisher<Object> erasePub;
 	private Publisher<Object> rectPub;
 	private Publisher<Object> polyPub;
@@ -109,7 +108,6 @@ public class NavigationMain {
 		erasePub = node.newPublisher("gui/Erase", "lab5_msgs/GUIEraseMsg");
 		pointPub = node.newPublisher("gui/Point", "lab5_msgs/GUIPointMsg");
 		segPub = node.newPublisher("gui/Segment", "lab5_msgs/GUISegmentMsg");
-		movePub = node.newPublisher("command/Motors", "rss_msgs/MotionMsg");
 
 		log.info("~~~~~~~~~~waiting for gui as a listener");
 		rectPub = node.newPublisher("gui/Rect", "lab6_msgs/GUIRectMsg");

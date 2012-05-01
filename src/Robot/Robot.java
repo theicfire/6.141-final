@@ -16,9 +16,9 @@ import org.ros.node.Node;
 import Controller.Utility;
 import Grasping.Arm;
 import Grasping.RosArmDriver;
+import Localization.Localizer;
 import Navigation.NavigationMain;
 import VisualServoSolution.VisionMsgWrapper;
-import WaypointDriver.Odometer;
 
 public class Robot {
 	Arm arm;
@@ -29,7 +29,7 @@ public class Robot {
 	
 	private RobotState robotState;
 	NavigationMain navigationMain;
-	Odometer odom;
+	Localizer odom;
 	VisionMsgWrapper vision;
 	private boolean doneMoving;
 
@@ -59,9 +59,7 @@ public class Robot {
 		this.movePub = node.newPublisher("rss/waypointMovecommand", "rss_msgs/MotionMsg");
 
 		log.info("Waiting for movePub");
-		while (movePub.getNumberOfSubscribers() == 0) {
-			// block
-		}
+		
 		log.info("Done waiting for movePub");
 		log.info("Done waiting for waypointCommand");
 		while (waypointCommandPub.getNumberOfSubscribers() == 0) {
@@ -69,7 +67,7 @@ public class Robot {
 		}
 		log.info("Done waiting for waypointCommand");
 		
-		this.odom = new Odometer(node);
+		this.odom = new Localizer(node);
 		this.vision = new VisionMsgWrapper();
 		this.visionSub.addMessageListener(new VisionMessageListener());
 		this.doneMovingSub.addMessageListener(new DoneMovingListener());

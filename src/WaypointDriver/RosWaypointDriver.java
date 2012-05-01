@@ -19,6 +19,7 @@ import Controller.AngleController;
 import Controller.PositionController;
 import Controller.PositionController.VelocityPair;
 import Controller.Utility;
+import Localization.Localizer;
 
 /**
  * Moves the robot to a location (actually drives the robot)
@@ -37,7 +38,7 @@ public class RosWaypointDriver implements NodeMain {
 	private Node globalNode;
 	private Log log;
 	private Publisher<MotionMsg> movePub;
-	private Odometer odom;
+	private Localizer odom;
 	long lastTime = 0;
 	
 	boolean forceStop = false; // comes from a message; stops movement
@@ -54,6 +55,9 @@ public class RosWaypointDriver implements NodeMain {
 		StartRosWaypointDriver(node);
 
 		movePub = node.newPublisher("command/Motors", "rss_msgs/MotionMsg");
+		while (movePub.getNumberOfSubscribers() == 0) {
+			// block
+		}
 		pubComplete = node.newPublisher("rss/waypointcomplete", "rss_msgs/BreakBeamMsg");
 		
 		destSub = node.newSubscriber("rss/waypointcommand", "rss_msgs/OdometryMsg");
@@ -93,15 +97,11 @@ public class RosWaypointDriver implements NodeMain {
 			movePub.publish(motionMsg);
 		}
 	}
-	
+
 	public class AngleCommandMessageListener implements
 			MessageListener<org.ros.message.rss_msgs.OdometryMsg> {
 		public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg om) {
-			if (om.x == 0 && om.y == 0) {
-			rotateToPoint(om.theta);
-			} else {
-				rotateToPoint(Math.atan2(om.y, om.x));
-			}
+			rotateToPoint(new Point2D.Double(om.x, om.y));
 		}
 	}
 
@@ -118,7 +118,7 @@ public class RosWaypointDriver implements NodeMain {
 		this.globalNode = node;
 		this.log = node.getLog();
 		
-		odom = new Odometer(globalNode);
+		odom = new Localizer(globalNode);
 	}
 
 	void robotMoveAlongPath(List<Point2D.Double> verts) {
@@ -156,35 +156,68 @@ public class RosWaypointDriver implements NodeMain {
 	/**
 	 * Blocking method that rotates the robot to point to a specified point
 	 * @param vert
+	 * TODO use the commented code below this which has a controller implemented
 	 */
-	public void rotateToPoint(double theta) {		
-		double desired = theta + odom.getAngle();		
-		desired = Utility.inRangeNegPiToPi(desired);
-		
-		AngleController ac = new AngleController(0.5, desired, odom);
+	public void rotateToPoint(Double vert) {
+		// AngleController ac = new AngleController(odom);
+		// ac.setGain(0.5);
+		// ac.setDesiredOutput(Math.atan2(vert.y - odom.odomXY[1], vert.x
+		// - odom.odomXY[0]));
+
+		double error = Math.atan2(vert.y - odom.getY(), vert.x
+				- odom.getX())
+				- odom.getTheta();
+		if (error > Math.PI) {
+			do {
+				error -= 2 * Math.PI;
+			} while (error > Math.PI);
+		} else if (error < -Math.PI) {
+			do {
+				error += 2 * Math.PI;
+			} while (error < -Math.PI);
+		}
 
 		double rv = MAX_ROTATIONAL_VELOCITY;
-		
-		while (Math.abs(ac.difference()) > 0.01) {
-//			log.info("desired angle " + desired + " actual " + Utility.inRangeNegPiToPi(odom.getAngle()) + 
-//					"actual actual " + ac.getFeedbackOutput());
-//			log.info("difference was " + ac.difference());
-			double acOutput = ac.controlStep();
-//			double output = Math.min(ac.getFeedbackOutput(), rv);
-//			if (ac.getFeedbackOutput() < 0)
-//				output = Math.max(ac.getFeedbackOutput(), -rv);
-			this.sendMotorMessage(0, acOutput);
-			try {
-				Thread.sleep(20);
-//				Thread.sleep((long) (Math.abs(acOutput * 1000 / rv)));
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+		if (error < 0)
+			rv *= -1;
+		this.sendMotorMessage(0, rv);
+		try {
+			Thread.sleep((long) (Math.abs(error * 1000 / rv)));
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
-			
-		this.stopMoving();
+
+	this.stopMoving();
 	}
+//	public void rotateToPoint(double theta) {		
+//		double desired = theta + odom.getAngle();		
+//		desired = Utility.inRangeNegPiToPi(desired);
+//		
+//		AngleController ac = new AngleController(0.5, desired, odom);
+//
+//		double rv = MAX_ROTATIONAL_VELOCITY;
+//		
+//		while (Math.abs(ac.difference()) > 0.01) {
+////			log.info("desired angle " + desired + " actual " + Utility.inRangeNegPiToPi(odom.getAngle()) + 
+////					"actual actual " + ac.getFeedbackOutput());
+////			log.info("difference was " + ac.difference());
+//			double acOutput = ac.controlStep();
+////			double output = Math.min(ac.getFeedbackOutput(), rv);
+////			if (ac.getFeedbackOutput() < 0)
+////				output = Math.max(ac.getFeedbackOutput(), -rv);
+//			this.sendMotorMessage(0, acOutput);
+//			try {
+//				Thread.sleep(20);
+////				Thread.sleep((long) (Math.abs(acOutput * 1000 / rv)));
+//			} catch (InterruptedException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+//		}
+//			
+//		this.stopMoving();
+//	}
 	/**
 	 * Blocking method which drives the robot to a target point using
 	 * proportional control.
@@ -197,7 +230,7 @@ public class RosWaypointDriver implements NodeMain {
 		log.info("GO FIND " + vert);
 
 		Point2D.Double start = odom.getPosition();
-		rotateToPoint(Math.atan2(vert.y, vert.x));
+		rotateToPoint(vert);
 		
 		PositionController p = new PositionController(PROPORTIONAL_GAIN,
 				INTEGRAL_GAIN, new Point2D.Double(start.x, start.y),
@@ -212,8 +245,8 @@ public class RosWaypointDriver implements NodeMain {
 				lastTime = System.currentTimeMillis();
 			}
 
-			double distanceToDst = Math.sqrt(Math.pow(odom.odomXY[0] - vert.x,
-					2) + Math.pow(odom.odomXY[1] - vert.y, 2));
+			double distanceToDst = Math.sqrt(Math.pow(odom.getX() - vert.x,
+					2) + Math.pow(odom.getY() - vert.y, 2));
 
 			if (distanceToDst < epsilon2) {
 				break;

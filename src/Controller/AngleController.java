@@ -2,20 +2,20 @@ package Controller;
 
 import org.ros.message.rosgraph_msgs.Log;
 
-import WaypointDriver.Odometer;
+import Localization.Localizer;
 
 public class AngleController extends ProportionalController {
 
-	Odometer odom;
+	Localizer odom;
 	
-	public AngleController(double gain, double desired, Odometer odom) {
+	public AngleController(double gain, double desired, Localizer odom) {
 		super(gain, desired);
 		this.odom = odom;
 	}
 
 	@Override
 	public double getFeedbackOutput() {
-		return this.odom.getAngle();
+		return this.odom.getTheta();
 	}
 
 	@Override

@@ -3,7 +3,7 @@ package Controller;
 import java.awt.geom.Point2D;
 import org.apache.commons.logging.Log;
 
-import WaypointDriver.Odometer;
+import Localization.Localizer;
 
 public class PositionController extends
 ProportionalIntegralFeedbackController
@@ -21,13 +21,13 @@ PositionController.VelocityPair,Double // integral: in, out, gain
 	private static final double MAX_SPEED = .4;
 	private static final double MIN_SPEED = .1;
 
-	Odometer odom;
+	Localizer odom;
 	private Error accumulatedError;
 	private Log log;
 
 	public PositionController(Double propGain, Double integralGain,
 			Point2D.Double start, Point2D.Double goal,
-			Odometer odom, Log log) {
+			Localizer odom, Log log) {
 		super(propGain, integralGain);
 		this.odom = odom;
 		this.accumulatedError = new Error(0.0,0.0,0.0);
@@ -38,7 +38,7 @@ PositionController.VelocityPair,Double // integral: in, out, gain
 	@Override
 	public PointAnglePair getFeedbackOutput() {
 //		log.info("location is" + " " + this.odom.getPosition() + " " + this.odom.getAngle());
-		return new PointAnglePair(this.odom.getPosition(), this.odom.getAngle());
+		return new PointAnglePair(this.odom.getPosition(), this.odom.getTheta());
 	}
 
 	@Override
@@ -82,7 +82,7 @@ PositionController.VelocityPair,Double // integral: in, out, gain
 		double translationalVelocity = 0.0;
 		double rotationalVelocity = 0.0;
 		double angleToGoal = Math.atan2(error.errorY,error.errorX);
-		double errorAngleToGoal = bringIntoRangeNegPiToPi(angleToGoal - this.odom.getAngle());
+		double errorAngleToGoal = bringIntoRangeNegPiToPi(angleToGoal - this.odom.getTheta());
 		
 		if (errorAngleToGoal < Math.PI/2) {
 			if (errorAngleToGoal > -Math.PI/2) {

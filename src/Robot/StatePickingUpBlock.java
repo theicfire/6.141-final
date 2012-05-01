@@ -20,6 +20,7 @@ import org.ros.node.parameter.ParameterTree;
 import Controller.AngleController;
 import Controller.Utility;
 import Grasping.Arm;
+import Planner.Planner;
 
 public class StatePickingUpBlock extends RobotState {
 
@@ -39,6 +40,10 @@ public class StatePickingUpBlock extends RobotState {
 		boolean done = false;
 
 		// robot.arm.prepareToPickup();
+		
+		// update position of the odometry
+		// something like 
+		robot.odom.updatePosition((new Utility()).new Pose(Planner.getCurrentBlockPoint(), 0));
 
 		while (!done) {
 			switch (state) {
@@ -89,6 +94,7 @@ public class StatePickingUpBlock extends RobotState {
 
 				robot.log.info("done storing block");
 				done = true;
+				Planner.nextBlock();
 				break;
 			}
 			case CHECK_HOLDING_PEN: {

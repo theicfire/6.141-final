@@ -1658,7 +1658,7 @@ public class VisionGUI extends JPanel implements NodeMain {
 		    }
 		    );
 
-		odoSub = node.newSubscriber("/rss/odometry", "rss_msgs/OdometryMsg");
+		odoSub = node.newSubscriber("/rss/odometryAdjusted", "rss_msgs/OdometryMsg");
 		odoSub.addMessageListener(
 					  new MessageListener<org.ros.message.rss_msgs.OdometryMsg>() {
 					      @Override

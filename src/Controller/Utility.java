@@ -1,6 +1,9 @@
 package Controller;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
+
+import org.ros.message.rss_msgs.OdometryMsg;
 
 public class Utility {
 	public static double getMagnitude(Point2D.Double a, Point2D.Double b) {
@@ -43,6 +46,12 @@ public class Utility {
 			setTheta(theta);
 		}
 
+		public Pose(Double point, double theta) {
+			setX(point.x);
+			setY(point.y);
+			setTheta(theta);
+		}
+
 		public double getY() {
 			return _y;
 		}
@@ -65,6 +74,14 @@ public class Utility {
 
 		public void setX(double _x) {
 			this._x = _x;
+		}
+
+		public OdometryMsg getOdomMsg() {
+			OdometryMsg om = new OdometryMsg();
+			om.x = getX();
+			om.y = getY();
+			om.theta = getTheta();
+			return om;
 		}
 	}
 

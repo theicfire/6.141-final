@@ -115,7 +115,7 @@ public class Arm implements ArmGymnastics {
 	 * Return true if done; otherwise set new pwm and return false
 	 */
 	public boolean discreteMoveJoint(ArmJoint joint) {
-		int delta = 50;
+		int delta = 20;
 		int diffPWM = joint.getDesiredPWM() - joint.getCurPWM();
 //		log.info("desired " + joint.getDesiredPWM() + " current " + joint.getCurPWM());
 //		log.info("diff is " + diffPWM);
