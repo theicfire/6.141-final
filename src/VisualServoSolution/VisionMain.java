@@ -30,8 +30,8 @@ public class VisionMain implements NodeMain {
 //	private double saturation_level = 0.8; // (Solution)
 	
 
-	private double target_hue_level = 0.60; // (Solution)
-	private double hue_threshold = 0.04; // (Solution)
+	private double target_hue_level = 0.66; // (Solution)
+	private double hue_threshold = 0.02; // (Solution)
 	private double saturation_level = 0.8; // (Solution)
 	// // Units are fraction of total number of pixels detected in blob //
 	// (Solution)

@@ -75,13 +75,13 @@ public class Arm implements ArmGymnastics {
 
 	@Override
 	public void lowerArm() {
-		elbow.setDesiredPWM(elbow.MIN_PWM);
+		elbow.setDesiredPWM(elbow.MAX_PWM);
 		shoulder.setDesiredPWM(shoulder.MIN_PWM);
 	}
 
 	@Override
 	public void raiseArm() {
-		elbow.setDesiredPWM(elbow.MAX_PWM);
+		elbow.setDesiredPWM(elbow.MIN_PWM);
 		shoulder.setDesiredPWM(shoulder.MAX_PWM);
 	}
 

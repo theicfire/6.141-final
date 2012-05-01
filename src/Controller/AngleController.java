@@ -1,5 +1,7 @@
 package Controller;
 
+import org.ros.message.rosgraph_msgs.Log;
+
 import WaypointDriver.Odometer;
 
 public class AngleController extends ProportionalController {
@@ -19,18 +21,12 @@ public class AngleController extends ProportionalController {
 	@Override
 	public double difference() {
 		double error = this.getDesiredOutput() - getFeedbackOutput();
-
-		if (error > Math.PI) {
-			do {
-				error -= 2*Math.PI;
-			} while (error > Math.PI);
-		} else if (error < -Math.PI) {
-			do {
-				error += 2*Math.PI;
-			} while (error < -Math.PI);
-		}
-
-		return error;
+		return Utility.inRangeNegPiToPi(error);
+	}
+	
+	@Override
+	public double controlStep() {
+		return Utility.inRangeNegPiToPi(super.controlStep());
 	}
 
 }

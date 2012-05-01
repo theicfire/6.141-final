@@ -56,16 +56,20 @@ public class Robot {
 
 		this.stopPub = node.newPublisher("rss/stopcommand",
 				"rss_msgs/BreakBeamMsg");
-		this.movePub = node
-				.newPublisher("command/Motors", "rss_msgs/MotionMsg");
-
-		this.odom = new Odometer(node);
+		this.movePub = node.newPublisher("rss/waypointMovecommand", "rss_msgs/MotionMsg");
 
 		log.info("Waiting for movePub");
-		while (waypointCommandPub.getNumberOfSubscribers() == 0) {
+		while (movePub.getNumberOfSubscribers() == 0) {
 			// block
 		}
 		log.info("Done waiting for movePub");
+		log.info("Done waiting for waypointCommand");
+		while (waypointCommandPub.getNumberOfSubscribers() == 0) {
+			// block
+		}
+		log.info("Done waiting for waypointCommand");
+		
+		this.odom = new Odometer(node);
 		this.vision = new VisionMsgWrapper();
 		this.visionSub.addMessageListener(new VisionMessageListener());
 		this.doneMovingSub.addMessageListener(new DoneMovingListener());
@@ -118,26 +122,43 @@ public class Robot {
 		log.info("setting angle based on point2d" + loc);
 		OdometryMsg dest = new OdometryMsg();
 		dest.x = loc.x;
-		dest.y = loc.y;
+		dest.y = loc.y;		
 		angleCommandPub.publish(dest);
 		doneMoving = false;
 	}
 
 	public void rotateToTheta(double theta) {
-		// make an arbitrary point that is theta away
-		// TODO sign ok?
-		Point2D.Double p = new Point2D.Double(Math.cos(theta), Math.sin(theta));
-		rotateToLocation(p);
+		log.info("rotating by " + theta);
+		OdometryMsg dest = new OdometryMsg();
+		dest.x = 0;
+		dest.y = 0;
+		dest.theta = theta;
+		angleCommandPub.publish(dest);
+		doneMoving = false;
 	}
-
+	
+	public void sendMotorMessage(double translationalVelocity, double rotationalVelocity) {
+		MotionMsg motionMsg = new MotionMsg();
+		motionMsg.rotationalVelocity = rotationalVelocity;
+		motionMsg.translationalVelocity = translationalVelocity;
+		movePub.publish(motionMsg);
+	}
+	
 	public Double getCurrentLocation() {
 		return this.odom.getPosition();
 	}
 
+	// TODO move these somewhere else? I don't really like this...
 	public void driveForward(double atAngle) {
-		// TODO Auto-generated method stub
 		OdometryMsg om = new OdometryMsg();
 		om.type = "forward";
+		om.theta = atAngle;
+		this.waypointCommandPub.publish(om);
+	}
+	
+	public void driveBackward(double atAngle) {
+		OdometryMsg om = new OdometryMsg();
+		om.type = "backward";
 		om.theta = atAngle;
 		this.waypointCommandPub.publish(om);
 	}

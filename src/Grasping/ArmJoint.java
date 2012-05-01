@@ -17,6 +17,7 @@ public class ArmJoint extends InverseKinematics.Joint {
 	private int curPWM;
 	
 	
+	// note that the ArmJoint initially sets: curPWM = MAX_PWM
 	public ArmJoint(double length, double startTheta, int min_pwm, int max_pwm, int pwm_theta0, int pwm_thetaPIBy2) {
 		super(length, startTheta);
 		MAX_PWM = max_pwm;
@@ -24,7 +25,7 @@ public class ArmJoint extends InverseKinematics.Joint {
 		PWM_theta0 = pwm_theta0;
 		PWM_thetaPIBy2 = pwm_thetaPIBy2;		
 		desiredPWM = MIN_PWM;
-		curPWM = MIN_PWM;
+		curPWM = MAX_PWM; // note that MAX is different for each joint; some are "up", others are "down"
 	}
 		
 	public double pwmToRadians(int pwm) {

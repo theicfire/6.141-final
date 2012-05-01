@@ -63,6 +63,10 @@ public class RosArmDriver {
 		armPub.publish(msg);
 	}
 
+	/**
+	 * Blocking function which actuates the physical arm to match the idea passed "toArm"
+	 * @param toArm
+	 */
 	public void doMovement(Arm toArm) {
 		// set the desired theta of the joints
 		while (! toArm.step()) {

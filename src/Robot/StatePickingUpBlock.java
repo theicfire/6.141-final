@@ -67,13 +67,13 @@ public class StatePickingUpBlock extends RobotState {
 					robot.log.info("see block - lowering arm");
 					Utility.sleepFor5Seconds();
 					robot.arm.openGripper();
+					robot.armDriver.doMovement(robot.arm);
 					robot.arm.lowerArm();
 					// blocking arm controller movement, TODO replace with
 					// non-blocking
 					robot.armDriver.doMovement(robot.arm);
 					state = State.STORING_BLOCK;
 					robot.log.info("arm lowered");
-					Utility.sleepFor5Seconds();
 				}
 				break;
 			}

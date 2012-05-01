@@ -17,8 +17,9 @@ import Robot.StateLookingForBlocks.State;
  */
 public class StateMovingToBlock extends RobotState {
 
-	private static final double STANDOFF_ANGLE = 0.05;
-	private static final double STANDOFF_DISTANCE = .79; // should 0.75
+	private static final double STANDOFF_ANGLE = 0.1;
+	private static final double STANDOFF_DISTANCE = .75; // should 0.75
+	private static final double STANDOFF_EPSILON = .02; // should 0.75
 
 	public StateMovingToBlock(Robot ri) {
 		super(ri);
@@ -32,7 +33,7 @@ public class StateMovingToBlock extends RobotState {
 	public void perform() {
 		robot.stopMoving(); // safety
 		State state = State.INIT;
-		
+		robot.arm.lowerArm();
 		robot.arm.openGripper();
 		robot.armDriver.doMovement(robot.arm);
 		
@@ -44,14 +45,27 @@ public class StateMovingToBlock extends RobotState {
 					Utility.sleepFor20ms();
 					break;
 				}
+				
 				double dist = robot.vision.getBlockDistance();
-				if (dist < STANDOFF_DISTANCE) { //&& Math.abs(robot.vision.getBlockTheta()) < STANDOFF_ANGLE) {
+				if (Math.abs(dist - STANDOFF_DISTANCE) < STANDOFF_EPSILON && 
+						Math.abs(robot.vision.getBlockTheta()) < STANDOFF_ANGLE) {
 					robot.log.info("In StateMovingBlock; going to statePickingUpblock");
 					robot.setStateObject(new StatePickingUpBlock(robot));
+//					robot.setStateObject(new StateMovingToBlock(robot));
 					return;
 				} else {
-					robot.log.info("distance to block is " + dist);
-					robot.driveForward(robot.vision.getBlockTheta() / 3.0);					
+					if (Math.abs(robot.vision.getBlockTheta()) > STANDOFF_ANGLE) {
+						// rotate to that angle
+						robot.sendMotorMessage(0, robot.vision.getBlockTheta() * .3);
+						Utility.sleepFor20ms();
+					} else if (dist < STANDOFF_DISTANCE){
+//						robot.driveBackward(robot.vision.getBlockTheta() / 3.0);
+						robot.driveBackward(0);
+					} else {
+						robot.driveForward(0);
+					}
+					robot.log.info("distance to block is " + dist + " angle is " + Math.abs(robot.vision.getBlockTheta()));
+										
 //					robot.log.info("dist " + dist + " camvis: "
 //							+ robot.vision.getBlockDistance() + " camang"
 //							+ robot.vision.getBlockTheta());

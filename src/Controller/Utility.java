@@ -68,5 +68,17 @@ public class Utility {
 		}
 	}
 
+	public static double inRangeNegPiToPi(double radians) {
+		if (radians > Math.PI) {
+			do {
+				radians -= 2*Math.PI;
+			} while (radians > Math.PI);
+		} else if (radians < -Math.PI) {
+			do {
+				radians += 2*Math.PI;
+			} while (radians < -Math.PI);
+		}
+		return radians;
+	}
 
 }

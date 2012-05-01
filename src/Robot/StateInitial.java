@@ -20,12 +20,15 @@ public class StateInitial extends RobotState {
 
 	public StateInitial(Robot ri) {
 		super(ri);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void perform() {	
-		this.robot.setStateObject(new StateLookingForBlocks(this.robot));
+//		robot.arm.raiseArm();
+//		robot.armDriver.doMovement(robot.arm);
+//		this.robot.setStateObject(new StateLookingForBlocks(this.robot));
+		
+		robot.setStateObject(new StateMovingToBlock(robot));
 	}
 
 }
