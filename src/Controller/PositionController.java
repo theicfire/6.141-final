@@ -20,6 +20,7 @@ PositionController.VelocityPair,Double // integral: in, out, gain
 
 	private static final double MAX_SPEED = .4;
 	private static final double MIN_SPEED = .1;
+	private static final double MAX_ROTATIONAL_SPEED = .2;
 
 	Localizer odom;
 	private Error accumulatedError;
@@ -96,10 +97,12 @@ PositionController.VelocityPair,Double // integral: in, out, gain
 				if (maxTranslationalSpeed < MIN_SPEED) {
 					maxTranslationalSpeed = MIN_SPEED;
 				}
+				
 
 //				rotationalVelocity = maxTranslationalSpeed * Math.sin(errorAngleToGoal);
 //				translationalVelocity = maxTranslationalSpeed * Math.cos(errorAngleToGoal);
 				rotationalVelocity = errorAngleToGoal * this.propGain;
+				
 				translationalVelocity = maxTranslationalSpeed;
 			} else {
 				// we must not drive forward (we'd be moving away from goal)
@@ -109,7 +112,6 @@ PositionController.VelocityPair,Double // integral: in, out, gain
 			// we must not drive forward (we'd be moving away from goal)
 			rotationalVelocity = errorAngleToGoal * this.propGain;
 		}
-
 		
 		VelocityPair result =
 			new VelocityPair(translationalVelocity,rotationalVelocity);
@@ -155,6 +157,13 @@ PositionController.VelocityPair,Double // integral: in, out, gain
 		public void setRotationalVelocity(double rotationalVelocity) {
 			this.rotationalVelocity = rotationalVelocity;
 		}
+		@Override
+		public String toString() {
+			return "VelocityPair [translationalVelocity="
+					+ translationalVelocity + ", rotationalVelocity="
+					+ rotationalVelocity + "]";
+		}
+		
 	}
 	
 	// holder

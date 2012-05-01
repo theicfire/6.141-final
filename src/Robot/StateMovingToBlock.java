@@ -47,8 +47,9 @@ public class StateMovingToBlock extends RobotState {
 				}
 				
 				double dist = robot.vision.getBlockDistance();
-				if (Math.abs(dist - STANDOFF_DISTANCE) < STANDOFF_EPSILON && 
-						Math.abs(robot.vision.getBlockTheta()) < STANDOFF_ANGLE) {
+//				if (Math.abs(dist - STANDOFF_DISTANCE) < STANDOFF_EPSILON && 
+//						Math.abs(robot.vision.getBlockTheta()) < STANDOFF_ANGLE) {
+				if (robot.isBeamBroken()) {
 					robot.log.info("In StateMovingBlock; going to statePickingUpblock");
 					robot.setStateObject(new StatePickingUpBlock(robot));
 //					robot.setStateObject(new StateMovingToBlock(robot));
@@ -59,7 +60,6 @@ public class StateMovingToBlock extends RobotState {
 						robot.sendMotorMessage(0, robot.vision.getBlockTheta() * .3);
 						Utility.sleepFor20ms();
 					} else if (dist < STANDOFF_DISTANCE){
-//						robot.driveBackward(robot.vision.getBlockTheta() / 3.0);
 						robot.driveBackward(0);
 					} else {
 						robot.driveForward(0);

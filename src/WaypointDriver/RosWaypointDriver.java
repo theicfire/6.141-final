@@ -236,10 +236,12 @@ public class RosWaypointDriver implements NodeMain {
 				INTEGRAL_GAIN, new Point2D.Double(start.x, start.y),
 				new Point2D.Double(vert.x, vert.y), odom, log);
 		while (!forceStop) {
-			VelocityPair step = p.controlStep();
+			
 
 			boolean enoughTimeHasPassed = System.currentTimeMillis() - lastTime > ENOUGH_TIME;
 			if (enoughTimeHasPassed) {
+				VelocityPair step = p.controlStep();
+				log.info("Step is " + step);
 				this.sendMotorMessage(step.getTranslationalVelocity(),
 						step.getRotationalVelocity());
 				lastTime = System.currentTimeMillis();

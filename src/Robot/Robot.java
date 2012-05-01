@@ -35,6 +35,8 @@ public class Robot {
 
 	private Subscriber<VisionMsg> visionSub;
 	private Subscriber<BreakBeamMsg> doneMovingSub;
+	private Subscriber<BreakBeamMsg> breakBeamSub;
+	private boolean beamBroken;
 
 	private Publisher<OdometryMsg> waypointCommandPub;
 	private Publisher<OdometryMsg> angleCommandPub;
@@ -51,6 +53,7 @@ public class Robot {
 		this.visionSub = node.newSubscriber("rss/VisionMain", "rss_msgs/VisionMsg");
 
 		this.doneMovingSub = node.newSubscriber("rss/waypointcomplete", "rss_msgs/BreakBeamMsg");
+		this.breakBeamSub = node.newSubscriber("rss/BreakBeam", "rss_msgs/BreakBeamMsg");
 		this.waypointCommandPub = node.newPublisher("rss/waypointcommand","rss_msgs/OdometryMsg");
 		this.angleCommandPub = node.newPublisher("rss/anglecommand", "rss_msgs/OdometryMsg");
 
@@ -72,6 +75,7 @@ public class Robot {
 		this.vision = new VisionMsgWrapper();
 		this.visionSub.addMessageListener(new VisionMessageListener());
 		this.doneMovingSub.addMessageListener(new DoneMovingListener());
+		this.breakBeamSub.addMessageListener(new BreakBeamListener());
 	}
 
 	public class VisionMessageListener implements
@@ -86,6 +90,13 @@ public class Robot {
 		public void onNewMessage(org.ros.message.rss_msgs.BreakBeamMsg bb) {
 			log.info("Done moving message received");
 			doneMoving = bb.beamBroken; // probably always true
+		}
+	}
+	
+	public class BreakBeamListener implements
+			MessageListener<org.ros.message.rss_msgs.BreakBeamMsg> {
+		public void onNewMessage(org.ros.message.rss_msgs.BreakBeamMsg bb) {
+			beamBroken = bb.beamBroken; // probably always true
 		}
 	}
 
@@ -160,6 +171,10 @@ public class Robot {
 		om.type = "backward";
 		om.theta = atAngle;
 		this.waypointCommandPub.publish(om);
+	}
+	
+	public boolean isBeamBroken() {
+		return beamBroken;
 	}
 
 	// NO MORE METHODS HERE!!!! NO MORE METHODS HERE!!!!
