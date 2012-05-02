@@ -35,7 +35,7 @@ public class NavigationMain {
 	private Log log;
 
 	private GrandChallengeMap map;
-	Map<Point2D.Double, List<Point2D.Double>> visGraph;
+	public Map<Point2D.Double, List<Point2D.Double>> visGraph;
 
 	private static ColorMsg COLOR_MSG_RED;
 	private static ColorMsg COLOR_MSG_GREEN;

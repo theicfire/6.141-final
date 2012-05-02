@@ -2,10 +2,12 @@ package Robot;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.ros.message.MessageListener;
 import org.ros.message.rss_msgs.OdometryMsg;
 
+import Navigation.DijkstraGood;
 import Planner.Planner;
 
 public class StateLookingForBlocks extends RobotState {
@@ -51,7 +53,12 @@ public class StateLookingForBlocks extends RobotState {
 //				waypoint = robot.navigationMain.pickNewPoint();
 //				waypoint = tmpPoints.get(tmpCount);
 		
-				robot.driveToLocation(robot.planner.getCurrentBlockPosition());
+//				robot.driveToLocation(robot.planner.getCurrentBlockPosition());
+
+				ArrayList<Point2D.Double> shortestPath = DijkstraGood.getMyDijkstra(
+						robot.navigationMain.visGraph, robot.odom.getPosition(), 
+						robot.planner.getCurrentBlockPosition(), robot.log);
+				robot.driveToLocations(shortestPath);
 				state = State.MOVING;
 				break;
 			case MOVING:

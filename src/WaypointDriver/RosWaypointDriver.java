@@ -83,8 +83,7 @@ public class RosWaypointDriver implements NodeMain {
 			} else if (om.type.startsWith("backward")) {
 				log.info("MOVE BACKWARD BY THETA: " + om.theta);
 				sendMotorMessage(-0.15, om.theta);
-			}
-			else {
+			} else {
 				driveToPoint(new Point2D.Double(om.x, om.y));
 			}
 		}
@@ -128,7 +127,6 @@ public class RosWaypointDriver implements NodeMain {
 			driveToPoint(vert);
 		}
 
-		this.stopMoving();
 		this.stopMoving();
 
 		log.info("NOW WE ARE DONE");

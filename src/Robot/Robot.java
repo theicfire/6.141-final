@@ -2,6 +2,8 @@ package Robot;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
@@ -45,12 +47,16 @@ public class Robot {
 	private Publisher<MotionMsg> movePub;
 	private Publisher<BreakBeamMsg> stopPub;
 	public Log log;
+	
+	private LinkedList<Point2D.Double> navQueue;
 
 	public Robot(Node node) {
 		this.log = node.getLog();
 		this.navigationMain = new NavigationMain(node);
 		this.arm = new Arm();
 		this.armDriver = new RosArmDriver(node);
+		
+		navQueue = new LinkedList<Point2D.Double>();
 		
 		this.visionSub = node.newSubscriber("rss/VisionMain", "rss_msgs/VisionMsg");
 
@@ -92,7 +98,13 @@ public class Robot {
 			MessageListener<org.ros.message.rss_msgs.BreakBeamMsg> {
 		public void onNewMessage(org.ros.message.rss_msgs.BreakBeamMsg bb) {
 			log.info("Done moving message received");
-			doneMoving = bb.beamBroken; // probably always true
+			if (navQueue.size() > 0) {
+				// keep going to the next location in the queue until you are done with all the location points
+				driveToLocation(navQueue.removeLast());
+			} else {
+				// we are done with everything
+				doneMoving = bb.beamBroken; // probably always true
+			}
 		}
 	}
 	
@@ -129,6 +141,12 @@ public class Robot {
 		dest.y = loc.y;
 		waypointCommandPub.publish(dest);
 		doneMoving = false;
+	}
+	
+	public void driveToLocations(ArrayList<Point2D.Double> locs) {
+		for (Point2D.Double loc : locs) {
+			navQueue.addLast(loc);
+		}
 	}
 
 	public void rotateToLocation(Point2D.Double loc) {

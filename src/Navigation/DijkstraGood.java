@@ -115,7 +115,7 @@ public class DijkstraGood {
 		throw new RuntimeException("no point found for vertex");
 	}
 
-	public static List<Point2D.Double> getMyDijkstra(
+	public static ArrayList<Point2D.Double> getMyDijkstra(
 			Map<Point2D.Double, List<Point2D.Double>> adjacencyMatrix, 
 			Point2D.Double start, Point2D.Double end, Log log) {
 		
@@ -166,7 +166,7 @@ public class DijkstraGood {
 //		}
 		Vertex endV = findVertex(vertices, end);
 		List<Vertex> path = DijkstraGood.getShortestPathTo(endV);
-		List<Point2D.Double> fin = new ArrayList<Point2D.Double>();
+		ArrayList<Point2D.Double> fin = new ArrayList<Point2D.Double>();
 		for (Vertex v : path) {
 			fin.add(v.myPoint);
 			log.info("FINAL PATH TO " + v.myPoint);
