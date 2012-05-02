@@ -18,6 +18,7 @@ import Grasping.Arm;
 import Grasping.RosArmDriver;
 import Localization.Localizer;
 import Navigation.NavigationMain;
+import Planner.Planner;
 import VisualServoSolution.VisionMsgWrapper;
 
 public class Robot {
@@ -28,6 +29,7 @@ public class Robot {
 	// SonarSensor sideSonars[4];
 	
 	private RobotState robotState;
+	Planner planner;
 	NavigationMain navigationMain;
 	Localizer odom;
 	VisionMsgWrapper vision;
@@ -49,7 +51,7 @@ public class Robot {
 		this.navigationMain = new NavigationMain(node);
 		this.arm = new Arm();
 		this.armDriver = new RosArmDriver(node);
-
+		
 		this.visionSub = node.newSubscriber("rss/VisionMain", "rss_msgs/VisionMsg");
 
 		this.doneMovingSub = node.newSubscriber("rss/waypointcomplete", "rss_msgs/BreakBeamMsg");
@@ -72,6 +74,7 @@ public class Robot {
 		log.info("~~~~DONE ALL WAITING IN ROBOT~~~~");
 		
 		this.odom = new Localizer(node, true);
+		this.planner = new Planner(odom, log);
 		this.vision = new VisionMsgWrapper();
 		this.visionSub.addMessageListener(new VisionMessageListener());
 		this.doneMovingSub.addMessageListener(new DoneMovingListener());

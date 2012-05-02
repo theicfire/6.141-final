@@ -43,7 +43,8 @@ public class StatePickingUpBlock extends RobotState {
 		
 		// update position of the odometry
 		// something like 
-		robot.odom.updatePosition((new Utility()).new Pose(Planner.getCurrentBlockPoint(), robot.odom.getTheta()));
+		robot.odom.updatePosition((new Utility()).new Pose(robot.planner.getCurrentBlockPosition(),
+				robot.odom.getTheta()));
 
 		while (!done) {
 			switch (state) {
@@ -94,7 +95,7 @@ public class StatePickingUpBlock extends RobotState {
 
 				robot.log.info("done storing block");
 				done = true;
-				Planner.nextBlock();
+				robot.planner.nextClosestBlock();
 				break;
 			}
 			case CHECK_HOLDING_PEN: {

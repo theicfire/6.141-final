@@ -143,10 +143,10 @@ public class NavigationMain {
 
 		erasePub.publish(new GUIEraseMsg());
 
-		GUIRectMsg rectMsg = new GUIRectMsg();
-		log.info("world rect is " + map.getWorldRect());
-		ConstructionGUI.fillRectMsg(rectMsg, map.getWorldRect(), null, false);
-		rectPub.publish(rectMsg);
+//		GUIRectMsg rectMsg = new GUIRectMsg();
+//		log.info("world rect is " + map.getWorldRect());
+//		ConstructionGUI.fillRectMsg(rectMsg, map.getWorldRect(), null, false);
+//		rectPub.publish(rectMsg);
 
 		// plot the non config space stuff
 		PolygonObstacle[] polygons = map.getPolygonObstacles(); // world
@@ -164,7 +164,7 @@ public class NavigationMain {
 		// new Point2D.Double(0.0,0.0));
 		// Rectangle2D.Double rsRobotRect =
 		// this.createOverEstimatedSquareRobot();
-		Rectangle2D.Double rsRobotRect = this.createCorrectSquareRobot();
+		Rectangle2D.Double rsRobotRect = this.createOldSquareRobotRect();//this.createCorrectSquareRobot();
 		PolygonObstacle robotPoly = this.rectToPoly(rsRobotRect);
 		cspace = new CSpace(polygons, robotPoly, new Point2D.Double(0.0,
 				0.0));
@@ -197,14 +197,12 @@ public class NavigationMain {
 		// cWorldRect.addVertex(new Point2D.Double(h.x, h.y + h.height));
 		// cWorldRect.close();
 
-		Point2D.Double ROBOT_START = new Point2D.Double(0, 0);
-		Point2D.Double ROBOT_END = new Point2D.Double(1, 1);
-		VisibilityGraph vis = new VisibilityGraph(ROBOT_START,
-				ROBOT_END, cWorldRect, cspace, globalNode);
+		VisibilityGraph vis = new VisibilityGraph(map.robotStart,
+				map.robotGoal, map.getConstructionObjects(), cWorldRect, cspace, globalNode);
 
 		// plot the cspace rect
 		plotObstacle(cWorldRect, COLOR_MSG_PINK);
-		plotObstacles(polygons, COLOR_MSG_GREEN);
+//		plotObstacles(polygons, COLOR_MSG_GREEN);
 
 		// plot the visibility graph
 		visGraph = vis.getGraph();
@@ -241,8 +239,8 @@ public class NavigationMain {
 			// it.remove(); // avoids a ConcurrentModificationException
 		}
 
-		List<Point2D.Double> shortestPath = DijkstraGood.getMyDijkstra(
-				visGraph, ROBOT_START, ROBOT_END, log);
+//		List<Point2D.Double> shortestPath = DijkstraGood.getMyDijkstra(
+//				visGraph, ROBOT_START, ROBOT_END, log);
 		// List<Point2D.Double> shortestPath = new ArrayList<Point2D.Double>();
 		// shortestPath.add(map.getRobotStart());
 		// shortestPath.add(new Point2D.Double(.9, 0));
@@ -253,7 +251,7 @@ public class NavigationMain {
 		// shortestPath.add(new Point2D.Double(0, 0));
 	}
 
-	double robotSquareSideLength = .25;
+	double robotSquareSideLength = .25 * Math.sqrt(2);
 
 	PolygonObstacle createOldSquareRobot() {
 		ArrayList<Point2D.Double> testPoints = new ArrayList<Point2D.Double>();
@@ -263,6 +261,15 @@ public class NavigationMain {
 				-robotSquareSideLength));
 		testPoints.add(new Point2D.Double(0.0, -robotSquareSideLength));
 		return GeomUtils.convexHull(testPoints);
+	}
+
+	Rectangle2D.Double createOldSquareRobotRect() {
+		return new Rectangle2D.Double(
+				-robotSquareSideLength,
+				-robotSquareSideLength,
+				robotSquareSideLength,
+				robotSquareSideLength);
+		
 	}
 
 	double metersRobotSquareSideLength = 0.377825;
@@ -424,5 +431,5 @@ public class NavigationMain {
 		int n = (int) (Math.random() * visGraph.keySet().size());
 		return (Point2D.Double) visGraph.keySet().toArray()[n];
 	}
-
+	
 }

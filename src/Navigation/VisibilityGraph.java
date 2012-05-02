@@ -12,16 +12,20 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.ros.node.Node;
 
+import Challenge.ConstructionObject;
+
 public class VisibilityGraph {
 	private Point2D.Double start;
 	private Point2D.Double goal;
+	private ConstructionObject[] blocks;
 	private PolygonObstacle cworldRect;
 	private CSpace cspace;
 	private Log log;
-	public VisibilityGraph(Point2D.Double start, Point2D.Double goal,
+	public VisibilityGraph(Point2D.Double start, Point2D.Double goal, ConstructionObject[] blocks,
 			PolygonObstacle cworldRect, CSpace cspace, Node node) {
 		this.start = start;
 		this.goal = goal;
+		this.blocks = blocks;
 		this.cworldRect = cworldRect;
 		this.cspace = cspace;
 		this.log = node.getLog();
@@ -42,28 +46,11 @@ public class VisibilityGraph {
 //		configObstacles.add(goalPoly);
 //		
 		
-		List<Point2D.Double> pointsVisibleToStartPoint = new ArrayList<Point2D.Double>();
-		List<Point2D.Double> pointsVisibleToGoalPoint = new ArrayList<Point2D.Double>();
-		for (PolygonObstacle poly2 : configObstacles) {			
-				for (Point2D.Double point2 : poly2.getVertices()) {
-					Line2D edgeStart = new Line2D.Double(start, point2);
-					if (isEdgeInsideWorldRect(edgeStart) && !edgeIntersects(edgeStart, configObstacles)) {
-						pointsVisibleToStartPoint.add(point2);
-					}
-				}
-				
-				if (poly2.contains(goal)) 
-					continue;
-				
-				for (Point2D.Double point2 : poly2.getVertices()) {
-					Line2D edgeGoal = new Line2D.Double(goal, point2);
-					if (isEdgeInsideWorldRect(edgeGoal) && !edgeIntersects(edgeGoal, configObstacles)) {
-						pointsVisibleToGoalPoint.add(point2);
-					}
-				}
+		ret.put(start, getReachablePoints(configObstacles, start));
+		ret.put(goal, getReachablePoints(configObstacles, goal));
+		for (ConstructionObject block : blocks) {
+			ret.put(block.getPosition(), getReachablePoints(configObstacles, block.getPosition()));
 		}
-		ret.put(start, pointsVisibleToStartPoint);
-		ret.put(goal, pointsVisibleToGoalPoint);
 
 		// CONSTRUCT VISIBILITY GRAPH
 		
@@ -130,6 +117,21 @@ public class VisibilityGraph {
 		
 		// make sure the point is inside the rectangle
 		return isEdgeInsideWorldRect(edge);
+	}
+	
+	public ArrayList<Point2D.Double> getReachablePoints(PolygonObstacle[] configObstacles, Point2D.Double fromPoint) {
+		ArrayList<Point2D.Double> pointsVisibleToPoint = new ArrayList<Point2D.Double>();
+		for (PolygonObstacle poly2 : configObstacles) {			
+				if (poly2.contains(fromPoint)) 
+					continue;
+				for (Point2D.Double point2 : poly2.getVertices()) {
+					Line2D edgeGoal = new Line2D.Double(fromPoint, point2);
+					if (isEdgeInsideWorldRect(edgeGoal) && !edgeIntersects(edgeGoal, configObstacles)) {
+						pointsVisibleToPoint.add(point2);
+					}
+				}
+		}
+		return pointsVisibleToPoint;
 	}
 	
 	public boolean isEdgeInsideWorldRect(Line2D edge) {

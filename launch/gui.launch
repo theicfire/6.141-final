@@ -7,6 +7,7 @@
 
 <!-- ****************************** logic ****************************** -->
   <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.ConstructionGUI" machine="workstation"></node>
+  <node name="constructmap" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.GrandChallengeMap" machine="workstation"></node>
   <node name="mainmain" pkg="rosjava_bootstrap" type="run.py" args="Challenge Planner.Main" machine="workstation"></node>
   <node name="roswaypoint" pkg="rosjava_bootstrap" type="run.py" args="Challenge WaypointDriver.RosWaypointDriver" machine="workstation"></node>
 

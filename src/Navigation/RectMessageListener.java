@@ -27,7 +27,7 @@ public class RectMessageListener implements MessageListener<GUIRectMsg> {
 		Color color;
 		if (c== null){
 			color = gui.rectColor;
-		}else {
+		} else {
 			color = new Color(c.r, c.g, c.b);
 		}
 		return color;

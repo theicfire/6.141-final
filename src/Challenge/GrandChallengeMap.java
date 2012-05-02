@@ -43,22 +43,22 @@ public class GrandChallengeMap implements NodeMain {
     /**
      * <p> array of ConstructionObjects parsed from the file</p>
      */
-    public static ConstructionObject[] constructionObjects;
+    public ConstructionObject[] constructionObjects;
     /**
      * <p> array of fiducials parsed from the file</p>
      */
-    public static Fiducial[] fiducials;
+    public Fiducial[] fiducials;
     /**
      * <p> array of obstacles parsed from the file</p>
      */
-    public static PolygonObstacle[] obstacles;
+    public PolygonObstacle[] obstacles;
     /**
      * <p> bounding box rectangle of the world.</p>
      */
     private Rectangle2D.Double worldRect;
 
-    private Point2D.Double robotStart;
-    private Point2D.Double robotGoal;
+    public Point2D.Double robotStart;
+    public Point2D.Double robotGoal;
 
     //These are a few things that are used a lot in the file parsing, so they have
     //Their own variables defined.  Most strings associated with file parsing live in
@@ -551,14 +551,17 @@ public class GrandChallengeMap implements NodeMain {
 	polyPub = node.newPublisher("gui/Poly", "lab6_msgs/GUIPolyMsg");
 
 	ParameterTree paramTree = node.newParameterTree();
-	String mapFileName = paramTree.getString(node.resolveName("~/mapFileName"));
+//	paramTree.getString(node.resolveName("~/mapFileName"));
+	// lol
+	String mapFileName = "/home/rss-student/RSS-I-group/Challenge/src/challenge_2012.txt";
 	System.out.println("filename = " + mapFileName);
 	//String filename = "/home/jbrooksh/my_sandbox/6.141/spring2012/priv/labs/Challenge/src/construction_map_2011.txt";
 
     	try{
 	        Thread.sleep(2000);
 
-		erasePub.publish(new GUIEraseMsg());
+	        // don't erase
+		//erasePub.publish(new GUIEraseMsg());
 		Thread.sleep(1000);
 
     		GrandChallengeMap gcm = GrandChallengeMap.parseFile(mapFileName);

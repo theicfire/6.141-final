@@ -51,7 +51,7 @@ public class StateLookingForBlocks extends RobotState {
 //				waypoint = robot.navigationMain.pickNewPoint();
 //				waypoint = tmpPoints.get(tmpCount);
 		
-				robot.driveToLocation(Planner.getCurrentBlockPoint());
+				robot.driveToLocation(robot.planner.getCurrentBlockPosition());
 				state = State.MOVING;
 				break;
 			case MOVING:
@@ -68,7 +68,7 @@ public class StateLookingForBlocks extends RobotState {
 					state = State.INIT;
 					// normally the block retrival code calls this. but if we got here,
 					// we didn't find a block. just go to the next one. it's ok.
-					Planner.nextBlock();
+					robot.planner.nextClosestBlock();
 //					tmpCount += 1;
 //					tmpCount = tmpCount % 4;
 					
