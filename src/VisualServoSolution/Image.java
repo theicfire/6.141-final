@@ -81,7 +81,7 @@ public class Image{
 
 	//FIELDS
 	private int width, height;
-	private List<Pixel> pixels;
+	public List<Pixel> pixels;
 
   /**
    * <p>Gets the width of this image</p>
@@ -118,6 +118,26 @@ public class Image{
 				r = src[srcIndex++] & 0xff;
 				g = src[srcIndex++] & 0xff;
 				b = src[srcIndex++] & 0xff;
+				pixels.add(new Pixel(r, g, b));
+			}
+		}
+	}
+
+	public Image(byte[] src, int width, int height, int widthStep){
+		// widthStep is the number of bytes per line in src
+		pixels = new ArrayList<Pixel>();
+		this.width = width;
+		this.height = height;
+		int srcIndex = 0;
+		int r, g, b;
+
+		for(int y = 0; y<height; y++){
+			int yTimesWStep = y*widthStep;
+			for(int x = 0; x<width; x++) {
+				int threeX = 3*x;
+				r = src[yTimesWStep + threeX + 0] & 0xff;
+				g = src[yTimesWStep + threeX + 1] & 0xff;
+				b = src[yTimesWStep + threeX + 2] & 0xff;
 				pixels.add(new Pixel(r, g, b));
 			}
 		}

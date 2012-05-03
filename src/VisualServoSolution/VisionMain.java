@@ -2,7 +2,6 @@ package VisualServoSolution;
 
 import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
-import org.ros.message.rss_msgs.ArmMsg;
 import org.ros.message.rss_msgs.VisionMsg;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
@@ -16,6 +15,8 @@ public class VisionMain implements NodeMain {
 	Subscriber<org.ros.message.sensor_msgs.Image> rawVidSub;
 	Log log;
 
+	boolean useNew = false;
+	BlobTracking2 bt2;
 	BlobTracking bt;
 	private Publisher<VisionMsg> blobDetectedPub;
 	public double centroidX;
@@ -56,7 +57,8 @@ public class VisionMain implements NodeMain {
 
 
 		log.info("added video sub");
-//		bt = new BlobTracking(IMAGE_WIDTH, IMAGE_HEIGHT, log);
+		
+		if (!useNew) {
 		bt = new BlobTracking(IMAGE_WIDTH, IMAGE_HEIGHT, log);
 		bt.targetHueLevel = target_hue_level;//(Solution)
 		bt.hueThreshold = hue_threshold;//(Solution)
@@ -71,6 +73,23 @@ public class VisionMain implements NodeMain {
 		bt.rotationVelocityGain = rotation_velocity_gain;//(Solution)
 		bt.rotationVelocityMax = rotation_velocity_max;//(Solution)
 		bt.useGaussianBlur = use_gaussian_blur;//(Solution)
+		} else {
+			bt2 = new BlobTracking2(IMAGE_WIDTH, IMAGE_HEIGHT, log);
+			bt2.targetHueLevel = target_hue_level;//(Solution)
+			bt2.hueThreshold = hue_threshold;//(Solution)
+			bt2.saturationLevel = saturation_level;//(Solution)
+			bt2.blobSizeThreshold = blob_size_threshold;//(Solution)
+			bt2.targetRadius = target_radius;//(Solution)
+			bt2.desiredFixationDistance = desired_fixation_distance;//(Solution)
+			bt2.translationErrorTolerance = translation_error_tolerance;//(Solution)
+			bt2.translationVelocityGain = translation_velocity_gain;//(Solution)
+			bt2.translationVelocityMax = translation_velocity_max;//(Solution)
+			bt2.rotationErrorTolerance = rotation_error_tolerance;//(Solution)
+			bt2.rotationVelocityGain = rotation_velocity_gain;//(Solution)
+			bt2.rotationVelocityMax = rotation_velocity_max;//(Solution)
+			bt2.useGaussianBlur = use_gaussian_blur;//(Solution)
+			
+		}
 		
 		vidPub = node.newPublisher("/rss/blobVideo", "sensor_msgs/Image");
 		Subscriber<org.ros.message.sensor_msgs.Image> rawVidSub = node.newSubscriber("rss/video", "sensor_msgs/Image");
@@ -127,6 +146,8 @@ public class VisionMain implements NodeMain {
 			Image otherSrc = new Image(src.data, (int) src.width,
 					(int) src.height);
 			//log.info("bt + " + bt);
+		
+			if (!useNew) {
 			bt.apply(otherSrc, dest);
 
 //			for (int i = 50; i < 55; i++) {
@@ -139,6 +160,13 @@ public class VisionMain implements NodeMain {
 			centroidX = bt.centroidX;
 			centroidY = bt.centroidY;
 			range = bt.targetRange;
+			} else {
+				bt2.apply(otherSrc, dest);
+				targetDetected = bt2.targetDetected;
+				centroidX = bt2.centroidX;
+				centroidY = bt2.centroidY;
+				range = bt2.targetRange;
+			}
 			angle = (0.0171693 + 0.00987868 * centroidX) - Math.PI / 4;
 
 //			log.info("range, angle" + range + ", " + angle);

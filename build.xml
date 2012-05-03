@@ -18,6 +18,10 @@
 
   <path id="classpath">
     <pathelement path="${ros.compile.classpath}" />
+    <pathelement path="/home/rss-student/RSS-I-group/roscv/lib/javacv-linux-x86-0.0.jar" />
+    <pathelement path="/home/rss-student/RSS-I-group/roscv/lib/javacv-linux-x86_64.jar" />
+    <pathelement path="/home/rss-student/RSS-I-group/roscv/lib/javacv-0.0.jar" />
+    <pathelement path="/home/rss-student/RSS-I-group/roscv/lib/javacpp-0.0.jar" />
   </path>
 
   <path id="test.classpath">
