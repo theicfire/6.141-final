@@ -22,6 +22,7 @@ import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
 
 import Challenge.ConstructionGUI;
+import Challenge.ConstructionObject;
 import Challenge.GrandChallengeMap;
 
 public class NavigationMain {
@@ -31,11 +32,13 @@ public class NavigationMain {
 	private Publisher<Object> erasePub;
 	private Publisher<Object> rectPub;
 	private Publisher<Object> polyPub;
+	public CSpace cspace;
+	public PolygonObstacle cWorldRect;
 	private Node globalNode;
 	private Log log;
 
 	private GrandChallengeMap map;
-	public Map<Point2D.Double, List<Point2D.Double>> visGraph;
+//	
 
 	private static ColorMsg COLOR_MSG_RED;
 	private static ColorMsg COLOR_MSG_GREEN;
@@ -158,7 +161,7 @@ public class NavigationMain {
 		// Rectangle2D.Double rsRobotRect = new Rectangle2D.Double(
 		// -robotSquareSideLength,-robotSquareSideLength,robotSquareSideLength,robotSquareSideLength);
 
-		CSpace cspace;
+		
 		cspace = new CSpace(polygons, robotSquareSideLength);
 		// CSpace cspace = new CSpace(wsPolyObstacles, createOldSquareRobot(),
 		// new Point2D.Double(0.0,0.0));
@@ -183,61 +186,17 @@ public class NavigationMain {
 		polyRect.addVertex(new Point2D.Double(wsWorldRect.x, wsWorldRect.y
 				+ wsWorldRect.height));
 		polyRect.close();
-
-		PolygonObstacle cWorldRect;
+		
+		
 		// cWorldRect = CSpace.sumAndConvexHull(polyRect, robotPoly);
 		cWorldRect = calcCSpaceWorldRect(wsWorldRect, rsRobotRect);
-		// Rectangle2D.Double h = GoalFinder.cSpaceWorldRectApproximator(
-		// wsWorldRect, rsRobotRect, 0.0);
-		// PolygonObstacle cWorldRect = new PolygonObstacle();
-		// cWorldRect.addVertex(new Point2D.Double(h.x, h.y));
-		// cWorldRect.addVertex(new Point2D.Double(h.x + h.width, h.y));
-		// cWorldRect.addVertex(new Point2D.Double(h.x + h.width, h.y +
-		// h.height));
-		// cWorldRect.addVertex(new Point2D.Double(h.x, h.y + h.height));
-		// cWorldRect.close();
-
-		VisibilityGraph vis = new VisibilityGraph(map.robotStart,
-				map.robotGoal, map.getConstructionObjects(), cWorldRect, cspace, globalNode);
-
+		
 		// plot the cspace rect
 		plotObstacle(cWorldRect, COLOR_MSG_PINK);
 //		plotObstacles(polygons, COLOR_MSG_GREEN);
 
-		// plot the visibility graph
-		visGraph = vis.getGraph();
-
-		// GoalFinder.generateRrt(10, // numAngles
-		// map.getRobotGoal(), 0.02, // double rrtIntervalDistance,
-		// wsPolyObstacles, // List<PolygonObstacle> wsObstacles,
-		// createOverEstimatedSquareRobot(), // Rectangle2D.Double
-		// // robotRect,
-		// new Point2D.Double(0.0, 0.0), // Point2D.Double
-		// // robotReferencePoint,
-		// visGraph, // Map<Point2D.Double,List<Point2D.Double>> vGraph,
-		// wsWorldRect, // Rectangle2D.Double wsWorldRect,
-		// rsRobotRect, // Rectangle2D.Double conservativeCSpaceWorldRect,
-		// configObstacles, // ArrayList<PolygonObstacle>
-		// // conservativeCSpaceObstacles
-		// log);
-
-		Iterator<Entry<Point2D.Double, List<Point2D.Double>>> it = visGraph
-				.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<Point2D.Double, List<Point2D.Double>> pairs = it.next();
-			Point2D.Double point1 = pairs.getKey();
-			for (Point2D.Double point2 : pairs.getValue()) {
-
-				// map the line on the graph
-				GUISegmentMsg segMsg = new GUISegmentMsg();
-				segMsg.startX = point1.x;
-				segMsg.startY = point1.y;
-				segMsg.endX = point2.x;
-				segMsg.endY = point2.y;
-				segPub.publish(segMsg);
-			}
-			// it.remove(); // avoids a ConcurrentModificationException
-		}
+		getAndPlotVisGraph(map.robotStart);
+		
 
 //		List<Point2D.Double> shortestPath = DijkstraGood.getMyDijkstra(
 //				visGraph, ROBOT_START, ROBOT_END, log);
@@ -426,10 +385,39 @@ public class NavigationMain {
 		rectPub.publish(gpm);
 
 	}
+	
+	public Map<Point2D.Double, List<Point2D.Double>> getAndPlotVisGraph(Point2D.Double start) {
+		VisibilityGraph vis = new VisibilityGraph(start,
+				map.robotGoal, map.getConstructionObjects(), cWorldRect, cspace, globalNode);
 
-	public Point2D.Double pickNewPoint() {
-		int n = (int) (Math.random() * visGraph.keySet().size());
-		return (Point2D.Double) visGraph.keySet().toArray()[n];
+		// plot the visibility graph
+		Map<Point2D.Double, List<Point2D.Double>> visGraph = vis.getGraph();
+
+		Iterator<Entry<Point2D.Double, List<Point2D.Double>>> it = visGraph
+				.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<Point2D.Double, List<Point2D.Double>> pairs = it.next();
+			Point2D.Double point1 = pairs.getKey();
+			for (Point2D.Double point2 : pairs.getValue()) {
+
+				// map the line on the graph
+				GUISegmentMsg segMsg = new GUISegmentMsg();
+				segMsg.startX = point1.x;
+				segMsg.startY = point1.y;
+				segMsg.endX = point2.x;
+				segMsg.endY = point2.y;
+				segPub.publish(segMsg);
+			}
+			// it.remove(); // avoids a ConcurrentModificationException
+		}
+		return visGraph;
 	}
+	
+
+
+//	public Point2D.Double pickNewPoint() {
+//		int n = (int) (Math.random() * visGraph.keySet().size());
+//		return (Point2D.Double) visGraph.keySet().toArray()[n];
+//	}
 	
 }

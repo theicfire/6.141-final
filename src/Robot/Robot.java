@@ -80,7 +80,7 @@ public class Robot {
 		log.info("~~~~DONE ALL WAITING IN ROBOT~~~~");
 		
 		this.odom = new Localizer(node, true);
-		this.planner = new Planner(odom, log);
+		this.planner = new Planner(odom, log, navigationMain);
 		this.vision = new VisionMsgWrapper();
 		this.visionSub.addMessageListener(new VisionMessageListener());
 		this.doneMovingSub.addMessageListener(new DoneMovingListener());
@@ -98,13 +98,8 @@ public class Robot {
 			MessageListener<org.ros.message.rss_msgs.BreakBeamMsg> {
 		public void onNewMessage(org.ros.message.rss_msgs.BreakBeamMsg bb) {
 			log.info("Done moving message received");
-			if (navQueue.size() > 0) {
-				// keep going to the next location in the queue until you are done with all the location points
-				driveToLocation(navQueue.removeLast());
-			} else {
-				// we are done with everything
-				doneMoving = bb.beamBroken; // probably always true
-			}
+			driveToNextLocation(bb.beamBroken);
+			planner.markCurrentBlockDone();
 		}
 	}
 	
@@ -144,8 +139,22 @@ public class Robot {
 	}
 	
 	public void driveToLocations(ArrayList<Point2D.Double> locs) {
+		log.info("ROBOT driveToLocations " + locs);
 		for (Point2D.Double loc : locs) {
 			navQueue.addLast(loc);
+		}
+		driveToNextLocation(true);
+	}
+	
+	public void driveToNextLocation(boolean didStep) {
+		if (navQueue.size() > 0) {
+			// keep going to the next location in the queue until you are done with all the location points
+			Point2D.Double nextLoc = navQueue.removeFirst();
+			log.info("DRIVING TO NEXT LOC: " + nextLoc);
+			driveToLocation(nextLoc);
+		} else {
+			// we are done with everything
+			doneMoving = didStep; // probably always true
 		}
 	}
 

@@ -27,7 +27,7 @@ public class CSpace {
 		this.robotReferencePoint = new Point2D.Double(robotReferencePoint.x,robotReferencePoint.y);
 	}
 	
-	protected PolygonObstacle[] getObstacles() {
+	public PolygonObstacle[] getObstacles() {
 		ArrayList<PolygonObstacle> ret = new ArrayList<PolygonObstacle>();
 
 		if (robot == null) {

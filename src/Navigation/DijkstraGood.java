@@ -151,6 +151,7 @@ public class DijkstraGood {
 			}
 		}
 
+		log.info("looking for start vertex " + start);
 		DijkstraGood.computePaths(findVertex(vertices, start));
 //		for (Vertex v : vertices) {
 //			List<Edge> edges = v.adjacencies;

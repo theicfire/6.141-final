@@ -1,5 +1,5 @@
 <launch>
-  <include file="$(find lab4)/launch/config.launch" />
+  <include file="$(find Challenge)/launch/config.launch" />
 <!--
   <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.ConstructionGUI"          machine="workstation">
   </node>     
@@ -7,32 +7,25 @@
 
 
 <!-- ****************************** logic ****************************** -->
-<!--
-  <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.ConstructionGUI" machine="workstation"></node>
+ <node name="gui" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.ConstructionGUI" machine="workstation"></node>
   <node name="constructmap" pkg="rosjava_bootstrap" type="run.py" args="Challenge Challenge.GrandChallengeMap" machine="workstation"></node>
   <node name="mainmain" pkg="rosjava_bootstrap" type="run.py" args="Challenge Planner.Main" machine="workstation"></node>
   <node name="roswaypoint" pkg="rosjava_bootstrap" type="run.py" args="Challenge WaypointDriver.RosWaypointDriver" machine="workstation"></node>
--->
 <!-- ****************************** video ****************************** -->
   
   <node name="rep" pkg="image_transport" type="republish" args="compressed in:=/gscam/image_raw raw out:=/rss/video" machine="workstation"/>
   <node name="view" pkg="image_view" type="image_view" args="image:=/rss/video" machine="workstation" />
-
   <node name="rep2" pkg="image_transport" type="republish" args="compressed in:=/gscam222/image_raw raw out:=/rss/video2" machine="workstation"/>
-  <node name="view2" pkg="image_view" type="image_view" args="image:=/rss/video2" machine="workstation" /> 
-
+ <node name="view2" pkg="image_view" type="image_view" args="image:=/rss/video2" machine="workstation" /> 
 
   <node name="blobview" pkg="image_view" type="image_view" args="image:=/rss/blobVideo" machine="workstation" />
   <node name="vid" pkg="gscam" type="gscam" machine="netbook" />
   <node name="vid2" pkg="gscam222" type="gscam222" machine="netbook" />
   <node name="vision" pkg="rosjava_bootstrap" type="run.py" args="Challenge VisualServoSolution.VisionMain" machine="workstation"></node>
 
-
 <!-- ****************************** HARDWARE ****************************** -->
   <node name="pub" pkg="rosjava_bootstrap" type="run.py" args="uorc_publisher Publisher" machine="netbook" />
   <node name="odo" pkg="rosjava_bootstrap" type="run.py" args="odometry odometry.Odometry" machine="netbook" /> 
   <node name="lis" pkg="rosjava_bootstrap" type="run.py" args="uorc_listener Listener" machine="netbook" /> 
-
-
 
 </launch>

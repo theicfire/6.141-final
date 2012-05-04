@@ -18,6 +18,7 @@ public class VisibilityGraph {
 	private Point2D.Double start;
 	private Point2D.Double goal;
 	private ConstructionObject[] blocks;
+
 	private PolygonObstacle cworldRect;
 	private CSpace cspace;
 	private Log log;
@@ -29,7 +30,6 @@ public class VisibilityGraph {
 		this.cworldRect = cworldRect;
 		this.cspace = cspace;
 		this.log = node.getLog();
-
 	}
 	
 	public Map<Point2D.Double,List<Point2D.Double>> getGraph() {
@@ -46,10 +46,11 @@ public class VisibilityGraph {
 //		configObstacles.add(goalPoly);
 //		
 		
-		ret.put(start, getReachablePoints(configObstacles, start));
-		ret.put(goal, getReachablePoints(configObstacles, goal));
+		ret.put(start, getReachablePoints(configObstacles, start, cworldRect));
+		log.info("put point " + start);
+		ret.put(goal, getReachablePoints(configObstacles, goal, cworldRect));
 		for (ConstructionObject block : blocks) {
-			ret.put(block.getPosition(), getReachablePoints(configObstacles, block.getPosition()));
+			ret.put(block.getPosition(), getReachablePoints(configObstacles, block.getPosition(), cworldRect));
 		}
 
 		// CONSTRUCT VISIBILITY GRAPH
@@ -95,9 +96,7 @@ public class VisibilityGraph {
 
 				ret.put(point1, pointsVisibleToPoint1);
 			}
-		}
-		
-		
+		}			
 		return ret;
 	}
 	
@@ -116,17 +115,18 @@ public class VisibilityGraph {
 		}
 		
 		// make sure the point is inside the rectangle
-		return isEdgeInsideWorldRect(edge);
+		return isEdgeInsideWorldRect(edge, cworldRect);
 	}
 	
-	public ArrayList<Point2D.Double> getReachablePoints(PolygonObstacle[] configObstacles, Point2D.Double fromPoint) {
+	public static ArrayList<Point2D.Double> getReachablePoints(PolygonObstacle[] configObstacles,
+			Point2D.Double fromPoint, PolygonObstacle theWorldRect) {
 		ArrayList<Point2D.Double> pointsVisibleToPoint = new ArrayList<Point2D.Double>();
 		for (PolygonObstacle poly2 : configObstacles) {			
 				if (poly2.contains(fromPoint)) 
 					continue;
 				for (Point2D.Double point2 : poly2.getVertices()) {
 					Line2D edgeGoal = new Line2D.Double(fromPoint, point2);
-					if (isEdgeInsideWorldRect(edgeGoal) && !edgeIntersects(edgeGoal, configObstacles)) {
+					if (isEdgeInsideWorldRect(edgeGoal, theWorldRect) && !edgeIntersects(edgeGoal, configObstacles)) {
 						pointsVisibleToPoint.add(point2);
 					}
 				}
@@ -134,8 +134,8 @@ public class VisibilityGraph {
 		return pointsVisibleToPoint;
 	}
 	
-	public boolean isEdgeInsideWorldRect(Line2D edge) {
-		return cworldRect.contains(edge.getP1()) && cworldRect.contains(edge.getP2());
+	public static boolean isEdgeInsideWorldRect(Line2D edge, PolygonObstacle theWorldRect) {
+		return theWorldRect.contains(edge.getP1()) && theWorldRect.contains(edge.getP2());
 	}
 	
 	/*
@@ -173,7 +173,6 @@ public class VisibilityGraph {
 		}
 		return false;
 	}
-	
 	
 
 }

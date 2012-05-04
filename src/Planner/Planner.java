@@ -11,8 +11,10 @@ import Challenge.Fiducial;
 import Challenge.GrandChallengeMap;
 import Controller.Utility;
 import Localization.Localizer;
+import Navigation.NavigationMain;
 import Navigation.PolygonMap;
 import Navigation.PolygonObstacle;
+import Navigation.VisibilityGraph;
 
 public class Planner {
 
@@ -21,9 +23,14 @@ public class Planner {
 	private ArrayList<ConstructionObject> blocks;
 	private ConstructionObject currentBlock;
 	private Localizer odom;
+	private Log log;
+	NavigationMain navigationMain;
 
-	public Planner(Localizer ourOdom, Log log) {
+	public Planner(Localizer ourOdom, Log log, NavigationMain navigationMain) {
+		this.log = log;
+		this.navigationMain = navigationMain;
 		initPoints();
+		odom = ourOdom;
 		blocks = new ArrayList<ConstructionObject>();
 
 		String mapFileName = "/home/rss-student/RSS-I-group/Challenge/src/challenge_2012.txt";
@@ -36,8 +43,11 @@ public class Planner {
 		}
 
 		for (ConstructionObject c : map.constructionObjects) {
-			blocks.add(c);
-			log.info("block at " + c.getPosition());
+			if (VisibilityGraph.getReachablePoints(navigationMain.cspace.getObstacles(), 
+					c.getPosition(), navigationMain.cWorldRect).size() > 0) {
+				blocks.add(c);
+				log.info("block at " + c.getPosition());
+			}
 		}
 		this.nextClosestBlock();
 		log.info("current block: " + currentBlock.getPosition());
@@ -72,14 +82,17 @@ public class Planner {
 		double min = Double.MAX_VALUE;
 		ConstructionObject choice = null;
 		for (ConstructionObject b : blocks) {
-			if (Utility.getMagnitude(here, b.getPosition()) < min) {
+			double dist = Utility.getMagnitude(here, b.getPosition());
+			if (dist < min) {
 				choice = b;
+				min = dist;
 			}
 		}
 		currentBlock = choice;
 	}
 
 	public Point2D.Double getCurrentBlockPosition() {
+		log.info("asking for block position; returning" + currentBlock.getPosition());
 		return currentBlock.getPosition();
 	}
 
