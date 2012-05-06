@@ -554,6 +554,7 @@ public class GrandChallengeMap implements NodeMain {
 //	paramTree.getString(node.resolveName("~/mapFileName"));
 	// lol
 	String mapFileName = "/home/rss-student/RSS-I-group/Challenge/src/challenge_2012.txt";
+//	String mapFileName = "/home/rss-student/RSS-I-group/Challenge/src/construction_map_2012.txt";
 	System.out.println("filename = " + mapFileName);
 	//String filename = "/home/jbrooksh/my_sandbox/6.141/spring2012/priv/labs/Challenge/src/construction_map_2011.txt";
 

@@ -2,6 +2,7 @@ package Navigation;
 
 import java.awt.Color;
 
+import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
 import org.ros.message.lab5_msgs.ColorMsg;
 import org.ros.message.lab6_msgs.GUIRectMsg;
@@ -9,9 +10,11 @@ import org.ros.message.lab6_msgs.GUIRectMsg;
 public class RectMessageListener implements MessageListener<GUIRectMsg> {
 
 	private MapGUI gui;
+	Log log;
 
-	public RectMessageListener(MapGUI mapGUI) {
+	public RectMessageListener(MapGUI mapGUI, Log log) {
 		this.gui = mapGUI;
+		this.log = log;
 	}
 
 	@Override
@@ -28,7 +31,9 @@ public class RectMessageListener implements MessageListener<GUIRectMsg> {
 		if (c== null){
 			color = gui.rectColor;
 		} else {
-			color = new Color(c.r, c.g, c.b);
+//			log.info("color: " + c.r +" " + c.g +" " + c.b);
+			color = new Color((int)c.r, (int)c.g, (int)c.b);
+//			color = new Color(c.r, c.g, c.b);
 		}
 		return color;
 	}

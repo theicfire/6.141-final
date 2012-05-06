@@ -18,7 +18,7 @@ public class Main implements NodeMain {
 		robot.log.info("Start performing");
 		while (true) {
 			// make states represent atomic actions
-			robot.getRobotState().perform();
+//			robot.getRobotState().perform();
 		}
 	}
 

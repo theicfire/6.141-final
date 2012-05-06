@@ -449,7 +449,7 @@ public class MapGUI extends SonarGUI implements NodeMain{
      **/
     public void onStart(Node node) {
 	guiRectSub = node.newSubscriber("gui/Rect", "lab6_msgs/GUIRectMsg");
-	guiRectSub.addMessageListener(new RectMessageListener(this));
+	guiRectSub.addMessageListener(new RectMessageListener(this,node.getLog()));
 	guiPolySub = node.newSubscriber("gui/Poly", "lab6_msgs/GUIPolyMsg");
 	guiPolySub.addMessageListener(new PolyMessageListener(this));
 	guiEraseSub = node.newSubscriber("gui/Erase", "lab5_msgs/GUIEraseMsg");

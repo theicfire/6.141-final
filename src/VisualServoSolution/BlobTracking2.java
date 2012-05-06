@@ -5,7 +5,14 @@ import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 
+import com.googlecode.javacpp.Loader;
+import com.googlecode.javacpp.Pointer;
 import com.googlecode.javacv.cpp.opencv_core;
+import com.googlecode.javacv.cpp.opencv_imgproc;
+import com.googlecode.javacv.cpp.opencv_core.CvContour;
+import com.googlecode.javacv.cpp.opencv_core.CvMemStorage;
+import com.googlecode.javacv.cpp.opencv_core.CvPoint;
+import com.googlecode.javacv.cpp.opencv_core.CvSeq;
 import com.googlecode.javacv.cpp.opencv_core.CvSize;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
@@ -79,9 +86,20 @@ public class BlobTracking2 {
 	IplImage imgHSV;
 	IplImage imgBlobMaskBlue;
 	IplImage imgBlobMaskGreen;
-	IplImage imgBlobMaskRedLo;
-	IplImage imgBlobMaskRedHi;
+	IplImage imgBlobMaskRedLo; // only Lo hue values
+	IplImage imgBlobMaskRed; // both Lo and Hi values
 	IplImage imgBlobMaskYellow;
+	
+	CvMemStorage cvStorage;
+
+	// blurring properties and edge detection
+	static int LOW_THRESHOLD = 200;
+	static int RATIO = 5;
+	static int KERNEL_SIZE = 5;
+	// blob thresholds
+	int MIN_BLOB_AREA = 200;
+	int MAX_BLOB_AREA = 1024;
+
 
 	/**
 	 * <p>Create a BlobTracking object</p>
@@ -114,11 +132,13 @@ public class BlobTracking2 {
 				size,opencv_core.IPL_DEPTH_8U,1);
 		imgBlobMaskRedLo = opencv_core.cvCreateImage(
 				size,opencv_core.IPL_DEPTH_8U,1);
-		imgBlobMaskRedHi = opencv_core.cvCreateImage(
+		imgBlobMaskRed = opencv_core.cvCreateImage(
 				size,opencv_core.IPL_DEPTH_8U,1);
 		imgBlobMaskYellow = opencv_core.cvCreateImage(
 				size,opencv_core.IPL_DEPTH_8U,1);
 
+		cvStorage = opencv_core.cvCreateMemStorage(0);
+		
 		blockMapper = new BlockMapper(width,height);
 	}	
 	//(Solution)
@@ -351,13 +371,13 @@ public class BlobTracking2 {
 		stepTiming();  // monitors the frame rate
 
 		// Begin Student Code
-		
+
 		// convert the image to ipl
 		IplImage rgbIpl = Utility.rgbImgToRgbIplImg(src, log);
 		int blueLower = 100;
 		int blueUpper = 150;
-		int blueSatLower = 160; // 160
-		int blueValLower = 20; //30
+		int blueSatLower = 150; // 160
+		int blueValLower = 15; //30
 		
 		int greenLower = 50;
 		int greenUpper = 80;
@@ -367,16 +387,62 @@ public class BlobTracking2 {
 		int redLoLower = 0;
 		int redLoUpper = 10;
 		int redLoSatLower = 160;
-		int redLoValLower = 80;
+		int redLoValLower = 75;
 		int redHiLower = 175;
 		int redHiUpper = 180;
 		int redHiSatLower = 160;
-		int redHiValLower = 80;
+		int redHiValLower = 75;
 		
-		int yellowLower = 20;
+		int yellowLower = 22;
 		int yellowUpper = 35;
 		int yellowSatLower = 170;
-		int yellowValLower = 80;
+		int yellowValLower = 83;
+//		if (lastBlob != null) {
+//			switch (lastBlob.color) {
+//			
+//			case BLUE:
+//				ArrayList<Blob> blobListBlue = this.getBlobList(
+//						imgBlobMaskBlue,Blob.BlobColor.BLUE,
+//						MIN_BLOB_AREA, MAX_BLOB_AREA,
+//						LOW_THRESHOLD, RATIO, KERNEL_SIZE);
+//				if (blobListBlue.size() > 0) {
+//					// pick the blob that is closest to the last blob
+//					double closeEnough = 300;
+//					double closestDistSqr = Double.POSITIVE_INFINITY;
+//					for (Blob blob: blobListBlue) {
+//						if (blob.color == lastBlob.color) {
+//							double deltaX = lastBlob.px_x - blob.px_x;
+//							double deltaY = lastBlob.px_y - blob.px_y;
+//							double distSqr = deltaX*deltaX + deltaY*deltaY;
+//							if (distSqr < closeEnough && distSqr < closestDistSqr) {
+////									log.info("distSqr: " + distSqr);
+//								pickedBlob = blob;
+//								closestDistSqr = distSqr;
+//							}
+//						}
+//					}
+//
+//					if (pickedBlob == null) {
+//						pickedBlob = blobList.get(0);
+//					}
+//				} else {
+//					// no blue blobs, pick new color
+//				}
+//				
+//				
+//				
+//				
+//				
+//				break;
+//			
+//			
+//			}
+//			
+//		}
+		
+		
+		
+
 		ImageAnalyzer.getBlobs(rgbIpl,
 				imgHSV,
 				blueLower,
@@ -404,7 +470,7 @@ public class BlobTracking2 {
 				redHiUpper,
 				redHiSatLower,
 				redHiValLower,
-				imgBlobMaskRedHi);
+				imgBlobMaskRed);
 		ImageAnalyzer.getBlobs(rgbIpl,
 				imgHSV,
 				yellowLower,
@@ -414,25 +480,42 @@ public class BlobTracking2 {
 				imgBlobMaskYellow);
 		opencv_core.cvSet(rgbIpl,opencv_core.cvScalar(255,255,0,0),imgBlobMaskBlue);
 		opencv_core.cvSet(rgbIpl,opencv_core.cvScalar(255,0,0,0),imgBlobMaskGreen);
-		opencv_core.cvSet(rgbIpl,opencv_core.cvScalar(0,255,0,0),imgBlobMaskRedLo);
-		opencv_core.cvSet(rgbIpl,opencv_core.cvScalar(0,255,0,0),imgBlobMaskRedHi);
+		opencv_core.cvOr(imgBlobMaskRedLo,imgBlobMaskRed,imgBlobMaskRed, null);
+//		opencv_core.cvSet(rgbIpl,opencv_core.cvScalar(0,255,0,0),imgBlobMaskRedLo);
+		opencv_core.cvSet(rgbIpl,opencv_core.cvScalar(0,255,0,0),imgBlobMaskRed);
 		opencv_core.cvSet(rgbIpl,opencv_core.cvScalar(0,255,255,0),imgBlobMaskYellow);
 //		log.info("~~~~~~~~~~~~~~~~~here");
 		Utility.copyFromRgbIplImgToRgbImg(rgbIpl,dest,log);
-		// blob it in ipl
-		// convert the blobbed
-		// 
+
 		
 		
 		
-		ArrayList<Blob> blobList =
-				this.blockMapper.getBlobList(src,log);
+//		ArrayList<Blob> blobList =
+//		this.blockMapper.getBlobList(src,log);
+		ArrayList<Blob> blobListBlue = this.getBlobList(
+				imgBlobMaskBlue,Blob.BlobColor.BLUE,
+				MIN_BLOB_AREA, MAX_BLOB_AREA,
+				LOW_THRESHOLD, RATIO, KERNEL_SIZE);
+		ArrayList<Blob> blobListGreen = this.getBlobList(
+				imgBlobMaskGreen,Blob.BlobColor.GREEN,
+				MIN_BLOB_AREA, MAX_BLOB_AREA,
+				LOW_THRESHOLD, RATIO, KERNEL_SIZE);
+		ArrayList<Blob> blobList = this.getBlobList(
+				imgBlobMaskRed,Blob.BlobColor.RED,
+				MIN_BLOB_AREA, MAX_BLOB_AREA,
+				LOW_THRESHOLD, RATIO, KERNEL_SIZE);
+		ArrayList<Blob> blobListYellow = this.getBlobList(
+				imgBlobMaskYellow,Blob.BlobColor.YELLOW,
+				MIN_BLOB_AREA, MAX_BLOB_AREA,
+				LOW_THRESHOLD, RATIO, KERNEL_SIZE);
 		Blob pickedBlob = null;
+
+//		log.info("numBlobs: " + blobList.size());
 		
 		if (blobList.size() > 0) {
 			if (lastBlob != null) {
 				// pick the blob that is closest to the last blob
-				double closeEnough = 50;
+				double closeEnough = 300;
 				double closestDistSqr = Double.POSITIVE_INFINITY;
 				for (Blob blob: blobList) {
 					if (blob.color == lastBlob.color) {
@@ -440,6 +523,7 @@ public class BlobTracking2 {
 						double deltaY = lastBlob.px_y - blob.px_y;
 						double distSqr = deltaX*deltaX + deltaY*deltaY;
 						if (distSqr < closeEnough && distSqr < closestDistSqr) {
+//							log.info("distSqr: " + distSqr);
 							pickedBlob = blob;
 							closestDistSqr = distSqr;
 						}
@@ -460,6 +544,18 @@ public class BlobTracking2 {
 //					+ pickedBlob.px_y + " "
 //					+ pickedBlob.area + " ");
 
+			// draw a marker for the selected block
+			int halfSquareWidth = 2;
+			int yStart = Math.max(0, pickedBlob.px_y-halfSquareWidth);
+			int yEnd = Math.min(dest.getHeight(),pickedBlob.px_y+halfSquareWidth);
+			int xStart = Math.max(0, pickedBlob.px_x-halfSquareWidth);
+			int xEnd = Math.min(dest.getWidth(),pickedBlob.px_x+halfSquareWidth);
+			for (int i = yStart; i < yEnd; i++) {
+				for (int j = xStart; j < xEnd; j++) {
+					dest.setPixel(j,i,new Pixel(255,0,255));
+				}
+			}	
+			
 			centroidX = pickedBlob.px_x;
 			centroidY = pickedBlob.px_y;
 			targetArea = pickedBlob.area;
@@ -512,30 +608,95 @@ public class BlobTracking2 {
 		
 	}
 	
-	static void getBlobList(IplImage imgMask) {
-		ArrayList<Blob> blobList = new ArrayList<Blob>();
+	ArrayList<Blob> getBlobList(IplImage imgMask,
+			Blob.BlobColor blobColor,
+			int minBlobArea, int maxBlobArea,
+			int lowThreshold, int ratio,
+			int kernel_size) {
+		ArrayList<Blob> blobList =
+				new ArrayList<Blob>();
 
-		// green blobs
-//		ArrayList<Utility.Pair<ArrayList<Point>,Double>> blobContours =
-//			imgAnal.detectBlobs(iplRgb,
-//				hueRedLowerBound,hueRedUpperBound,
-//				minBlobArea,maxBlobArea);
-//		for (Utility.Pair<ArrayList<Point>, Double> pair: blobContours) {
-//			int centerX = 0;
-//			int centerY = 0;
-//			ArrayList<Point> ctr = pair.first;
-//			for (Point p: ctr) {
-//				centerX += p.x;
-//				centerY += p.y;
-//			}
-//			centerX /= ctr.size();
-//			centerY /= ctr.size();
-//			Blob blob = new Blob(centerX,centerY,
-//					pair.second,Blob.BlobColor.RED);
-//			blobList.add(blob);
-//		}
-//		
-//		return blobList;
+		ArrayList<Utility.Pair<ArrayList<Point>,Double>>
+		blobContours =
+			discretizeBlobs(imgMask, minBlobArea,
+					maxBlobArea, lowThreshold,
+					ratio, kernel_size);
+		
+		for (Utility.Pair<ArrayList<Point>, Double> pair: blobContours) {
+			int centerX = 0;
+			int centerY = 0;
+			ArrayList<Point> ctr = pair.first;
+			for (Point p: ctr) {
+				centerX += p.x;
+				centerY += p.y;
+			}
+			centerX /= ctr.size();
+			centerY /= ctr.size();
+			Blob blob = new Blob(centerX,centerY,
+					pair.second,blobColor);
+			blobList.add(blob);
+		}
+		
+		return blobList;
+	}
+	
+	ArrayList<Utility.Pair<
+	ArrayList<Point>, Double>> discretizeBlobs(
+			IplImage imgMask,
+			int minBlobArea, int maxBlobArea,
+			int lowThreshold, int ratio,
+			int kernel_size) {
+        opencv_imgproc.cvCanny(imgMask, imgMask,
+        		lowThreshold,lowThreshold*ratio,
+        		kernel_size);
+//		opencv_imgproc.cvDilate(imgMask,
+//				imgMask, null, 1);
+
+		// find contours
+		CvSeq first_contour = new CvSeq();
+		CvSeq contour = first_contour;
+		int header_size = Loader.sizeof(CvContour.class);
+		opencv_imgproc.cvFindContours(imgMask,
+			cvStorage,first_contour,header_size,
+//			opencv_imgproc.CV_RETR_LIST,
+			opencv_imgproc.CV_RETR_TREE,
+			opencv_imgproc.CV_CHAIN_APPROX_SIMPLE);
+
+		ArrayList<Utility.Pair<ArrayList<Point>,Double>> shapes =
+			new ArrayList<Utility.Pair<ArrayList<Point>,Double>>();
+		while (contour != null && !contour.isNull()) {
+			int numPoints = contour.total();
+			if (numPoints >= 6) {
+				double epsilon = 0.03;
+				epsilon *= opencv_imgproc.cvContourPerimeter(contour);
+				CvSeq seqPoints2 = contour;
+				CvSeq seqPoints = opencv_imgproc.cvApproxPoly(seqPoints2,
+						Loader.sizeof(CvContour.class),cvStorage,
+						opencv_imgproc.CV_POLY_APPROX_DP, epsilon,
+						1);
+				int numSeqPts = seqPoints.total();
+				if (numSeqPts >= 4) {
+					double area = opencv_imgproc.cvContourArea(
+							seqPoints, opencv_core.CV_WHOLE_SEQ, 0);
+					if (area >= minBlobArea && area <= maxBlobArea) {
+						ArrayList<Point> points = new ArrayList<Point>();
+						for (int i = 0; i < numSeqPts; ++i) {
+							Pointer ptrPoint = opencv_core.cvGetSeqElem(seqPoints,i);
+							CvPoint point = new CvPoint(ptrPoint);
+			                points.add(new Point(point.x(),point.y()));
+						}
+						Utility.Pair<ArrayList<Point>,Double> shapeAndAreaPair =
+							new Utility.Pair<ArrayList<Point>,Double>(points, area);
+						shapes.add(shapeAndAreaPair);
+					}
+				}
+			}
+			
+			contour = contour.h_next();
+		}
+
+		opencv_core.cvClearMemStorage(cvStorage);
+		return shapes;
 	}
 	
 }

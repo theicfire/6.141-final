@@ -172,7 +172,7 @@ public class Utility {
 		int width = rgbIpl.width();
 		int height = rgbIpl.height();
 		int widthStep = rgbIpl.widthStep();
-		log.info("" + width + " " + height + " " + widthStep + " ");
+//		log.info("" + width + " " + height + " " + widthStep + " ");
 		for(int y = 0; y < height; y++){
 			int yTimesWStep = y*widthStep;
 			for(int x = 0; x < width; x++) {
