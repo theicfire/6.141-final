@@ -15,7 +15,7 @@ public class VisionMain implements NodeMain {
 	Subscriber<org.ros.message.sensor_msgs.Image> rawVidSub;
 	Log log;
 
-	boolean useNew = true;
+	boolean useNew = false;
 	BlobTracking2 bt2;
 	BlobTracking bt;
 	private Publisher<VisionMsg> blobDetectedPub;
@@ -169,7 +169,7 @@ public class VisionMain implements NodeMain {
 			}
 			angle = (0.0171693 + 0.00987868 * centroidX) - Math.PI / 4;
 
-			log.info("range, angle" + range + ", " + angle);
+//			log.info("range, angle" + range + ", " + angle);
 
 			org.ros.message.sensor_msgs.Image pubImage = new org.ros.message.sensor_msgs.Image();
 			pubImage.width = IMAGE_WIDTH;

@@ -46,11 +46,19 @@ public class VisibilityGraph {
 //		configObstacles.add(goalPoly);
 //		
 		
-		ret.put(start, getReachablePoints(configObstacles, start, cworldRect));
-		log.info("put point " + start);
-		ret.put(goal, getReachablePoints(configObstacles, goal, cworldRect));
+		ArrayList<Point2D.Double> otherPoints = new ArrayList<Point2D.Double>();
 		for (ConstructionObject block : blocks) {
-			ret.put(block.getPosition(), getReachablePoints(configObstacles, block.getPosition(), cworldRect));
+			otherPoints.add(block.getPosition());
+		}
+		otherPoints.add(start);
+		otherPoints.add(goal);
+		
+		
+		ret.put(start, getReachablePoints(configObstacles, otherPoints, start, cworldRect));
+		log.info("put point " + start);
+		ret.put(goal, getReachablePoints(configObstacles, otherPoints, goal, cworldRect));
+		for (ConstructionObject block : blocks) {
+			ret.put(block.getPosition(), getReachablePoints(configObstacles, otherPoints, block.getPosition(), cworldRect));
 		}
 
 		// CONSTRUCT VISIBILITY GRAPH
@@ -118,7 +126,7 @@ public class VisibilityGraph {
 		return isEdgeInsideWorldRect(edge, cworldRect);
 	}
 	
-	public static ArrayList<Point2D.Double> getReachablePoints(PolygonObstacle[] configObstacles,
+	public static ArrayList<Point2D.Double> getReachablePoints(PolygonObstacle[] configObstacles, ArrayList<Point2D.Double> otherPoints,
 			Point2D.Double fromPoint, PolygonObstacle theWorldRect) {
 		ArrayList<Point2D.Double> pointsVisibleToPoint = new ArrayList<Point2D.Double>();
 		for (PolygonObstacle poly2 : configObstacles) {			
@@ -130,6 +138,16 @@ public class VisibilityGraph {
 						pointsVisibleToPoint.add(point2);
 					}
 				}
+		}
+		
+		if (otherPoints != null) {
+			// Duplicate code :(... this adds possible points that are in "otherPoints"
+			for (Point2D.Double point : otherPoints) {
+				Line2D edgeGoal = new Line2D.Double(fromPoint, point);
+				if (isEdgeInsideWorldRect(edgeGoal, theWorldRect) && !edgeIntersects(edgeGoal, configObstacles)) {
+					pointsVisibleToPoint.add(point);
+				}
+			}
 		}
 		return pointsVisibleToPoint;
 	}

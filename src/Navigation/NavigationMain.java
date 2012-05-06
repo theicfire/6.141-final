@@ -36,6 +36,7 @@ public class NavigationMain {
 	public PolygonObstacle cWorldRect;
 	private Node globalNode;
 	private Log log;
+	private VisibilityGraph vis;
 
 	private GrandChallengeMap map;
 //	
@@ -387,7 +388,7 @@ public class NavigationMain {
 	}
 	
 	public Map<Point2D.Double, List<Point2D.Double>> getAndPlotVisGraph(Point2D.Double start) {
-		VisibilityGraph vis = new VisibilityGraph(start,
+		vis = new VisibilityGraph(start,
 				map.robotGoal, map.getConstructionObjects(), cWorldRect, cspace, globalNode);
 
 		// plot the visibility graph

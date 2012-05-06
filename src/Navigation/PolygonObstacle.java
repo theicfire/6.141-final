@@ -158,6 +158,18 @@ public class PolygonObstacle {
 
     return vertices;
   }
+  
+  public List<Line2D> getSegments() {
+	  Point2D.Double prevPoint = null;
+	  ArrayList<Line2D> r = new ArrayList<Line2D>();
+	  for (Point2D.Double p : this.getVertices()) {
+		  if (prevPoint != null) {
+			  r.add(new Line2D.Double(prevPoint, p));
+		  }
+		  prevPoint = p;
+	  }
+	  return r;
+  }
 
   /**
    * <p>Covers {@link #toStringBuffer}, internally conses a StringBuffer.</p>

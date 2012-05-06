@@ -127,6 +127,12 @@ public class Robot {
 		BreakBeamMsg stop = new BreakBeamMsg();
 		stop.beamBroken = true;
 		stopPub.publish(stop);
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void driveToLocation(Point2D.Double loc) {

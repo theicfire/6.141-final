@@ -32,7 +32,7 @@ public class RosWaypointDriver implements NodeMain {
 	final double PROPORTIONAL_GAIN = 1.5;
 	final double INTEGRAL_GAIN = 9999.0;
 	final double MAX_ROTATIONAL_VELOCITY = .3;
-	final double epsilon2 = .005; // in m
+	final double epsilon2 = .02; // in m
 	final long ENOUGH_TIME = 400;
 
 	private Node globalNode;

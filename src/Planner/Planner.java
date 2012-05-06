@@ -19,6 +19,7 @@ import Navigation.VisibilityGraph;
 public class Planner {
 
 	public int blockIndex = 0;
+	private int counter = 0;
 	private ArrayList<Point2D.Double> tmpPoints;
 	private ArrayList<ConstructionObject> blocks;
 	private ConstructionObject currentBlock;
@@ -43,7 +44,7 @@ public class Planner {
 		}
 
 		for (ConstructionObject c : map.constructionObjects) {
-			if (VisibilityGraph.getReachablePoints(navigationMain.cspace.getObstacles(), 
+			if (VisibilityGraph.getReachablePoints(navigationMain.cspace.getObstacles(), null,
 					c.getPosition(), navigationMain.cWorldRect).size() > 0) {
 				blocks.add(c);
 				log.info("block at " + c.getPosition());
@@ -78,17 +79,18 @@ public class Planner {
 	// }
 
 	public void nextClosestBlock() {
-		Point2D.Double here = odom.getPosition();
-		double min = Double.MAX_VALUE;
-		ConstructionObject choice = null;
-		for (ConstructionObject b : blocks) {
-			double dist = Utility.getMagnitude(here, b.getPosition());
-			if (dist < min) {
-				choice = b;
-				min = dist;
-			}
-		}
-		currentBlock = choice;
+//		Point2D.Double here = odom.getPosition();
+//		double min = Double.MAX_VALUE;
+//		ConstructionObject choice = null;
+//		for (ConstructionObject b : blocks) {
+//			double dist = Utility.getMagnitude(here, b.getPosition());
+//			if (dist < min) {
+//				choice = b;
+//				min = dist;
+//			}
+//		}
+//		currentBlock = choice;
+		currentBlock = blocks.get(counter);
 	}
 
 	public Point2D.Double getCurrentBlockPosition() {
@@ -97,7 +99,8 @@ public class Planner {
 	}
 
 	public void markCurrentBlockDone() {
-		blocks.remove(currentBlock);
+//		blocks.remove(currentBlock);
+		counter = (counter + 1) % blocks.size();
 	}
 
 }

@@ -59,6 +59,7 @@ public class StateLookingForBlocks extends RobotState {
 				ArrayList<Point2D.Double> shortestPath = DijkstraGood.getMyDijkstra(
 						robot.navigationMain.getAndPlotVisGraph(robotpos), robotpos, 
 						robot.planner.getCurrentBlockPosition(), robot.log);
+				shortestPath.remove(0); // we should already be at the first waypoint
 				robot.driveToLocations(shortestPath);
 				state = State.MOVING;
 				break;
