@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
+import org.ros.message.lab5_msgs.GUIPointMsg;
 import org.ros.message.sensor_msgs.Image;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
@@ -29,7 +30,10 @@ import com.googlecode.javacv.cpp.opencv_imgproc;
 import Challenge.ConstructionObject;
 import Challenge.GrandChallengeMap;
 import Controller.Utility;
+import Controller.Utility.ConfidencePose;
+import Controller.Utility.Pose;
 import Localization.ICP;
+import Localization.Localizer;
 import Navigation.PolygonObstacle;
 import Navigation.VisibilityGraph;
 import VisualServoSolution.VisionMain.InterpRawVid;
@@ -40,7 +44,9 @@ public class VisionMain2 implements NodeMain {
 	GrandChallengeMap map;
 	Publisher<org.ros.message.sensor_msgs.Image> vidPub;
 	Subscriber<org.ros.message.sensor_msgs.Image> rawVidSub;
+	Publisher<Object> pointPub;
 	Log log;
+	Localizer odom;
 
 	static IplImage imgHsv; // 3 channels
 	static IplImage imgThreshold; // 1 channel
@@ -59,31 +65,26 @@ public class VisionMain2 implements NodeMain {
 	@Override
 	public void onStart(Node node) {
 		log = node.getLog();
+		this.odom = new Localizer(node, true);
 
 		// TODO Auto-generated method stub
 		vidPub = node.newPublisher("/rss/blobVideo2", "sensor_msgs/Image");
-		rawVidSub.addMessageListener(new InterpRawVid());
+
 		rawVidSub = node.newSubscriber("rss/video2", "sensor_msgs/Image");
-
-		String mapFileName = "/home/rss-student/RSS-I-group/Challenge/src/challenge_2012.txt";
-		map = new GrandChallengeMap();
-
-		try {
-			map = GrandChallengeMap.parseFile(mapFileName);
-		} catch (Exception e) {
-			throw new RuntimeException(
-					"DIE DIE DIE DIE DIE DIE couldn't load map");
-		}
+		rawVidSub.addMessageListener(new InterpRawVid());
+		
+		pointPub = node.newPublisher("gui/Point", "lab5_msgs/GUIPointMsg");
+		
+		map = Utility.getChallengeMap();
+		
 		// image processing initialization
 		cvStorage = opencv_core.cvCreateMemStorage(0);
 
 		// homography
-		String homographyData = "";
+		String homographyData = "/home/rss-student/RSS-I-group/Challenge/calibration2.hom";
 		ArrayList<HomographySrcDstPoint> homoPoints = HomographySrcDstPoint
 				.loadHomographyData(homographyData);
-
 		pixelToFloorH = Utility.computeHomography(homoPoints);
-
 	}
 
 	public class InterpRawVid implements
@@ -116,6 +117,14 @@ public class VisionMain2 implements NodeMain {
 		// TODO Auto-generated method stub
 		IplImage rgbIpl = Utility.rgbImgMsgToRgbIplImg(src, log);
 
+		
+		log.info("");
+		log.info("");
+		log.info("");
+		log.info("");
+		log.info("");
+		log.info(rgbIpl);
+		
 		// compute HSV
 		opencv_imgproc.cvCvtColor(rgbIpl, imgHsv, opencv_imgproc.CV_BGR2HSV);
 		// compute Threshold
@@ -168,6 +177,7 @@ public class VisionMain2 implements NodeMain {
 		CvMat res = VisualLocalization.getFloorPointsLocalSpace(interpolated,
 				this.pixelToFloorH);
 
+		Pose bestGuess = odom.getPositionPose();
 		int numInterpolated = interpolated.size();
 		ArrayList<Point2D.Double> visionPoints =
 				new ArrayList<Point2D.Double>(numInterpolated);
@@ -176,10 +186,21 @@ public class VisionMain2 implements NodeMain {
 			double y = res.get(1,i);
 			double invZ = 1.0/res.get(2,i);
 			visionPoints.add(new Point2D.Double(x*invZ,y*invZ));
+			// plot these points on the GUI
+
+			double cos = Math.cos(bestGuess.getTheta());
+			double sin = Math.sin(bestGuess.getTheta());
+			GUIPointMsg pm = new GUIPointMsg();
+			pm.x = x*cos - y*sin + bestGuess.getX();
+			pm.y = sin*x + y* cos + bestGuess.getY();
+			pointPub.publish(pm);
 		}
 
-		ICP.computeOffset(ICP.discretizeMap(map.obstacles), visionPoints, log);
-
+		ConfidencePose offset = ICP.computeOffset(bestGuess, ICP.discretizeMap(map.obstacles), visionPoints, log, null);
+		// TODO update via ICP happens here
+		log.info("confidence " + offset.getConfidence() + " offset "
+				+ offset.getX() + ", " + offset.getY() + ", theta "
+				+ offset.getTheta());
 	}
 
 	@Override

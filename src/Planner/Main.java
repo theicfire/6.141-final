@@ -1,8 +1,13 @@
 package Planner;
 
+import java.awt.geom.Point2D;
+
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
+
+import Controller.Utility;
+import Controller.Utility.Pose;
 import Robot.StateInitial;
 import Robot.Robot;
 
@@ -16,6 +21,13 @@ public class Main implements NodeMain {
 		robot.setStateObject(startState);
 
 		robot.log.info("Start performing");
+		
+		// Testing purposes only!!!
+		Point2D.Double blockPose = robot.planner.getCurrentBlockPosition();
+		robot.odom.updatePosition((new Utility()).new Pose(blockPose,
+				robot.odom.getTheta()));
+		robot.planner.markCurrentBlockDone();
+		
 		while (true) {
 			// make states represent atomic actions
 			robot.getRobotState().perform();

@@ -35,14 +35,8 @@ public class Planner {
 		odom = ourOdom;
 		blocks = new ArrayList<ConstructionObject>();
 
-		String mapFileName = "/home/rss-student/RSS-I-group/Challenge/src/challenge_2012.txt";
 		GrandChallengeMap map = new GrandChallengeMap();
-		try {
-			map = GrandChallengeMap.parseFile(mapFileName);
-		} catch (Exception e) {
-			throw new RuntimeException(
-					"DIE DIE DIE DIE DIE DIE couldn't load map");
-		}
+		map = Utility.getChallengeMap();
 
 		for (ConstructionObject c : map.constructionObjects) {
 			if (VisibilityGraph.getReachablePoints(navigationMain.cspace.getObstacles(), null,
@@ -91,6 +85,7 @@ public class Planner {
 //			}
 //		}
 //		currentBlock = choice;
+		log.info("Next block at index" + counter);
 		currentBlock = blocks.get(counter);
 	}
 

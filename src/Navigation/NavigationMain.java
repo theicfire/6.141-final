@@ -24,6 +24,7 @@ import org.ros.node.topic.Publisher;
 import Challenge.ConstructionGUI;
 import Challenge.ConstructionObject;
 import Challenge.GrandChallengeMap;
+import Controller.Utility;
 
 public class NavigationMain {
 
@@ -80,7 +81,6 @@ public class NavigationMain {
 		// "/home/rss-student/RSS-I-group/lab6/src/global-nav-maze-2011-basic.map";
 		// String mapFileName =
 		// "/home/rss-student/RSS-I-group/lab6/src/global-nav-maze-2011-med.map";
-		String mapFileName = "/home/rss-student/RSS-I-group/Challenge/src/challenge_2012.txt";
 		// String mapFileName =
 		// "/home/rss-student/RSS-I-group/lab6/src/global-nav-maze.map";
 		// String mapFileName =
@@ -88,26 +88,10 @@ public class NavigationMain {
 		// String mapFileName =
 		// "/home/rss-student/RSS-I-group/lab6/src/practice-maze-02.map";
 
-		log.info("~~~~~~~~~~map file name resolved to: " + mapFileName);
 		map = new GrandChallengeMap();
 //		map.makeLogger(node);
-
-		log.info("~~~~~~~~~~parsing map file: " + mapFileName);
-		// parse file
-		try {
-//			map.parse(new File(mapFileName));
-			map = GrandChallengeMap.parseFile(mapFileName);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			log.info("~~~~~~~~~~error parsing map file, IOException: "
-					+ mapFileName);
-			e.printStackTrace();
-		} catch (ParseException e) {
-			log.info("~~~~~~~~~~error parsing map file, ParseException: "
-					+ mapFileName);
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		log.info("~~~~~~~~~~parsing map file");
+		map = Utility.getChallengeMap();
 
 		erasePub = node.newPublisher("gui/Erase", "lab5_msgs/GUIEraseMsg");
 		pointPub = node.newPublisher("gui/Point", "lab5_msgs/GUIPointMsg");

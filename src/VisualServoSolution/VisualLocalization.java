@@ -23,17 +23,17 @@ public class VisualLocalization {
 		double xDiff = end.x-start.x;
 		double yDiff = end.y-start.y;
 
-		Point2D.Double unitDir =
+		Point2D.Double scaledDir =
 			new Point2D.Double(xDiff,yDiff);
 		double dist = Math.sqrt(xDiff*xDiff + yDiff*yDiff);
-		double invDist = 1.0/dist;
-		unitDir.x *= invDist;
-		unitDir.y *= invDist;
+		double scale = granularity/dist;
+		scaledDir.x *= scale;
+		scaledDir.y *= scale;
 
 		int numTimes = (int) (dist/granularity);
 		for (int i = 0; i < numTimes; ++i) {
-			double x = i*unitDir.x + start.x;
-			double y = i*unitDir.y + start.y;
+			double x = i*scaledDir.x + start.x;
+			double y = i*scaledDir.y + start.y;
 			result.add(new Point2D.Double(x,y));
 		}
 

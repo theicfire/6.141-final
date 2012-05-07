@@ -19,6 +19,8 @@ import org.ros.message.lab6_msgs.GUIPolyMsg;
 import org.ros.message.lab6_msgs.GUIRectMsg;
 import org.ros.message.Challenge_msgs.GUIEllipseMessage;
 import org.ros.message.Challenge_msgs.GUIStringMessage;
+
+import Controller.Utility;
 import Navigation.PolygonObstacle;
 import org.ros.node.parameter.ParameterTree;
 
@@ -551,57 +553,59 @@ public class GrandChallengeMap implements NodeMain {
 	polyPub = node.newPublisher("gui/Poly", "lab6_msgs/GUIPolyMsg");
 
 	ParameterTree paramTree = node.newParameterTree();
-//	paramTree.getString(node.resolveName("~/mapFileName"));
-	// lol
-	String mapFileName = "/home/rss-student/RSS-I-group/Challenge/src/challenge_2012.txt";
-//	String mapFileName = "/home/rss-student/RSS-I-group/Challenge/src/construction_map_2012.txt";
-	System.out.println("filename = " + mapFileName);
-	//String filename = "/home/jbrooksh/my_sandbox/6.141/spring2012/priv/labs/Challenge/src/construction_map_2011.txt";
 
-    	try{
-	        Thread.sleep(2000);
+		try {
+			Thread.sleep(2000);
 
-	        // don't erase
-		//erasePub.publish(new GUIEraseMsg());
-		Thread.sleep(1000);
+			// don't erase
+			// erasePub.publish(new GUIEraseMsg());
+			Thread.sleep(1000);
 
-    		GrandChallengeMap gcm = GrandChallengeMap.parseFile(mapFileName);
-		publishRect(gcm.worldRect, false, Color.BLACK);
-		for(int i=0; i < gcm.constructionObjects.length; i++) {
-		    ConstructionObject b = gcm.constructionObjects[i];
-    			Point2D.Double pos = b.getPosition();
-    			System.out.println("ConstructionObject at: "+pos.getX()+", "+pos.getY());
-			Rectangle2D.Double r = new Rectangle2D.Double();
-			if ( b.getSize() == 2 ) {
-			    r = new Rectangle2D.Double(b.getPosition().x, b.getPosition().y, 0.05, 0.05);
-			} else { 
-			    r = new Rectangle2D.Double(b.getPosition().x, b.getPosition().y, 0.05, 0.1);
+			GrandChallengeMap gcm = Utility.getChallengeMap();
+			publishRect(gcm.worldRect, false, Color.BLACK);
+			for (int i = 0; i < gcm.constructionObjects.length; i++) {
+				ConstructionObject b = gcm.constructionObjects[i];
+				Point2D.Double pos = b.getPosition();
+				System.out.println("ConstructionObject at: " + pos.getX()
+						+ ", " + pos.getY());
+				Rectangle2D.Double r = new Rectangle2D.Double();
+				if (b.getSize() == 2) {
+					r = new Rectangle2D.Double(b.getPosition().x,
+							b.getPosition().y, 0.05, 0.05);
+				} else {
+					r = new Rectangle2D.Double(b.getPosition().x,
+							b.getPosition().y, 0.05, 0.1);
+				}
+				publishRect(r, true, b.getColor());
+				publishString(b.getPosition().x, b.getPosition().y,
+						Integer.toString(i));
 			}
-			publishRect(r, true, b.getColor());
-			publishString(b.getPosition().x, b.getPosition().y, Integer.toString(i));
-    		}
-    		for(Fiducial f : gcm.fiducials){
-    			Point2D.Double pos = f.getPosition();
-    			System.out.println("Fiducial at ("+f.getTopColor()+"/"+f.getBottomColor()+")at: "+pos.getX()+", "+pos.getY());
-			publishEllipse(f.getPosition().x+0.1, f.getPosition().y+0.1, f.getBottomSize()*4.0, 
-				       f.getBottomSize()*4.0, f.getBottomColor());
-			publishEllipse(f.getPosition().x, f.getPosition().y, f.getTopSize()*4.0, 
-				       f.getTopSize()*4.0, f.getTopColor());
-			
-    		}
-		for (PolygonObstacle obstacle : gcm.obstacles){
-		    publishPoly(obstacle, Color.BLUE, false, true);
+			for (Fiducial f : gcm.fiducials) {
+				Point2D.Double pos = f.getPosition();
+				System.out.println("Fiducial at (" + f.getTopColor() + "/"
+						+ f.getBottomColor() + ")at: " + pos.getX() + ", "
+						+ pos.getY());
+				publishEllipse(f.getPosition().x + 0.1,
+						f.getPosition().y + 0.1, f.getBottomSize() * 4.0,
+						f.getBottomSize() * 4.0, f.getBottomColor());
+				publishEllipse(f.getPosition().x, f.getPosition().y,
+						f.getTopSize() * 4.0, f.getTopSize() * 4.0,
+						f.getTopColor());
+
+			}
+			for (PolygonObstacle obstacle : gcm.obstacles) {
+				publishPoly(obstacle, Color.BLUE, false, true);
+			}
+			System.out.println("WorldRect: " + gcm.worldRect);
+			publishPoint(gcm.robotStart.x, gcm.robotStart.y, 0, Color.RED);
+			publishPoint(gcm.robotGoal.x, gcm.robotGoal.y, 0, Color.CYAN);
+			publishString(gcm.robotStart.x, gcm.robotStart.y, "S");
+			publishString(gcm.robotGoal.x, gcm.robotGoal.y, "G");
+		} catch (Exception e) {
+			System.err.println("FAILURE!!!!");
+			e.printStackTrace();
 		}
-    		System.out.println("WorldRect: "+gcm.worldRect);
-		publishPoint(gcm.robotStart.x, gcm.robotStart.y, 0, Color.RED);
-		publishPoint(gcm.robotGoal.x, gcm.robotGoal.y, 0, Color.CYAN);
-		publishString(gcm.robotStart.x, gcm.robotStart.y, "S");
-		publishString(gcm.robotGoal.x, gcm.robotGoal.y, "G");
-    	}catch(Exception e){
-    		System.err.println("FAILURE!!!!");
-    		e.printStackTrace();
-    	}
-    }
+	}
 
 	/**
 	 * Shutdown hook for ROS when called as stand-alone node

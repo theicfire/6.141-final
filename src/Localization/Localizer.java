@@ -27,7 +27,7 @@ public class Localizer {
 	Subscriber<OdometryMsg> odomSub;
 	Publisher<OdometryMsg> odomAdjustPub;
 	private boolean init = true;
-	
+	private boolean master;
 	/**
 	 * For testing
 	 */
@@ -41,11 +41,12 @@ public class Localizer {
 	 * @param node
 	 * @param master only one master localizer; synchronizes all the others
 	 */
-	public Localizer(Node node, boolean master) {
+	public Localizer(Node node, boolean isMaster) {
 		log = node.getLog();
 		lastRawPose = (new Utility()).new Pose(0, 0, 0);
 		lastRealPose = (new Utility()).new Pose(0, 0, 0);
 		curRawPose = (new Utility()).new Pose(0, 0, 0);
+		master = isMaster;
 		//this.totalTicks = new double[2];
 		//this.totalTicks[0] = this.totalTicks[1] = 0.0;
 		//this.odomXY = new double[2];
@@ -53,39 +54,47 @@ public class Localizer {
 
 		// the master adjusts the position and relays the information to everyone else
 		if (master) {
-		    odomSub = node.newSubscriber("rss/odometryToAdjust", "rss_msgs/OdometryMsg");
-		    odomAdjustPub = node.newPublisher("rss/odometry", "rss_msgs/OdometryMsg");
-		    odomSub.addMessageListener(new MessageListener<OdometryMsg>() {
-			      @Override
-			      public void onNewMessage(OdometryMsg message) {
-			    	  curRawPose = (new Utility()).new Pose(message.x, message.y, message.theta);
-			    	  if (init) {
-			    		  updatePosition(0.0, 0.0, 0.0);
-			    		  init = false;
-			    	  }
-			    	  OdometryMsg newOdomMsg = getPositionPose().getOdomMsg();
-			    	  odomAdjustPub.publish(newOdomMsg);
-			      }
-			    });
-		    
+			odomSub = node.newSubscriber("rss/odometryToAdjust",
+					"rss_msgs/OdometryMsg");
+			odomAdjustPub = node.newPublisher("rss/odometry",
+					"rss_msgs/OdometryMsg");
+			odomSub.addMessageListener(new MessageListener<OdometryMsg>() {
+				@Override
+				public void onNewMessage(OdometryMsg message) {
+					curRawPose = (new Utility()).new Pose(message.x, message.y,
+							message.theta);
+					if (init) {
+						updatePosition(0.0, 0.0, 0.0);
+						init = false;
+					}
+					OdometryMsg newOdomMsg = getPositionPose().getOdomMsg();
+					odomAdjustPub.publish(newOdomMsg);
+				}
+			});
 		} else {
 			odomSub = node.newSubscriber("rss/odometry", "rss_msgs/OdometryMsg");
-		    odomSub.addMessageListener(new MessageListener<OdometryMsg>() {
-			      @Override
-			      public void onNewMessage(OdometryMsg message) {
-//					  log.info("got odom message" + message.x + " " + message.y);
-			    	  curRawPose = (new Utility()).new Pose(message.x, message.y, message.theta);
-			      }
-			    });
+			odomSub.addMessageListener(new MessageListener<OdometryMsg>() {
+				@Override
+				public void onNewMessage(OdometryMsg message) {
+					// log.info("got odom message" + message.x + " " +
+					// message.y);
+					curRawPose = (new Utility()).new Pose(message.x, message.y,
+							message.theta);
+				}
+			});
 		}
-	    
 	}
 
 	public void updatePosition(double x, double y, double theta) {
 		updatePosition((new Utility()).new Pose(x, y, theta));
 	}
+	
 	// update this by getting the difference between your current position and getPosition()
 	public void updatePosition(Utility.Pose correctLocation) {
+		if (! master) {
+			throw new RuntimeException("non master node attempted to update Position");
+		}
+		log.info("updating position to" + correctLocation);
 //		log.info("Update position to " + correctLocation);
 		lastRawPose = (new Utility()).new Pose(curRawPose.getX(), curRawPose.getY(), curRawPose.getTheta());
 		lastRealPose = correctLocation;

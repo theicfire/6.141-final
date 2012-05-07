@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.ros.message.rss_msgs.OdometryMsg;
 
+import Challenge.GrandChallengeMap;
 import VisualServoSolution.HomographySrcDstPoint;
 import VisualServoSolution.Image;
 import VisualServoSolution.Image.Pixel;
@@ -53,6 +54,20 @@ public class Utility {
 		}
 	}
 
+	public class ConfidencePose extends Pose {
+		private double _confidence;
+		
+		public ConfidencePose(double x, double y, double theta, double confidence) {
+			super(x, y, theta);
+			_confidence = confidence;
+		}
+		
+		public double getConfidence() {
+			return _confidence;
+		}
+		
+	}
+	
 	public class Pose {
 		private double _x, _y, _theta;
 
@@ -235,5 +250,16 @@ public class Utility {
 
 		return matH2;
     }
+	
+	public static GrandChallengeMap getChallengeMap() {
+		GrandChallengeMap map = new GrandChallengeMap();
+		try {
+			map = GrandChallengeMap.parseFile("/home/rss-student/RSS-I-group/Challenge/src/challenge_test.txt");
+		} catch (Exception e) {
+			throw new RuntimeException(
+					"DIE DIE DIE DIE DIE DIE couldn't load map");
+		}
+		return map;
+	}
 	
 }

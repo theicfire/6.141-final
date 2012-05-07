@@ -31,9 +31,9 @@ public class Robot {
 	// SonarSensor sideSonars[4];
 	
 	private RobotState robotState;
-	Planner planner;
+	public Planner planner;
 	NavigationMain navigationMain;
-	Localizer odom;
+	public Localizer odom;
 	VisionMsgWrapper vision;
 	private boolean doneMoving;
 
@@ -124,9 +124,11 @@ public class Robot {
 	}
 
 	public void stopMoving() {
+		log.info("Stop all movement!!!");
 		BreakBeamMsg stop = new BreakBeamMsg();
 		stop.beamBroken = true;
 		stopPub.publish(stop);
+		navQueue.clear();
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
@@ -152,7 +154,7 @@ public class Robot {
 		driveToNextLocation(true);
 	}
 	
-	public void driveToNextLocation(boolean didStep) {
+	private void driveToNextLocation(boolean didStep) {
 		if (navQueue.size() > 0) {
 			// keep going to the next location in the queue until you are done with all the location points
 			Point2D.Double nextLoc = navQueue.removeFirst();

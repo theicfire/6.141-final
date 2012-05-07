@@ -254,19 +254,21 @@ public class RosWaypointDriver implements NodeMain {
 		}
 		
 		this.sendMotorMessage(0.0, 0.0);
+		log.info("DriveToPoint stopped");
 
-		log.info("DONE FINDING " + vert);
-		
-		// Say that you are done to the world
-		BreakBeamMsg doneMsg = new BreakBeamMsg();
-		doneMsg.beamBroken = true;
-		pubComplete.publish(doneMsg);
+		if (!forceStop) { // then you actually made it to the goal
+			log.info("DONE FINDING " + vert);
+			
+			// Say that you are done to the world
+			BreakBeamMsg doneMsg = new BreakBeamMsg();
+			doneMsg.beamBroken = true;
+			pubComplete.publish(doneMsg);
+		}
 		
 		start = vert;
 	}
 
 	public void stopMoving() {
-		// TODO Auto-generated method stub
 		this.sendMotorMessage(0, 0.0);
 	}
 

@@ -19,6 +19,7 @@ import org.ros.node.parameter.ParameterTree;
 
 import Controller.AngleController;
 import Controller.Utility;
+import Controller.Utility.Pose;
 import Grasping.Arm;
 import Planner.Planner;
 
@@ -42,9 +43,15 @@ public class StatePickingUpBlock extends RobotState {
 		// robot.arm.prepareToPickup();
 		
 		// update position of the odometry
-		// something like 
-		robot.odom.updatePosition((new Utility()).new Pose(robot.planner.getCurrentBlockPosition(),
+		// something like
+		// TODO
+		final double DIST_FROM_BLOCK_TO_ROBOT = .14;
+		Point2D.Double blockPose = robot.planner.getCurrentBlockPosition();
+		blockPose.x -= DIST_FROM_BLOCK_TO_ROBOT * Math.cos(robot.odom.getTheta());
+		blockPose.y -= DIST_FROM_BLOCK_TO_ROBOT * Math.sin(robot.odom.getTheta());
+		robot.odom.updatePosition((new Utility()).new Pose(blockPose,
 				robot.odom.getTheta()));
+		robot.planner.markCurrentBlockDone();
 
 		while (!done) {
 			switch (state) {
