@@ -33,7 +33,7 @@ public class VisibilityGraph {
 	}
 	
 	public Map<Point2D.Double,List<Point2D.Double>> getGraph() {
-		log.info("getting graph");
+//		log.info("getting graph");
 		PolygonObstacle[] configObstacles = cspace.getObstacles();
 		Map<Point2D.Double,List<Point2D.Double>> ret = new HashMap<Point2D.Double,List<Point2D.Double>>();
 		// TODO include start and end
@@ -55,7 +55,7 @@ public class VisibilityGraph {
 		
 		
 		ret.put(start, getReachablePoints(configObstacles, otherPoints, start, cworldRect));
-		log.info("put point " + start);
+//		log.info("put point " + start);
 		ret.put(goal, getReachablePoints(configObstacles, otherPoints, goal, cworldRect));
 		for (ConstructionObject block : blocks) {
 			ret.put(block.getPosition(), getReachablePoints(configObstacles, otherPoints, block.getPosition(), cworldRect));

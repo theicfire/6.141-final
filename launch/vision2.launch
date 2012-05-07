@@ -1,0 +1,11 @@
+<launch>
+  <include file="$(find Challenge)/launch/config.launch" />
+
+<!-- ****************************** video ****************************** -->
+  <node name="rep2" pkg="image_transport" type="republish" args="compressed in:=/gscam222/image_raw raw out:=/rss/video2" machine="workstation"/>
+  <node name="view2" pkg="image_view" type="image_view" args="image:=/rss/video2" machine="workstation" /> 
+  <node name="blobview2" pkg="image_view" type="image_view" args="image:=/rss/blobVideo2" machine="workstation" />
+  <node name="vid2" pkg="gscam222" type="gscam222" machine="netbook" />
+  <node name="vision2" pkg="rosjava_bootstrap" type="run.py" args="Challenge VisualServoSolution.VisionMain2" machine="workstation"></node>
+
+</launch>

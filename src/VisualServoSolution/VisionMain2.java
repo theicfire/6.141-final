@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
 import org.ros.message.lab5_msgs.GUIPointMsg;
+import org.ros.message.rss_msgs.VisionMsg;
 import org.ros.message.sensor_msgs.Image;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
@@ -70,8 +71,9 @@ public class VisionMain2 implements NodeMain {
 		// TODO Auto-generated method stub
 		vidPub = node.newPublisher("/rss/blobVideo2", "sensor_msgs/Image");
 
-		rawVidSub = node.newSubscriber("rss/video2", "sensor_msgs/Image");
+		Subscriber<org.ros.message.sensor_msgs.Image> rawVidSub = node.newSubscriber("rss/video2", "sensor_msgs/Image");
 		rawVidSub.addMessageListener(new InterpRawVid());
+		rawVidSub = node.newSubscriber("rss/video2", "sensor_msgs/Image");
 		
 		pointPub = node.newPublisher("gui/Point", "lab5_msgs/GUIPointMsg");
 		
@@ -81,10 +83,11 @@ public class VisionMain2 implements NodeMain {
 		cvStorage = opencv_core.cvCreateMemStorage(0);
 
 		// homography
-		String homographyData = "/home/rss-student/RSS-I-group/Challenge/calibration2.hom";
+		String homographyData = "/home/rss-student/RSS-I-group/Challenge/calibration2.txt";
 		ArrayList<HomographySrcDstPoint> homoPoints = HomographySrcDstPoint
-				.loadHomographyData(homographyData);
+				.loadHomographyDataTextFile(homographyData);
 		pixelToFloorH = Utility.computeHomography(homoPoints);
+	
 	}
 
 	public class InterpRawVid implements
@@ -93,37 +96,31 @@ public class VisionMain2 implements NodeMain {
 		boolean firstMessage = true;
 
 		@Override
-		public void onNewMessage(org.ros.message.sensor_msgs.Image src) {
-			// ANTHONY CODE GOES HERE
+		synchronized public void onNewMessage(org.ros.message.sensor_msgs.Image src) {
+			log.info("VisionMain2.java: gotmsg," + src.width + " " + src.height);
 			if (firstMessage) {
+				log.info("VisionMain2.java: firstmsg," + src.width + " " + src.height);
 				// image processing initialization
-				imgHsv = IplImage.create((int) src.width, (int) src.height, 1,
+				int depth = 8;
+				imgHsv = IplImage.create((int) src.width, (int) src.height, depth,
 						3);
-				// imgThreshold = opencv_core.cvCreateImage(
-				// opencv_core.cvGetSize(srcImg), 8, 1);
+//				 imgThreshold = opencv_core.cvCreateImage(
+//				 opencv_core.cvGetSize(srcImg), 8, 1);
 				imgThreshold = IplImage.create((int) src.width,
-						(int) src.height, 1, 1);
+						(int) src.height, depth, 1);
 				imgDetectedEdges = IplImage.create((int) src.width,
-						(int) src.height, 1, 1);
+						(int) src.height, depth, 1);
 				imgContours = IplImage.create((int) src.width,
-						(int) src.height, 1, 1);
+						(int) src.height, depth, 1);
 				firstMessage = false;
 			}
 			processImage(src);
 		}
 	}
 
-	void processImage(Image src) {
+	synchronized void processImage(Image src) {
 		// TODO Auto-generated method stub
 		IplImage rgbIpl = Utility.rgbImgMsgToRgbIplImg(src, log);
-
-		
-		log.info("");
-		log.info("");
-		log.info("");
-		log.info("");
-		log.info("");
-		log.info(rgbIpl);
 		
 		// compute HSV
 		opencv_imgproc.cvCvtColor(rgbIpl, imgHsv, opencv_imgproc.CV_BGR2HSV);
@@ -172,35 +169,41 @@ public class VisionMain2 implements NodeMain {
 
 		ArrayList<Point> bestContour = VisualLocalization.findBestContour(
 				contourList, 60, .75);
-		ArrayList<Point2D.Double> interpolated = VisualLocalization
-				.getInterpolatedPointsFromContour(bestContour, 1);
-		CvMat res = VisualLocalization.getFloorPointsLocalSpace(interpolated,
-				this.pixelToFloorH);
+		if (bestContour != null) {
+			ArrayList<Point2D.Double> interpolated = VisualLocalization
+					.getInterpolatedPointsFromContour(bestContour, 1);
+			log.info("visionmain2.java: numpoints, " + interpolated.size());
+			CvMat res = VisualLocalization.getFloorPointsLocalSpace(interpolated,
+					this.pixelToFloorH);
 
-		Pose bestGuess = odom.getPositionPose();
-		int numInterpolated = interpolated.size();
-		ArrayList<Point2D.Double> visionPoints =
-				new ArrayList<Point2D.Double>(numInterpolated);
-		for (int i = 0; i < numInterpolated; ++i) {
-			double x = res.get(0,i);
-			double y = res.get(1,i);
-			double invZ = 1.0/res.get(2,i);
-			visionPoints.add(new Point2D.Double(x*invZ,y*invZ));
-			// plot these points on the GUI
+			Pose bestGuess = odom.getPositionPose();
+			int numInterpolated = interpolated.size();
+			ArrayList<Point2D.Double> visionPoints =
+					new ArrayList<Point2D.Double>(numInterpolated);
+			for (int i = 0; i < numInterpolated; ++i) {
+				double x = res.get(0,i);
+				double y = res.get(1,i);
+				double invZ = 1.0/res.get(2,i);
+				visionPoints.add(new Point2D.Double(x*invZ,y*invZ));
+				// plot these points on the GUI
 
-			double cos = Math.cos(bestGuess.getTheta());
-			double sin = Math.sin(bestGuess.getTheta());
-			GUIPointMsg pm = new GUIPointMsg();
-			pm.x = x*cos - y*sin + bestGuess.getX();
-			pm.y = sin*x + y* cos + bestGuess.getY();
-			pointPub.publish(pm);
+				double cos = Math.cos(bestGuess.getTheta());
+				double sin = Math.sin(bestGuess.getTheta());
+				GUIPointMsg pm = new GUIPointMsg();
+				pm.x = x*cos - y*sin + bestGuess.getX();
+				pm.y = sin*x + y* cos + bestGuess.getY();
+				pointPub.publish(pm);
+			}
+
+			ConfidencePose offset = ICP.computeOffset(bestGuess, ICP.discretizeMap(map.obstacles), visionPoints, log, null);
+			// TODO update via ICP happens here
+			log.info("confidence " + offset.getConfidence() + " offset "
+					+ offset.getX() + ", " + offset.getY() + ", theta "
+					+ offset.getTheta());
+		} else {
+			log.info("VisionMain2.java: no best contour");
 		}
-
-		ConfidencePose offset = ICP.computeOffset(bestGuess, ICP.discretizeMap(map.obstacles), visionPoints, log, null);
-		// TODO update via ICP happens here
-		log.info("confidence " + offset.getConfidence() + " offset "
-				+ offset.getX() + ", " + offset.getY() + ", theta "
-				+ offset.getTheta());
+		
 	}
 
 	@Override

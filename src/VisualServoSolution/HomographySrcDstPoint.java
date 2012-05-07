@@ -1,8 +1,10 @@
 package VisualServoSolution;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -61,4 +63,41 @@ public class HomographySrcDstPoint implements java.io.Serializable {
 		}
 		return r;
 	}
+
+	public static ArrayList<HomographySrcDstPoint> loadHomographyDataTextFile(
+			String filename) {
+		ArrayList<HomographySrcDstPoint> r = new ArrayList<HomographySrcDstPoint>();
+
+		String line;
+		FileReader fr = null;
+		try {
+			fr = new FileReader(filename);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		BufferedReader br = new BufferedReader(fr);
+
+		try {
+			while ((line = br.readLine()) != null) {
+				String[] theline = line.split("\t");
+				double src_x = Double.parseDouble(theline[0]);
+				double src_y = Double.parseDouble(theline[1]);
+				double dst_x = Double.parseDouble(theline[2]);
+				double dst_y = Double.parseDouble(theline[3]);
+				HomographySrcDstPoint p = new HomographySrcDstPoint(src_x, src_y,
+						dst_x, dst_y);
+				r.add(p);
+			}
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return r;
+	}
+
 }

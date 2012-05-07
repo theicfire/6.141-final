@@ -101,12 +101,10 @@ public class BlobTracking {
 			if (countExceptions == 0) {
 				log.info("OH NO; EXCEPTION!!!");
 				log.info(e.getStackTrace());
-				log.info("labeling; sizes are " + threshIm.length + " " + connIm.length);
-				log.info("and width/height are " + width + " " + height);
+//				log.info("labeling; sizes are " + threshIm.length + " " + connIm.length);
+//				log.info("and width/height are " + width + " " + height);
 				countExceptions += 1;
-			}
-			
-			
+			}						
 		}
 		// (Solution)
 		int colorMax = connComp.getColorMax(); // (Solution)
