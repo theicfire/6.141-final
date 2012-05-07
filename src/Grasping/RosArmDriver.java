@@ -35,6 +35,7 @@ import org.ros.message.rss_msgs.ArmMsg;
 //min 550
 
 public class RosArmDriver {
+	private static final int TIME_BETWEEN_ARM_COMMANDS = 50;
 	private final Publisher<ArmMsg> armPub;
 	private Subscriber<ArmMsg> armSub;
 
@@ -74,7 +75,7 @@ public class RosArmDriver {
 //			log.info("driver: moving arm");
 			sendArmPWM(toArm);
 			try {
-				Thread.sleep(75);
+				Thread.sleep(TIME_BETWEEN_ARM_COMMANDS);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

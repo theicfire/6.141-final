@@ -10,6 +10,7 @@ import Challenge.ConstructionObject;
 import Challenge.Fiducial;
 import Challenge.GrandChallengeMap;
 import Controller.Utility;
+import Localization.ICP;
 import Localization.Localizer;
 import Navigation.NavigationMain;
 import Navigation.PolygonMap;
@@ -102,5 +103,5 @@ public class Planner {
 //		blocks.remove(currentBlock);
 		counter = (counter + 1) % blocks.size();
 	}
-
+	
 }

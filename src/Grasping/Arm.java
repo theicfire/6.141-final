@@ -9,6 +9,7 @@ import Grasping.ArmJoint;
 
 public class Arm implements ArmGymnastics {
 
+	private static final int ARM_PWM_INCREMENT = 10;
 	private List<ArmJoint> joints;
 	private ArmJoint shoulder;
 	private ArmJoint elbow;
@@ -115,7 +116,7 @@ public class Arm implements ArmGymnastics {
 	 * Return true if done; otherwise set new pwm and return false
 	 */
 	public boolean discreteMoveJoint(ArmJoint joint) {
-		int delta = 20;
+		int delta = ARM_PWM_INCREMENT;
 		int diffPWM = joint.getDesiredPWM() - joint.getCurPWM();
 //		log.info("desired " + joint.getDesiredPWM() + " current " + joint.getCurPWM());
 //		log.info("diff is " + diffPWM);
