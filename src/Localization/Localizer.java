@@ -102,6 +102,15 @@ public class Localizer {
 //		this.odometryOffset.setY(odomXY[1] - correctLocation.getY());
 //		this.odometryOffset.setTheta(odomTheta - correctLocation.getTheta());
 	}
+
+	public void updatePosition(Utility.Pose correctLocation, int confidence) {
+        confidence = Math.pow(confidence, 2) // make the curve of accepting more dramatic
+        // make the lastRealPose a linear combination of lastRawPose and correctLocation, depending on confidence
+        correctLocation.x = correctLocation.getX() * confidence + curRawPose.getX() * (1 - confidence)
+        correctLocation.y = correctLocation.getY() * confidence + curRawPose.getY() * (1 - confidence)
+        correctLocation.theta = correctLocation.getTheta() * confidence + curRawPose.getTheta() * (1 - confidence)
+        updatePosition(correctLocation)
+	}
 	
 //	public double getTicksLeft() {
 //		return totalTicks[0];
