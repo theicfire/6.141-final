@@ -45,10 +45,10 @@ public class StatePickingUpBlock extends RobotState {
 		// update position of the odometry
 		// something like
 		// TODO
-		final double DIST_FROM_BLOCK_TO_ROBOT = .14;
+		final double DIST_FROM_BLOCK_TO_ROBOT = .28;
 		Point2D.Double blockPose = robot.planner.getCurrentBlockPosition();
-		blockPose.x -= DIST_FROM_BLOCK_TO_ROBOT * Math.cos(robot.odom.getTheta());
-		blockPose.y -= DIST_FROM_BLOCK_TO_ROBOT * Math.sin(robot.odom.getTheta());
+//		blockPose.x -= DIST_FROM_BLOCK_TO_ROBOT * Math.cos(robot.odom.getTheta());
+//		blockPose.y -= DIST_FROM_BLOCK_TO_ROBOT * Math.sin(robot.odom.getTheta());
 		robot.odom.updatePosition((new Utility()).new Pose(blockPose,
 				robot.odom.getTheta()));
 		robot.planner.markCurrentBlockDone();
@@ -78,7 +78,7 @@ public class StatePickingUpBlock extends RobotState {
 					done = true;
 				} else if (robot.vision.canSeeBlock()) {
 					robot.log.info("see block - lowering arm");
-					Utility.sleepFor5Seconds();
+//					Utility.sleepFor5Seconds();
 					robot.arm.openGripper();
 					robot.armDriver.doMovement(robot.arm);
 					robot.arm.lowerArm();

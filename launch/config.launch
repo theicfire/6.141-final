@@ -9,8 +9,8 @@
 	   ros-package-path="/home/rss-student/RSS-I-group:/home/rss-student/ros:/opt/ros/electric/stacks:/home/rss-student/spring2012/priv/labs_ros"> 
      <env name="ROS_MASTER_URI" value="http://netbook:11311" />
      <env name="ROS_HOSTNAME" value="netbook" />		     
-     <env name="GSCAM_CONFIG" value="'v4l2src device=/dev/video2 ! video/x-raw-rgb, width=160, height=120 ! ffmpegcolorspace'"/> 
-     <env name="GSCAM222_CONFIG" value="'v4l2src device=/dev/video1 ! video/x-raw-rgb, width=320, height=240 ! ffmpegcolorspace'"/>      
+     <env name="GSCAM_CONFIG" value="'v4l2src device=/dev/video1 ! video/x-raw-rgb, width=160, height=120 ! ffmpegcolorspace'"/> 
+     <env name="GSCAM222_CONFIG" value="'v4l2src device=/dev/video0 ! video/x-raw-rgb, width=320, height=240 ! ffmpegcolorspace'"/>      
      <env name="DISPLAY" value=":0" />
   </machine>
 </launch>

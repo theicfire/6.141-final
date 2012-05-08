@@ -1,6 +1,7 @@
 package VisualServoSolution;
 
 import java.awt.Point;
+import java.sql.Blob;
 import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
@@ -203,8 +204,9 @@ public class BlobTracking2 {
 			targetDetected = false; // (Solution)
 		} // (Solution)
 	} // (Solution)
-		// (Solution)
-		// (Solution)
+
+	// (Solution)
+	// (Solution)
 
 	/**
 	 * //(Solution)
@@ -269,7 +271,8 @@ public class BlobTracking2 {
 		focalPlaneDistance * targetRadius / Math.sqrt(targetArea / Math.PI); // (Solution)
 		targetBearing = Math.atan2(deltaX, focalPlaneDistance); // (Solution)
 	} // (Solution)
-		// (Solution)
+
+	// (Solution)
 
 	/**
 	 * //(Solution)
@@ -293,7 +296,8 @@ public class BlobTracking2 {
 					Math.min(translationVelocityMax, // (Solution)
 							translationError * translationVelocityGain)); // (Solution)
 	} // (Solution)
-		// (Solution)
+
+	// (Solution)
 
 	/**
 	 * //(Solution)
@@ -316,7 +320,8 @@ public class BlobTracking2 {
 					Math.min(rotationVelocityMax, // (Solution)
 							-rotationError * rotationVelocityGain)); // (Solution)
 	} // (Solution)
-		// (Solution)
+
+	// (Solution)
 
 	/**
 	 * <p>
@@ -367,7 +372,8 @@ public class BlobTracking2 {
 			} // (Solution)
 		} // (Solution)
 	} // (Solution)
-		// (Solution)
+
+	// (Solution)
 
 	/**
 	 * //(Solution)
@@ -404,9 +410,9 @@ public class BlobTracking2 {
 				if (hdist > 0.5) { // (Solution)
 					hdist = 1.0 - hdist; // (Solution)
 				} // (Solution)
-					// (Solution)
-					// classify pixel based on saturation level (Solution)
-					// and hue distance (Solution)
+				// (Solution)
+				// classify pixel based on saturation level (Solution)
+				// and hue distance (Solution)
 				if (pix.getSaturation() > saturationLevel
 						&& hdist < hueThreshold) { // (Solution)
 					mask[maskIndex++] = 255; // (Solution)
@@ -415,35 +421,38 @@ public class BlobTracking2 {
 				} // (Solution)
 			} // (Solution)
 		} // (Solution)
-			// (Solution)
-			// avg_h /= width * height; // (Solution)
-			// avg_s /= width * height; // (Solution)
-			// System.err.println("Total Avgerage Hue, Sat: "+avg_h+" "+avg_s);
-			// // (Solution)
+		// (Solution)
+		// avg_h /= width * height; // (Solution)
+		// avg_s /= width * height; // (Solution)
+		// System.err.println("Total Avgerage Hue, Sat: "+avg_h+" "+avg_s);
+		// // (Solution)
 	} // (Solution)
 
-	/**
-	 * <p>
-	 * Segment out a blob from the src image (if a good candidate exists).
-	 * </p>
-	 * 
-	 * <p>
-	 * <code>dest</code> is a packed RGB image for a java image drawing routine.
-	 * If it's not null, the blob is highlighted.
-	 * </p>
-	 * 
-	 * @param src
-	 *            the source RGB image, not packed
-	 * @param dest
-	 *            the destination RGB image, packed, may be null
-	 */
-	synchronized public void apply(Image src, Image dest) {
-		// for (int i = 0; i < 20; i++) {
-		// for (int j = 0; j < 20; j++) {
-		// dest.setPixel(i,j,new Image.Pixel(255,0,0));
-		// }
-		// }
+	int blueLower = 100;
+	int blueUpper = 150;
+	int blueSatLower = 150; // 160
+	int blueValLower = 15; // 30
 
+	int greenLower = 50;
+	int greenUpper = 80;
+	int greenSatLower = 160;
+	int greenValLower = 40;
+
+	int redLoLower = 0;
+	int redLoUpper = 10;
+	int redLoSatLower = 160;
+	int redLoValLower = 75;
+	int redHiLower = 175;
+	int redHiUpper = 180;
+	int redHiSatLower = 160;
+	int redHiValLower = 75;
+
+	int yellowLower = 22;
+	int yellowUpper = 35;
+	int yellowSatLower = 170;
+	int yellowValLower = 83;
+
+	synchronized public void apply(Image src, Image dest) {
 		stepTiming(); // monitors the frame rate
 
 		// Begin Student Code
@@ -453,104 +462,43 @@ public class BlobTracking2 {
 		opencv_imgproc.cvCvtColor(rgbIpl, imgHSV, opencv_imgproc.CV_RGB2HSV);
 		opencv_imgproc.cvSmooth(imgHSV, imgHSV, opencv_imgproc.CV_GAUSSIAN, 3);
 
-		int blueLower = 100;
-		int blueUpper = 150;
-		int blueSatLower = 150; // 160
-		int blueValLower = 15; // 30
-
-		int greenLower = 50;
-		int greenUpper = 80;
-		int greenSatLower = 160;
-		int greenValLower = 40;
-
-		int redLoLower = 0;
-		int redLoUpper = 10;
-		int redLoSatLower = 160;
-		int redLoValLower = 75;
-		int redHiLower = 175;
-		int redHiUpper = 180;
-		int redHiSatLower = 160;
-		int redHiValLower = 75;
-
-		int yellowLower = 22;
-		int yellowUpper = 35;
-		int yellowSatLower = 170;
-		int yellowValLower = 83;
-
 		Blob pickedBlob = null;
-		// if (lastBlob != null) {
-		// switch (lastBlob.color) {
-		//
-		// case BLUE:
-		// ArrayList<Blob> blobListBlue = this.getBlobList(
-		// imgBlobMaskBlue,Blob.BlobColor.BLUE,
-		// MIN_BLOB_AREA, MAX_BLOB_AREA,
-		// LOW_THRESHOLD, RATIO, KERNEL_SIZE);
-		// if (blobListBlue.size() > 0) {
-		// // pick the blob that is closest to the last blob
-		// double closeEnough = 300;
-		// double closestDistSqr = Double.POSITIVE_INFINITY;
-		// for (Blob blob: blobListBlue) {
-		// if (blob.color == lastBlob.color) {
-		// double deltaX = lastBlob.px_x - blob.px_x;
-		// double deltaY = lastBlob.px_y - blob.px_y;
-		// double distSqr = deltaX*deltaX + deltaY*deltaY;
-		// if (distSqr < closeEnough && distSqr < closestDistSqr) {
-		// // log.info("distSqr: " + distSqr);
-		// pickedBlob = blob;
-		// closestDistSqr = distSqr;
-		// }
-		// }
-		// }
-		//
-		// if (pickedBlob == null) {
-		// pickedBlob = blobList.get(0);
-		// }
-		// } else {
-		// // no blue blobs, pick new color
-		// }
-		//
-		//
-		//
-		//
-		//
-		// break;
-		//
-		//
-		// }
-		//
-		// }
+		if (lastBlob == null) {
+			pickedBlob = pickAnyBlobExcept(null);
+		} else {
+			pickedBlob = pickBlobClosestToLast(lastBlob.color);
+			if (pickedBlob == null) {
+				pickedBlob = pickAnyBlobExcept(lastBlob.color);
+			}
+		}
 
-		// ImageAnalyzer.getBlobs(imgHSV,
-		// blueLower,
-		// blueUpper,
-		// blueSatLower,
-		// blueValLower,
-		// imgBlobMaskBlue);
-		// ImageAnalyzer.getBlobs(imgHSV,
-		// greenLower,
-		// greenUpper,
-		// greenSatLower,
-		// greenValLower,
-		// imgBlobMaskGreen);
-		ImageAnalyzer.getBlobs(imgHSV, redLoLower, redLoUpper, redLoSatLower,
-				redLoValLower, imgBlobMaskRedLo);
-		ImageAnalyzer.getBlobs(imgHSV, redHiLower, redHiUpper, redHiSatLower,
-				redHiValLower, imgBlobMaskRed);
-		// ImageAnalyzer.getBlobs(imgHSV,
-		// yellowLower,
-		// yellowUpper,
-		// yellowSatLower,
-		// yellowValLower,
-		// imgBlobMaskYellow);
-		// opencv_core.cvSet(rgbIpl,opencv_core.cvScalar(255,255,0,0),imgBlobMaskBlue);
-		// opencv_core.cvSet(rgbIpl,opencv_core.cvScalar(255,0,0,0),imgBlobMaskGreen);
-		opencv_core
-				.cvOr(imgBlobMaskRedLo, imgBlobMaskRed, imgBlobMaskRed, null);
-		// opencv_core.cvSet(rgbIpl,opencv_core.cvScalar(0,255,0,0),imgBlobMaskRedLo);
-		opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(0, 255, 0, 0),
-				imgBlobMaskRed);
-		// opencv_core.cvSet(rgbIpl,opencv_core.cvScalar(0,255,255,0),imgBlobMaskYellow);
+		if (true) {
+			// BLUE
+			ImageAnalyzer.getBlobs(imgHSV, blueLower, blueUpper, blueSatLower,
+					blueValLower, imgBlobMaskBlue);
+			// GREEN
+			ImageAnalyzer.getBlobs(imgHSV, greenLower, greenUpper,
+					greenSatLower, greenValLower, imgBlobMaskGreen);
+			// RED
+			ImageAnalyzer.getBlobs(imgHSV, redLoLower, redLoUpper,
+					redLoSatLower, redLoValLower, imgBlobMaskRedLo);
+			ImageAnalyzer.getBlobs(imgHSV, redHiLower, redHiUpper,
+					redHiSatLower, redHiValLower, imgBlobMaskRed);
+			opencv_core.cvOr(imgBlobMaskRedLo, imgBlobMaskRed, imgBlobMaskRed,
+					null);
+			// YELLOW
+			ImageAnalyzer.getBlobs(imgHSV, yellowLower, yellowUpper,
+					yellowSatLower, yellowValLower, imgBlobMaskYellow);
+
+			opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(255, 255, 0, 0),
+					imgBlobMaskBlue);
+			opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(255, 0, 0, 0),
+					imgBlobMaskGreen);
+			opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(0, 255, 0, 0),
+					imgBlobMaskRed);
+			opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(0, 255, 255, 0),
+					imgBlobMaskYellow);
+		}
 		// log.info("~~~~~~~~~~~~~~~~~here");
 		Utility.copyFromRgbIplImgToRgbImg(rgbIpl, dest, log);
 
@@ -564,9 +512,9 @@ public class BlobTracking2 {
 		// imgBlobMaskGreen,Blob.BlobColor.GREEN,
 		// MIN_BLOB_AREA, MAX_BLOB_AREA,
 		// LOW_THRESHOLD, RATIO, KERNEL_SIZE);
-		ArrayList<Blob> blobList = this.getBlobList(imgBlobMaskRed,
-				Blob.BlobColor.RED, MIN_BLOB_AREA, MAX_BLOB_AREA,
-				LOW_THRESHOLD, RATIO, KERNEL_SIZE);
+//		ArrayList<Blob> blobList = this.getBlobList(imgBlobMaskRed,
+//				Blob.BlobColor.RED, MIN_BLOB_AREA, MAX_BLOB_AREA,
+//				LOW_THRESHOLD, RATIO, KERNEL_SIZE);
 		// ArrayList<Blob> blobListYellow = this.getBlobList(
 		// imgBlobMaskYellow,Blob.BlobColor.YELLOW,
 		// MIN_BLOB_AREA, MAX_BLOB_AREA,
@@ -574,34 +522,34 @@ public class BlobTracking2 {
 
 		// log.info("numBlobs: " + blobList.size());
 
-		if (blobList.size() > 0) {
-			if (lastBlob != null) {
-				// pick the blob that is closest to the last blob
-				int closeEnough = 300;
-				int closestDistSqr = Integer.MAX_VALUE;
-				for (Blob blob : blobList) {
-					if (blob.color == lastBlob.color) {
-						int deltaX = lastBlob.px_x - blob.px_x;
-						int deltaY = lastBlob.px_y - blob.px_y;
-						int distSqr = deltaX * deltaX + deltaY * deltaY;
-						if (distSqr < closeEnough && distSqr < closestDistSqr) {
-							// log.info("distSqr: " + distSqr);
-							pickedBlob = blob;
-							closestDistSqr = distSqr;
-						}
-					}
-				}
-			}
-
-			if (pickedBlob == null) {
-				// experimental - TODO - may stick too closely to a blob
-				// if (lastBlob != null) {
-				// pickedBlob = lastBlob;
-				// } else {
-				pickedBlob = blobList.get(0);
-				// }
-			}
-		}
+//		if (blobList.size() > 0) {
+//			if (lastBlob != null) {
+//				// pick the blob that is closest to the last blob
+//				int closeEnough = 300;
+//				int closestDistSqr = Integer.MAX_VALUE;
+//				for (Blob blob : blobList) {
+//					if (blob.color == lastBlob.color) {
+//						int deltaX = lastBlob.px_x - blob.px_x;
+//						int deltaY = lastBlob.px_y - blob.px_y;
+//						int distSqr = deltaX * deltaX + deltaY * deltaY;
+//						if (distSqr < closeEnough && distSqr < closestDistSqr) {
+//							// log.info("distSqr: " + distSqr);
+//							pickedBlob = blob;
+//							closestDistSqr = distSqr;
+//						}
+//					}
+//				}
+//			}
+//
+//			if (pickedBlob == null) {
+//				// experimental - TODO - may stick too closely to a blob
+//				// if (lastBlob != null) {
+//				// pickedBlob = lastBlob;
+//				// } else {
+//				pickedBlob = blobList.get(0);
+//				// }
+//			}
+//		}
 
 		lastBlob = pickedBlob;
 
@@ -636,49 +584,17 @@ public class BlobTracking2 {
 			translationVelocityCommand = 0.0;
 			rotationVelocityCommand = 0.0;
 		}
-
-		// averageRGB(src); // (Solution)
-		// averageHSB(src); // (Solution)
-		// if (useGaussianBlur) // (Solution)
-		// GaussianBlur.apply(src.toArray(), src.toArray(), width, height); //
-		// (Solution)
-		// blobPixel(src, blobPixelMask); //(Solution)
-		// blobPresent(blobPixelMask, imageConnected, blobMask); //(Solution)
-		// if (targetDetected) { // (Solution)
-		// blobFix(); // (Solution)
-		// computeTranslationVelocityCommand(); // (Solution)
-		// computeRotationVelocityCommand(); // (Solution)
-		// //XXX System.err.println("Bearing (Deg): " +
-		// (targetBearing*180.0/Math.PI)); // (Solution)
-		// //XXX System.err.println("Range (M): " + targetRange); // (Solution)
-		// } else { // (Solution)
-		// //XXX System.err.println("no target"); // (Solution)
-		// translationVelocityCommand = 0.0; // (Solution)
-		// rotationVelocityCommand = 0.0; // (Solution)
-		// } // (Solution)
-
-		// (Solution)
-		// XXX System.err.println("Tracking Velocity: " + // (Solution)
-		// XXX translationVelocityCommand + "m/s, " + // (Solution)
-		// XXX rotationVelocityCommand + "rad/s"); // (Solution)
-		// For a start, just copy src to dest. // (Solution)
-		// if (dest != null) {
-		// for (int y = 0; y < height; y++) {
-		// for (int x = 0; x < width; x++) {
-		// Pixel pix = src.getPixel(x, y);
-		// dest.setPixel(x, y, pix);
-		// }
-		// }
-		// // Histogram.getHistogram(src, dest, true); // (Solution)
-		// // markBlob(src, dest); // (Solution)
-		// } // (Solution)
 		// End Student Code
 
 	}
 
-	private static Blob pickClosestBlobToLastBlob(Blob lastBlob,
-			ArrayList<Blob> blobList) {
-		// int closeEnough = 300;
+	Blob pickBlobClosestToLast(Blob.BlobColor blobColor) {
+		ArrayList<Blob> blobList = this.getBlobList(blobColor, MIN_BLOB_AREA,
+				MAX_BLOB_AREA, LOW_THRESHOLD, RATIO, KERNEL_SIZE);
+		if (blobList.size() <= 0) {
+			return null;
+		}
+
 		int closestDistSqr = Integer.MAX_VALUE;
 		Blob pickedBlob = null;
 		for (Blob blob : blobList) {
@@ -693,10 +609,80 @@ public class BlobTracking2 {
 		return pickedBlob;
 	}
 
-	ArrayList<Blob> getBlobList(IplImage imgMask, Blob.BlobColor blobColor,
-			int minBlobArea, int maxBlobArea, int lowThreshold, int ratio,
-			int kernel_size) {
+	private Blob pickAnyBlobExcept(Blob.BlobColor exceptColor) {
+		ArrayList<Blob> blobList;
+
+		// BLUE
+		if (exceptColor != Blob.BlobColor.BLUE) {
+			blobList = this.getBlobList(Blob.BlobColor.BLUE, MIN_BLOB_AREA,
+					MAX_BLOB_AREA, LOW_THRESHOLD, RATIO, KERNEL_SIZE);
+			if (blobList.size() > 0) {
+				return blobList.get(0);
+			}
+		}
+
+		// GREEN
+		if (exceptColor != Blob.BlobColor.GREEN) {
+			blobList = this.getBlobList(Blob.BlobColor.GREEN, MIN_BLOB_AREA,
+					MAX_BLOB_AREA, LOW_THRESHOLD, RATIO, KERNEL_SIZE);
+			if (blobList.size() > 0) {
+				return blobList.get(0);
+			}
+		}
+
+		// RED
+		if (exceptColor != Blob.BlobColor.RED) {
+			blobList = this.getBlobList(Blob.BlobColor.RED, MIN_BLOB_AREA,
+					MAX_BLOB_AREA, LOW_THRESHOLD, RATIO, KERNEL_SIZE);
+			if (blobList.size() > 0) {
+				return blobList.get(0);
+			}
+		}
+
+		// YELLOW
+		if (exceptColor != Blob.BlobColor.YELLOW) {
+			blobList = this.getBlobList(Blob.BlobColor.YELLOW, MIN_BLOB_AREA,
+					MAX_BLOB_AREA, LOW_THRESHOLD, RATIO, KERNEL_SIZE);
+			if (blobList.size() > 0) {
+				return blobList.get(0);
+			}
+		}
+
+		return null;
+	}
+
+	ArrayList<Blob> getBlobList(Blob.BlobColor blobColor, int minBlobArea,
+			int maxBlobArea, int lowThreshold, int ratio, int kernel_size) {
 		ArrayList<Blob> blobList = new ArrayList<Blob>();
+		IplImage imgMask = null;
+
+		// compute the mask
+		switch (blobColor) {
+		case BLUE:
+			ImageAnalyzer.getBlobs(imgHSV, blueLower, blueUpper, blueSatLower,
+					blueValLower, imgBlobMaskBlue);
+			imgMask = imgBlobMaskBlue;
+			break;
+		case GREEN:
+			ImageAnalyzer.getBlobs(imgHSV, greenLower, greenUpper,
+					greenSatLower, greenValLower, imgBlobMaskGreen);
+			imgMask = imgBlobMaskGreen;
+			break;
+		case RED:
+			ImageAnalyzer.getBlobs(imgHSV, redLoLower, redLoUpper,
+					redLoSatLower, redLoValLower, imgBlobMaskRedLo);
+			ImageAnalyzer.getBlobs(imgHSV, redHiLower, redHiUpper,
+					redHiSatLower, redHiValLower, imgBlobMaskRed);
+			opencv_core.cvOr(imgBlobMaskRedLo, imgBlobMaskRed, imgBlobMaskRed,
+					null);
+			imgMask = imgBlobMaskRed;
+			break;
+		case YELLOW:
+			ImageAnalyzer.getBlobs(imgHSV, yellowLower, yellowUpper,
+					yellowSatLower, yellowValLower, imgBlobMaskYellow);
+			imgMask = imgBlobMaskYellow;
+			break;
+		}
 
 		ArrayList<Utility.Pair<ArrayList<Point>, Double>> blobContours = discretizeBlobs(
 				imgMask, minBlobArea, maxBlobArea, lowThreshold, ratio,
@@ -719,10 +705,28 @@ public class BlobTracking2 {
 		return blobList;
 	}
 
+	private static Blob pickClosestBlobToLastBlob(Blob lastBlob,
+			ArrayList<Blob> blobList) {
+		// int closeEnough = 300;
+		int closestDistSqr = Integer.MAX_VALUE;
+		Blob pickedBlob = null;
+		for (Blob blob : blobList) {
+			int deltaX = lastBlob.px_x - blob.px_x;
+			int deltaY = lastBlob.px_y - blob.px_y;
+			int distSqr = deltaX * deltaX + deltaY * deltaY;
+			if (distSqr < closestDistSqr) {
+				pickedBlob = blob;
+				closestDistSqr = distSqr;
+			}
+		}
+		return pickedBlob;
+	}
+
 	ArrayList<Utility.Pair<ArrayList<Point>, Double>> discretizeBlobs(
-			IplImage imgMask, int minBlobArea, int maxBlobArea,
-			int lowThreshold, int ratio, int kernel_size) {
-		opencv_imgproc.cvCanny(imgMask, imgMask, lowThreshold, lowThreshold
+			IplImage imgMask, IplImage imgCanny, int minBlobArea,
+			int maxBlobArea, int lowThreshold, int ratio, int kernel_size) {
+
+		opencv_imgproc.cvCanny(imgMask, imgCanny, lowThreshold, lowThreshold
 				* ratio, kernel_size);
 		// opencv_imgproc.cvDilate(imgMask,
 		// imgMask, null, 1);
@@ -774,3 +778,29 @@ public class BlobTracking2 {
 	}
 
 }
+
+// discard
+//
+// void computeImgMask(Blob.BlobColor maskColor) {
+// switch (color) {
+// case BLUE:
+// ImageAnalyzer.getBlobs(imgHSV, blueLower, blueUpper, blueSatLower,
+// blueValLower, imgBlobMaskBlue);
+// break;
+// case GREEN:
+// ImageAnalyzer.getBlobs(imgHSV, greenLower, greenUpper, greenSatLower,
+// greenValLower, imgBlobMaskGreen);
+// break;
+// case RED:
+// ImageAnalyzer.getBlobs(imgHSV, redLoLower, redLoUpper, redLoSatLower,
+// redLoValLower, imgBlobMaskRedLo);
+// ImageAnalyzer.getBlobs(imgHSV, redHiLower, redHiUpper, redHiSatLower,
+// redHiValLower, imgBlobMaskRed);
+// opencv_core.cvOr(imgBlobMaskRedLo, imgBlobMaskRed, imgBlobMaskRed, null);
+// break;
+// case YELLOW:
+// ImageAnalyzer.getBlobs(imgHSV, yellowLower, yellowUpper, yellowSatLower,
+// yellowValLower, imgBlobMaskYellow);
+// break;
+// }
+// }

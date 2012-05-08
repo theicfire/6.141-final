@@ -57,7 +57,7 @@ public class VisualLocalization {
 			ArrayList<Point2D.Double> srcPoints,
 			CvMat pixelToFloorHomography) {
 		int numPoints = srcPoints.size();
-		CvMat interpolatedPoints = CvMat.create(3,numPoints);
+		CvMat interpolatedPoints = CvMat.create(3,numPoints,opencv_core.CV_32FC1);
 		int i = 0;
 		for (Point2D.Double pt: srcPoints) {
 			interpolatedPoints.put(0,i,pt.x);
@@ -84,27 +84,7 @@ public class VisualLocalization {
 		for (int i = 0; i < numPoints; ++i) {
 			Point end = contour.get((i+1)%numPoints);
 			
-			int xDiff = end.x-start.x;
-			int yDiff = end.y-start.y;
-			double slope = ((double)yDiff)/xDiff;
-			if (!Double.isInfinite(slope)
-					&& !Double.isNaN(slope)
-					&& Math.abs(slope) < slopeThresh) {
-				// for each pixel between start(inclusive) and end(exclusive)
-				int increment = 1;
-				int numTimes = end.x-start.x;
-				if ( end.x < start.x) {
-					increment = -1;
-					numTimes = start.x-end.x;
-				}
-				
-				int x = start.x;
-				for (int j = 0; j < numTimes; ++j) {
-					double y = start.y + j*((double)slope);
-					interpolatedPoints.add(new Point2D.Double(x,y));
-					x += increment;
-				}
-			}
+			// call the 
 
 			start = end;
 		}
@@ -112,6 +92,33 @@ public class VisualLocalization {
 		return interpolatedPoints;
 	}
 	
+	static ArrayList<Point2D.Double> pointsFromLine(Point start, Point end, double slopeThresh) {
+		ArrayList<Point2D.Double> interpolatedPoints =
+				new ArrayList<Point2D.Double>();
+		int xDiff = end.x-start.x;
+		int yDiff = end.y-start.y;
+		double slope = ((double)yDiff)/xDiff;
+		if (!Double.isInfinite(slope)
+				&& !Double.isNaN(slope)
+				&& Math.abs(slope) < slopeThresh) {
+			// for each pixel between start(inclusive) and end(exclusive)
+			int increment = 1;
+//			int numTimes = end.x-start.x; // 
+			int numTimes = Math.abs(end.x - start.x);
+//			if ( end.x < start.x) {
+//				increment = -1;
+//				numTimes = start.x-end.x;
+//			}
+//			
+			int x = start.x;
+			for (int j = 0; j < numTimes; ++j) {
+				double y = start.y + j*((double)slope);
+				interpolatedPoints.add(new Point2D.Double(x,y));
+				x += increment;
+			}
+		}
+		return interpolatedPoints;
+	}
 	
 	// given a list of contours
 	// one of these contours is the best

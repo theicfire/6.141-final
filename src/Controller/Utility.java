@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.ros.message.rss_msgs.OdometryMsg;
 
 import Challenge.GrandChallengeMap;
+import Controller.Utility.ConfidencePose;
 import VisualServoSolution.HomographySrcDstPoint;
 import VisualServoSolution.Image;
 import VisualServoSolution.Image.Pixel;
@@ -65,7 +66,17 @@ public class Utility {
 		public double getConfidence() {
 			return _confidence;
 		}
-		
+
+		public void setConfidence(double confidence) {
+			_confidence = confidence;
+		}
+
+		public ConfidencePose add(Pose other) {
+			return (new Utility()).new ConfidencePose(this.getX() + other.getX(), 
+					this.getY() + other.getY(),
+					this.getTheta() + other.getTheta(),
+					this.getConfidence());			
+		}
 	}
 	
 	public class Pose {
@@ -154,6 +165,79 @@ public class Utility {
 		ByteBuffer iplBytePointer = rgbIpl.getByteBuffer();
 		return new Image(iplBytePointer.array(), rgbIpl.width(),
 				rgbIpl.height(), rgbIpl.widthStep());
+	}
+
+	public static org.ros.message.sensor_msgs.Image
+	rgbIplImgToRgbImgMsg(
+			IplImage rgbIpl) {
+
+		int width = rgbIpl.width();
+		int height = rgbIpl.height();
+		org.ros.message.sensor_msgs.Image dest =
+				new org.ros.message.sensor_msgs.Image();
+		dest.width = width;
+		dest.height = height;
+		dest.encoding = "rgb8";
+		dest.is_bigendian = 0;
+		dest.step = width * 3;
+
+		dest.data = new byte[width*height*3];
+
+		// widthStep is the number of bytes per line in src
+		ByteBuffer byteBuff = rgbIpl.getByteBuffer();
+	
+		int widthStep = rgbIpl.widthStep();
+		int i = 0;
+		int r, g, b;
+		for (int y = 0; y < height; y++) {
+			int yTimesWStep = y * widthStep;
+			for (int x = 0; x < width; x++) {
+				int threeX = 3 * x;
+				// log.info("" + yTimesWStep + " " + threeX + " ");
+				r = byteBuff.get(yTimesWStep + threeX + 0) & 0xff;
+				g = byteBuff.get(yTimesWStep + threeX + 1) & 0xff;
+				b = byteBuff.get(yTimesWStep + threeX + 2) & 0xff;				
+				dest.data[i++] = (byte) r;
+				dest.data[i++] = (byte) g;
+				dest.data[i++] = (byte) b;
+			}
+		}
+		return dest;
+	}
+
+	public static org.ros.message.sensor_msgs.Image
+	monoIplImgToRgbImgMsg(
+			IplImage monoIpl, Log log) {
+
+		int width = monoIpl.width();
+		int height = monoIpl.height();
+		org.ros.message.sensor_msgs.Image dest =
+				new org.ros.message.sensor_msgs.Image();
+		dest.width = width;
+		dest.height = height;
+		dest.encoding = "rgb8";
+		dest.is_bigendian = 0;
+		dest.step = width * 3;
+
+		dest.data = new byte[width*height*3];
+
+		// widthStep is the number of bytes per line in src
+		ByteBuffer byteBuff = monoIpl.getByteBuffer();
+	
+		int widthStep = monoIpl.widthStep();
+		int i = 0;
+		for (int y = 0; y < height; y++) {
+			int yTimesWStep = y * widthStep;
+			for (int x = 0; x < width; x++) {
+//				int threeX = 3 * x;
+				// log.info("" + yTimesWStep + " " + threeX + " ");
+				byte val = (byte) (byteBuff.get(yTimesWStep + x) & 0xff);
+				dest.data[i++] = val;
+				dest.data[i++] = val;
+				dest.data[i++] = val;
+			}
+		}
+		return dest;
 	}
 
 	public static IplImage rgbImgMsgToRgbIplImg(
@@ -254,12 +338,17 @@ public class Utility {
 	public static GrandChallengeMap getChallengeMap() {
 		GrandChallengeMap map = new GrandChallengeMap();
 		try {
-			map = GrandChallengeMap.parseFile("/home/rss-student/RSS-I-group/Challenge/src/challenge_test.txt");
+			String mapfilename = "/home/rss-student/RSS-I-group/Challenge/src/construction_map_2012.txt";
+			map = GrandChallengeMap.parseFile(mapfilename);
 		} catch (Exception e) {
 			throw new RuntimeException(
 					"DIE DIE DIE DIE DIE DIE couldn't load map");
 		}
 		return map;
 	}
+
+
+
+
 	
 }

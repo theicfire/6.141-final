@@ -38,12 +38,12 @@ public class ICP {
 	 *            performance)
 	 * @return Offset pose in coordinates relative to the robot's position
 	 */
-	public static ConfidencePose computeOffset(Pose initialGuess, List<Point2D.Double> worldMapPoints,
+	public static ConfidencePose computeCorrectedPosition(Pose initialGuess, List<Point2D.Double> worldMapPoints,
 			List<Point2D.Double> visionPoints, Log log, String writeToFilename) {
 
 		String s;
-		String cmd = "/home/rss-student/ICP/icp";
-
+		// provide extra args to skip displaying window
+		String cmd = "/home/rss-student/ICP/icp 1 2 3";
 		String r = null;
 		
 		try {
@@ -79,9 +79,9 @@ public class ICP {
 				out.close();
 			}
 
-			log.info("POINT CLOUD RESULT");
+			//log.info("POINT CLOUD RESULT");
 			r = IOPipe.pipe(str.toString());
-			log.info(r);
+			//log.info(r);
 
 			IOPipe.inp.close();
 			IOPipe.out.close();

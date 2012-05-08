@@ -74,19 +74,19 @@ public class Planner {
 	// }
 
 	public void nextClosestBlock() {
-//		Point2D.Double here = odom.getPosition();
-//		double min = Double.MAX_VALUE;
-//		ConstructionObject choice = null;
-//		for (ConstructionObject b : blocks) {
-//			double dist = Utility.getMagnitude(here, b.getPosition());
-//			if (dist < min) {
-//				choice = b;
-//				min = dist;
-//			}
-//		}
-//		currentBlock = choice;
-		log.info("Next block at index" + counter);
-		currentBlock = blocks.get(counter);
+		Point2D.Double here = odom.getPosition();
+		double min = Double.MAX_VALUE;
+		ConstructionObject choice = null;
+		for (ConstructionObject b : blocks) {
+			double dist = Utility.getMagnitude(here, b.getPosition());
+			if (dist < min) {
+				choice = b;
+				min = dist;
+			}
+		}
+		currentBlock = choice;
+//		log.info("Next block at index" + counter);
+//		currentBlock = blocks.get(counter);
 	}
 
 	public Point2D.Double getCurrentBlockPosition() {
@@ -95,8 +95,8 @@ public class Planner {
 	}
 
 	public void markCurrentBlockDone() {
-//		blocks.remove(currentBlock);
-		counter = (counter + 1) % blocks.size();
+		blocks.remove(currentBlock);
+//		counter = (counter + 1) % blocks.size();
 	}
 	
 }

@@ -47,16 +47,27 @@ public class ImageAnalyzer {
 		cvStorage = opencv_core.cvCreateMemStorage(0);
 	}
 	
-	static void getBlobs(IplImage srcImgRGB,
-			IplImage imgHSV,
+//	static void getBlobs2(IplImage srcImgRGB,
+//			IplImage imgHSV,
+//			int hueLowerBound,
+//			int hueUpperBound,
+//			int satLowerBound,
+//			int valLowerBound,
+//			IplImage dstImgBlobMask) {
+//		opencv_imgproc.cvCvtColor(srcImgRGB,imgHSV,
+//				opencv_imgproc.CV_RGB2HSV);
+//		
+//		opencv_core.cvInRangeS(imgHSV,
+//        		opencv_core.cvScalar(hueLowerBound, satLowerBound, valLowerBound, 0),
+//        		opencv_core.cvScalar(hueUpperBound, 255, 255, 0),
+//        		dstImgBlobMask);
+//	}
+	static void getBlobs(IplImage imgHSV,
 			int hueLowerBound,
 			int hueUpperBound,
 			int satLowerBound,
 			int valLowerBound,
 			IplImage dstImgBlobMask) {
-		opencv_imgproc.cvCvtColor(srcImgRGB,imgHSV,
-				opencv_imgproc.CV_RGB2HSV);
-		
 		opencv_core.cvInRangeS(imgHSV,
         		opencv_core.cvScalar(hueLowerBound, satLowerBound, valLowerBound, 0),
         		opencv_core.cvScalar(hueUpperBound, 255, 255, 0),

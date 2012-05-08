@@ -41,7 +41,7 @@ public class ICPTest {
 		
 		// convert it to points
 		Log log = LogFactory.getLog(ICPTest.class);
-		ConfidencePose offset = ICP.computeOffset(start, ICP.discretizeMap(map.obstacles), visionPoints, log, "/home/rss-student/points.txt");
+		ConfidencePose offset = ICP.computeCorrectedPosition(start, ICP.discretizeMap(map.obstacles), visionPoints, log, "/home/rss-student/points.txt");
 //		Pose offset = ICP.computeOffset(start, ICP.discretizeMap(pos), visionPoints, log, "/home/rss-student/points.txt");
 		log.info("done done, output " + offset);
 	}

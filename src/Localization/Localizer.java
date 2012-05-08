@@ -11,6 +11,7 @@ import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
+import Challenge.GrandChallengeMap;
 import Controller.Utility;
 import Controller.Utility.Pose;
 
@@ -64,7 +65,8 @@ public class Localizer {
 					curRawPose = (new Utility()).new Pose(message.x, message.y,
 							message.theta);
 					if (init) {
-						updatePosition(0.0, 0.0, 0.0);
+						GrandChallengeMap map = Utility.getChallengeMap();
+						updatePosition(map.robotStart.x, map.robotStart.y, 0.0);
 						init = false;
 					}
 					OdometryMsg newOdomMsg = getPositionPose().getOdomMsg();
@@ -103,13 +105,18 @@ public class Localizer {
 //		this.odometryOffset.setTheta(odomTheta - correctLocation.getTheta());
 	}
 
-	public void updatePosition(Utility.Pose correctLocation, int confidence) {
-        confidence = Math.pow(confidence, 2) // make the curve of accepting more dramatic
+	public void updatePosition(Utility.ConfidencePose correctLocation) {
+		 // make the curve of accepting more dramatic
+        double confidence = Math.pow(correctLocation.getConfidence(), 2);
+        if (confidence == 0) {
+        	return;
+        }
         // make the lastRealPose a linear combination of lastRawPose and correctLocation, depending on confidence
-        correctLocation.x = correctLocation.getX() * confidence + curRawPose.getX() * (1 - confidence)
-        correctLocation.y = correctLocation.getY() * confidence + curRawPose.getY() * (1 - confidence)
-        correctLocation.theta = correctLocation.getTheta() * confidence + curRawPose.getTheta() * (1 - confidence)
-        updatePosition(correctLocation)
+        Pose newCorrect = (new Utility()).new Pose(
+	        correctLocation.getX() * confidence + curRawPose.getX() * (1 - confidence),
+	        correctLocation.getY() * confidence + curRawPose.getY() * (1 - confidence),
+	        correctLocation.getTheta() * confidence + curRawPose.getTheta() * (1 - confidence));
+	    updatePosition(newCorrect);
 	}
 	
 //	public double getTicksLeft() {
