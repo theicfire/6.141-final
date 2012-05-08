@@ -240,6 +240,31 @@ public class Utility {
 		return dest;
 	}
 
+	void copyFromRgbImgMsgToRgbIplImg(
+			org.ros.message.sensor_msgs.Image src,
+			IplImage dest) {
+
+//		final int numChannels = 3;
+//		IplImage rgbIpl = IplImage.create((int) rgbImg.width,
+//				(int) rgbImg.height, opencv_core.IPL_DEPTH_8U, numChannels);
+		ByteBuffer iplBytePointer = dest.getByteBuffer();
+		int widthStep = dest.widthStep();
+
+		int srcIndex = 0;
+		byte[] srcArray = src.data;
+
+		for (int y = 0; y < src.height; ++y) {
+			for (int x = 0; x < src.width; ++x) {
+				byte r = (byte) (srcArray[srcIndex++] & 0xff);
+				byte g = (byte) (srcArray[srcIndex++] & 0xff);
+				byte b = (byte) (srcArray[srcIndex++] & 0xff);
+				iplBytePointer.put(y * widthStep + x * 3 + 0, b);
+				iplBytePointer.put(y * widthStep + x * 3 + 1, g);
+				iplBytePointer.put(y * widthStep + x * 3 + 2, r);
+			}
+		}
+	}
+	
 	public static IplImage rgbImgMsgToRgbIplImg(
 			org.ros.message.sensor_msgs.Image rgbImg,
 			org.apache.commons.logging.Log log) {

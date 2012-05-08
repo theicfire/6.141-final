@@ -89,7 +89,7 @@ public class VisionMain2 implements NodeMain {
 	boolean pixelYIsValid[];
 
 	// y increases from top to bottom
-	int HORIZONTAL_Y_THRESHOLD = 0;// 120; // pixels with y value less than this are not considered
+	int HORIZONTAL_Y_THRESHOLD = 120; // pixels with y value less than this are not considered
 	int SLOPE_THRESHOLD = 2;
 	CvMat pixelPointsWhereFloorMeetsWall;  // remember to initialize the third coordinate to 1.0
 	CvMat floorPoints;
@@ -109,7 +109,7 @@ public class VisionMain2 implements NodeMain {
 	@Override
 	public void onStart(Node node) {
 		log = node.getLog();
-		this.odom = new Localizer(node, false);
+		this.odom = new Localizer(node, true);
 		map = Utility.getChallengeMap();
 
 		obstacleToNormals =
@@ -340,7 +340,7 @@ public class VisionMain2 implements NodeMain {
 				double y = ewmaFloorY[i];
 				pm.x = x * cos - y * sin + bestGuess.getX();
 				pm.y = x * sin + y * cos + bestGuess.getY();
-//				pointPub.publish(pm);
+				//pointPub.publish(pm);
 			}
 		}
 		
@@ -351,14 +351,14 @@ public class VisionMain2 implements NodeMain {
 					&& odom.getPosition().x != 0
 					&& odom.getPosition().y != 0) {
 				ConfidencePose newLocation = ICP.computeCorrectedPosition(
-//						bestGuess, ICP.discretizeMap(map.obstacles),
-						bestGuess, pointCloud,
+						bestGuess, ICP.discretizeMap(map.obstacles),
+//						bestGuess, pointCloud,
 						visionPoints, log, "/home/rss-student/remap.txt");
 				log.info("confidence " + newLocation.getConfidence()
 						+ " new pose " + newLocation.getX() + ", "
 						+ newLocation.getY() + ", theta "
 						+ newLocation.getTheta());
-				//this.odom.updatePosition(newLocation);
+				this.odom.updatePosition(newLocation);
 				averageCount = 0;
 				visionPoints.clear();// = new ArrayList<Point2D.Double>();
 			}
