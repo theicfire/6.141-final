@@ -8,9 +8,9 @@ import org.ros.message.rss_msgs.OdometryMsg;
 import Navigation.DijkstraGood;
 import Planner.Planner;
 
-public class StateLookingForBlocks extends RobotState {
+public class StateBumpLookingForBlocks extends RobotState {
 	private boolean destComplete;
-	public StateLookingForBlocks(Robot ri) {
+	public StateBumpLookingForBlocks(Robot ri) {
 		super(ri);
 	}
 
@@ -23,30 +23,37 @@ public class StateLookingForBlocks extends RobotState {
 		// for safety!
 		robot.stopMoving();
 		State state = State.MOVING;
+		int lastMessage = -1; // 0 for left, 1 for right, 2 for forward
 		while (true) {
 			switch (state) {
 			case MOVING:
-				if (robot.vision.canSeeBlock()) {
+//				if (robot.vision.canSeeBlock()) {
+				if (false) {
 					robot.log.info("Robot can see block; stopping and going to StateMovingToBlock");
 					robot.stopMoving();
 					// TODO clearly long; we should get the block location from the vision system
 					robot.setStateObject(new StateMovingToBlock(robot));
 					return;
-				} else if (doneMoving) { // 
-                    if (leftBumpEngaged) {
-                        // block and move back
-                        // block and rotate right
-                        // done
-                    } else if (rightBumpEngaged) {
-                        // block and move back
-                        // block and rotate left
-                        // done
-                    } else {
-                        // Move forward
-                    }
+				} else if (robot.isLeftBump() || robot.isRightBump()) { //
+					if (lastMessage != 0) {
+						double rv = Math.random() > .5 ? .5 : -.5; // pick some random rotational velocity
+						robot.sendMotorMessage(-.5, rv);
+						lastMessage = 0;
+					}
+				    // block and move back
+                    // block and rotate right
+                    // done
+//				} else if (robot.isRightBump()) { //
+//					if (lastMessage != 1) {
+//						robot.sendMotorMessage(-.5, .5);
+//						lastMessage = 1;
+//					}
 				} else {
-                    Thread.sleep(200);
-                    // wait (block) until done moving or you see a block
+					robot.log.info("just go forward");
+					if (lastMessage != 2) {
+						robot.sendMotorMessage(.5, 0);
+						lastMessage = 2;
+					}
                 }
 				break;
 			}

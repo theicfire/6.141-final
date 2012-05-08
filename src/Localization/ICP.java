@@ -38,7 +38,8 @@ public class ICP {
 	 *            performance)
 	 * @return Offset pose in coordinates relative to the robot's position
 	 */
-	public static ConfidencePose computeCorrectedPosition(Pose initialGuess, List<Point2D.Double> worldMapPoints,
+	public static ConfidencePose computeCorrectedPosition(Pose initialGuess,
+			Collection<Point2D.Double> worldMapPoints,
 			List<Point2D.Double> visionPoints, Log log, String writeToFilename) {
 
 		String s;

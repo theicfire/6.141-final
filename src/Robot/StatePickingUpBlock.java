@@ -125,7 +125,7 @@ public class StatePickingUpBlock extends RobotState {
 		} // end while
 
 		// state transition
-		this.robot.setStateObject(new StateLookingForBlocks(this.robot));
+		this.robot.setStateObject(new StateInitial(this.robot));
 
 	}
 

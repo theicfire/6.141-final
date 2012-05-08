@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
 import org.ros.message.rss_msgs.BreakBeamMsg;
+import org.ros.message.rss_msgs.BumpMsg;
 import org.ros.message.rss_msgs.MotionMsg;
 import org.ros.message.rss_msgs.OdometryMsg;
 import org.ros.message.rss_msgs.VisionMsg;
@@ -36,10 +37,13 @@ public class Robot {
 	public Localizer odom;
 	VisionMsgWrapper vision;
 	private boolean doneMoving;
+	private boolean leftBump;
+	private boolean rightBump;
 
 	private Subscriber<VisionMsg> visionSub;
 	private Subscriber<BreakBeamMsg> doneMovingSub;
 	private Subscriber<BreakBeamMsg> breakBeamSub;
+	private Subscriber<BumpMsg> bumpSensorsSub;
 	private boolean beamBroken;
 
 	private Publisher<OdometryMsg> waypointCommandPub;
@@ -62,6 +66,7 @@ public class Robot {
 
 		this.doneMovingSub = node.newSubscriber("rss/waypointcomplete", "rss_msgs/BreakBeamMsg");
 		this.breakBeamSub = node.newSubscriber("rss/BreakBeam", "rss_msgs/BreakBeamMsg");
+		this.bumpSensorsSub = node.newSubscriber("rss/BumpSensors", "rss_msgs/BumpMsg");
 		this.waypointCommandPub = node.newPublisher("rss/waypointcommand","rss_msgs/OdometryMsg");
 		this.angleCommandPub = node.newPublisher("rss/anglecommand", "rss_msgs/OdometryMsg");
 
@@ -85,6 +90,7 @@ public class Robot {
 		this.visionSub.addMessageListener(new VisionMessageListener());
 		this.doneMovingSub.addMessageListener(new DoneMovingListener());
 		this.breakBeamSub.addMessageListener(new BreakBeamListener());
+		this.bumpSensorsSub.addMessageListener(new BumpSensorsListener());
 	}
 
 	public class VisionMessageListener implements
@@ -107,6 +113,14 @@ public class Robot {
 			MessageListener<org.ros.message.rss_msgs.BreakBeamMsg> {
 		public void onNewMessage(org.ros.message.rss_msgs.BreakBeamMsg bb) {
 			beamBroken = bb.beamBroken; // probably always true
+		}
+	}
+	
+	public class BumpSensorsListener implements
+			MessageListener<org.ros.message.rss_msgs.BumpMsg> {
+		public void onNewMessage(org.ros.message.rss_msgs.BumpMsg bm) {
+			leftBump = bm.left;
+			rightBump = bm.right;
 		}
 	}
 
@@ -213,6 +227,14 @@ public class Robot {
 	
 	public boolean isBeamBroken() {
 		return beamBroken;
+	}
+	
+	public boolean isLeftBump() {
+		return leftBump;
+	}
+	
+	public boolean isRightBump() {
+		return rightBump;
 	}
 
 	// NO MORE METHODS HERE!!!! NO MORE METHODS HERE!!!!

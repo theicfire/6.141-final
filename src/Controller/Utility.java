@@ -80,7 +80,7 @@ public class Utility {
 	}
 	
 	public class Pose {
-		private double _x, _y, _theta;
+		public double _x, _y, _theta;
 
 		public Pose(double x, double y, double theta) {
 			setX(x);
@@ -366,5 +366,56 @@ public class Utility {
 		}
 	}
 
+	
+	// assumes that shapes are specified
+	// in counter clockwise order
+	public static ArrayList<Point2D.Double> calcOutwardNormals(
+			ArrayList<Point2D.Double> shape) {
+
+		int numVertices = shape.size();
+		ArrayList<Point2D.Double> normals = new ArrayList<Point2D.Double>(
+				numVertices);
+		Point2D.Double v1 = new Point2D.Double();
+		Point2D.Double v2 = new Point2D.Double();
+		Point2D.Double p0 = shape.get(0);
+		Point2D.Double p1 = shape.get(1);
+		for (int i = 0; i < numVertices; ++i) {
+			Point2D.Double p2 = shape.get((i + 2) % numVertices);
+			v1.x = p0.x - p1.x;
+			v1.y = p0.y - p1.y;
+			v2.x = p2.x - p1.x;
+			v2.y = p2.y - p1.y;
+
+			double angle = Utility.signedAngleBetweenVectorsInStandardPosition(
+					v1, v2);
+
+			// dx = x2-x1 and dy=y2-y1,
+			// then the normals are (-dy, dx) and (dy, -dx)
+			Point2D.Double n = new Point2D.Double(v1.y, -v1.x);
+			double dot = n.x * v2.x + n.y * v2.y;
+			if (angle < Math.PI) {
+				if (dot < 0) {
+					n.y = -n.y;
+					n.x = -n.x;
+				}
+			} else {
+				if (dot > 0) {
+					n.y = -n.y;
+					n.x = -n.x;
+				}
+			}
+
+			double invLen = 1.0 / Math.sqrt(n.x * n.x + n.y * n.y);
+			n.x *= invLen;
+			n.y *= invLen;
+
+			normals.add(n);
+
+			p0 = p1;
+			p1 = p2;
+		}
+
+		return normals;
+	}
 	
 }

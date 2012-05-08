@@ -53,7 +53,7 @@ public class VisualLocalization {
 	// returns
 	// one point per column
 	// points are in homogeneous coordinates
-	static CvMat getFloorPointsLocalSpace(
+	static CvMat getFloorPointsLocalSpaceFromPoints2D(
 			ArrayList<Point2D.Double> srcPoints,
 			CvMat pixelToFloorHomography) {
 		int numPoints = srcPoints.size();
@@ -62,6 +62,26 @@ public class VisualLocalization {
 		for (Point2D.Double pt: srcPoints) {
 			interpolatedPoints.put(0,i,pt.x);
 			interpolatedPoints.put(1,i,pt.y);
+			interpolatedPoints.put(2,i,1.0);
+			++i;
+		}
+		opencv_core.cvMatMul(pixelToFloorHomography,
+				interpolatedPoints,interpolatedPoints);
+		return interpolatedPoints;
+	}
+
+	// returns
+	// one point per column
+	// points are in homogeneous coordinates
+	static CvMat getFloorPointsLocalSpaceFromPoints(
+			ArrayList<Point> srcPoints,
+			CvMat pixelToFloorHomography) {
+		int numPoints = srcPoints.size();
+		CvMat interpolatedPoints = CvMat.create(3,numPoints,opencv_core.CV_32FC1);
+		int i = 0;
+		for (Point pt: srcPoints) {
+			interpolatedPoints.put(0,i,(double)pt.x);
+			interpolatedPoints.put(1,i,(double)pt.y);
 			interpolatedPoints.put(2,i,1.0);
 			++i;
 		}
