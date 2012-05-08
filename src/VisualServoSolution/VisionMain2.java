@@ -340,7 +340,7 @@ public class VisionMain2 implements NodeMain {
 				double y = ewmaFloorY[i];
 				pm.x = x * cos - y * sin + bestGuess.getX();
 				pm.y = x * sin + y * cos + bestGuess.getY();
-				pointPub.publish(pm);
+//				pointPub.publish(pm);
 			}
 		}
 		
@@ -358,7 +358,7 @@ public class VisionMain2 implements NodeMain {
 						+ " new pose " + newLocation.getX() + ", "
 						+ newLocation.getY() + ", theta "
 						+ newLocation.getTheta());
-				this.odom.updatePosition(newLocation);
+				//this.odom.updatePosition(newLocation);
 				averageCount = 0;
 				visionPoints.clear();// = new ArrayList<Point2D.Double>();
 			}
