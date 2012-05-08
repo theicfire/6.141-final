@@ -348,7 +348,23 @@ public class Utility {
 	}
 
 
-
+	// standard position means that the vector originates at
+	// the origin
+	// returns radian angle between v1 and v2 by
+	// sweeping v1 into v2 according to righthand rule
+	// result is in range [0,2*pi]
+	public static double signedAngleBetweenVectorsInStandardPosition(
+			Point2D.Double v1,
+			Point2D.Double v2) {
+		double a = Math.atan2(v1.y,v1.x);
+		double b = Math.atan2(v2.y,v2.x);
+		double diff = b - a;
+		if (a < b) {
+			return diff;
+		} else {
+			return 2*Math.PI + diff;
+		}
+	}
 
 	
 }

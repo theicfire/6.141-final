@@ -15,7 +15,7 @@ public class VisionMain implements NodeMain {
 	Subscriber<org.ros.message.sensor_msgs.Image> rawVidSub;
 	Log log;
 
-	boolean useNew = false;
+	boolean useNew = true;
 	BlobTracking2 bt2;
 	BlobTracking bt;
 	private Publisher<VisionMsg> blobDetectedPub;

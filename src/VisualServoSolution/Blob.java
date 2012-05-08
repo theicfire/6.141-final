@@ -5,10 +5,11 @@ public class Blob {
 		BLUE,
 		GREEN,
 		RED,
-		YELLOW
+		YELLOW,
+		NONE
 	}
 	
-	BlobColor color;
+	public BlobColor color;
 	double area;
 	int px_x;
 	int px_y;

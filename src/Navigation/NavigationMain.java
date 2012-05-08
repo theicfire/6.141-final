@@ -152,7 +152,7 @@ public class NavigationMain {
 		// new Point2D.Double(0.0,0.0));
 		// Rectangle2D.Double rsRobotRect =
 		// this.createOverEstimatedSquareRobot();
-		Rectangle2D.Double rsRobotRect = this.createOldSquareRobotRect();//this.createCorrectSquareRobot();
+		Rectangle2D.Double rsRobotRect = this.createCorrectSquareRobot();
 		PolygonObstacle robotPoly = this.rectToPoly(rsRobotRect);
 		cspace = new CSpace(polygons, robotPoly, new Point2D.Double(0.0,
 				0.0));

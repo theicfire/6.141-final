@@ -25,8 +25,10 @@ import Planner.Planner;
 
 public class StatePickingUpBlock extends RobotState {
 
-	public StatePickingUpBlock(Robot ri) {
+	private Point2D.Double startPoint;
+	public StatePickingUpBlock(Robot ri, Point2D.Double startPoint) {
 		super(ri);
+		this.startPoint = startPoint;
 	}
 
 	enum State {
@@ -45,12 +47,20 @@ public class StatePickingUpBlock extends RobotState {
 		// update position of the odometry
 		// something like
 		// TODO
-		final double DIST_FROM_BLOCK_TO_ROBOT = .28;
+		final double DIST_FROM_BLOCK_TO_ROBOT = .25; // totally arbitrary
+		Point2D.Double curPoint = robot.odom.getPosition();
+		double curTheta = robot.odom.getTheta();
 		Point2D.Double blockPose = robot.planner.getCurrentBlockPosition();
-//		blockPose.x -= DIST_FROM_BLOCK_TO_ROBOT * Math.cos(robot.odom.getTheta());
-//		blockPose.y -= DIST_FROM_BLOCK_TO_ROBOT * Math.sin(robot.odom.getTheta());
+		// end - start
+		double odomAngle = Math.atan2(curPoint.y - startPoint.y, curPoint.x - startPoint.x);
+		double realAngle = Math.atan2(blockPose.y - startPoint.y, blockPose.x - startPoint.x);
+		double angleDiff = realAngle - odomAngle;
+		double newTheta = curTheta + angleDiff;
+		
+		blockPose.x -= DIST_FROM_BLOCK_TO_ROBOT * Math.cos(newTheta );
+		blockPose.y -= DIST_FROM_BLOCK_TO_ROBOT * Math.sin(newTheta );
 		robot.odom.updatePosition((new Utility()).new Pose(blockPose,
-				robot.odom.getTheta()));
+				newTheta));
 		robot.planner.markCurrentBlockDone();
 
 		while (!done) {

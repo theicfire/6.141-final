@@ -17,8 +17,8 @@ import Robot.StateLookingForBlocks.State;
  */
 public class StateMovingToBlock extends RobotState {
 
-	private static final double STANDOFF_ANGLE = 0.1;
-	private static final double STANDOFF_DISTANCE = .75; // should 0.75
+	private static final double STANDOFF_ANGLE = 0.05;
+	private static final double STANDOFF_DISTANCE = 1.0; // should 0.75
 	private static final double STANDOFF_EPSILON = .02; // should 0.75
 
 	public StateMovingToBlock(Robot ri) {
@@ -31,12 +31,11 @@ public class StateMovingToBlock extends RobotState {
 
 	@Override
 	public void perform() {
+		robot.log.info("IN STATE MOVING TO BLOCK");
 		robot.stopMoving(); // safety
 		State state = State.INIT;
-		robot.arm.lowerArm();
-		robot.arm.openGripper();
-		robot.armDriver.doMovement(robot.arm);
-		
+		boolean lowered = false;
+		Point2D.Double startPoint = robot.odom.getPosition();
 		while (true) {
 			switch (state) {
 			case INIT:
@@ -49,9 +48,9 @@ public class StateMovingToBlock extends RobotState {
 				double dist = robot.vision.getBlockDistance();
 //				if (Math.abs(dist - STANDOFF_DISTANCE) < STANDOFF_EPSILON && 
 //						Math.abs(robot.vision.getBlockTheta()) < STANDOFF_ANGLE) {
-				if (robot.isBeamBroken()) {
+				if (lowered && robot.isBeamBroken()) {
 					robot.log.info("In StateMovingBlock; going to statePickingUpblock");
-					robot.setStateObject(new StatePickingUpBlock(robot));
+					robot.setStateObject(new StatePickingUpBlock(robot, startPoint));
 //					robot.setStateObject(new StateMovingToBlock(robot));
 					return;
 				} else {
@@ -59,9 +58,16 @@ public class StateMovingToBlock extends RobotState {
 						// rotate to that angle
 						robot.sendMotorMessage(0, robot.vision.getBlockTheta() * .3);
 						Utility.sleepFor20ms();
-					} else if (dist < STANDOFF_DISTANCE){
+					} else if (!lowered && dist < STANDOFF_DISTANCE){
 						robot.driveBackward(0);
-					} else {
+					} else { // if the arm is lowered, we can assume the robot just goes forward
+						if (!lowered) {
+							robot.stopMoving(); // safety
+							robot.arm.lowerArm();
+							robot.arm.openGripper();
+							robot.armDriver.doMovement(robot.arm);
+							lowered = true;
+						}
 						robot.driveForward(0);
 					}
 					robot.log.info("distance to block is " + dist + " angle is " + Math.abs(robot.vision.getBlockTheta()));
