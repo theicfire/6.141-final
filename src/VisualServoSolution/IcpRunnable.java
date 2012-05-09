@@ -136,7 +136,10 @@ public class IcpRunnable implements Runnable {
 				}
 				continue;
 			}
-			
+
+			lastAccumulateReadingLeft = savedLeft;
+			lastAccumulateReadingRight = savedRight;
+
 			// take the point clouds
 			this.parent.lockPointCloudList.lock();
 			ArrayList<HashSet<Point2D.Double>> pointClouds =
@@ -212,9 +215,6 @@ public class IcpRunnable implements Runnable {
 //			this.odom.updatePosition(newLocation);
 
 			opencv_core.cvReleaseMat(worldPoints);
-			
-			lastAccumulateReadingLeft = savedLeft;
-			lastAccumulateReadingRight = savedRight;
 		}
 	}
 

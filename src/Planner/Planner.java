@@ -28,6 +28,7 @@ public class Planner {
 	private Localizer odom;
 	private Log log;
 	NavigationMain navigationMain;
+	public int blocksStored = 0;
 
 	public Planner(Localizer ourOdom, Log log, NavigationMain navigationMain) {
 		this.log = log;

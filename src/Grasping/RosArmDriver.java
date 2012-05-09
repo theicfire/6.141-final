@@ -45,7 +45,7 @@ public class RosArmDriver {
 		log = node.getLog();
 		armPub = node.newPublisher("command/Arm", "rss_msgs/ArmMsg");
 		
-		log.info("Waiting for subscribers");
+		log.info("Waiting for subscribers for ARM DRIVER");
 		while (armPub.getNumberOfSubscribers() == 0) {
 			// log.info("num sub is 0");
 		}

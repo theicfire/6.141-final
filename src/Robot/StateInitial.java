@@ -23,12 +23,15 @@ public class StateInitial extends RobotState {
 	}
 
 	@Override
-	public void perform() {	
-//		robot.arm.raiseArm();
-//		robot.armDriver.doMovement(robot.arm);
-//		this.robot.setStateObject(new StateLookingForBlocks(this.robot));
-		
-		robot.setStateObject(new StateLookingForBlocks(robot));
-	}
+	public void perform() {
+		// robot.arm.raiseArm();
+		// robot.armDriver.doMovement(robot.arm);
+		// this.robot.setStateObject(new StateLookingForBlocks(this.robot));
 
+		if (robot.planner.blocksStored >= 0) {
+			robot.setStateObject(new StateMakingStructure(robot));
+		} else {
+			robot.setStateObject(new StateLookingForBlocks(robot));
+		}
+	}
 }

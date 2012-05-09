@@ -110,6 +110,9 @@ public class StatePickingUpBlock extends RobotState {
 				robot.arm.openGripper();
 				robot.armDriver.doMovement(robot.arm);
 
+				// increment number of blocks
+				robot.planner.blocksStored += 1;
+				
 				robot.log.info("done storing block");
 				done = true;
 //				robot.planner.nextClosestBlock();
@@ -124,6 +127,8 @@ public class StatePickingUpBlock extends RobotState {
 			} // end switch
 		} // end while
 
+
+		
 		// state transition
 		this.robot.setStateObject(new StateInitial(this.robot));
 

@@ -22,15 +22,19 @@ public class Main implements NodeMain {
 
 		robot.log.info("Start performing");
 		
+		boolean actuallyWork = true;
+		if (! actuallyWork) {
+			robot.log.info("skip perform method flag set - JUST KIDDING");
+		}
 		// Testing purposes only!!!
 //		Point2D.Double blockPose = robot.planner.getCurrentBlockPosition();
 //		robot.odom.updatePosition((new Utility()).new Pose(blockPose,
 //				robot.odom.getTheta()));
 //		robot.planner.markCurrentBlockDone();
 		
-		while (true) {
+		while (actuallyWork) {
 			// make states represent atomic actions
-//			robot.getRobotState().perform();
+			robot.getRobotState().perform();
 		}
 	}
 

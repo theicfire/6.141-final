@@ -63,10 +63,6 @@ public class Robot {
 		this.armDriver = new RosArmDriver(node);
 		this.doorDriver = new RosDoorDriver(node);
 		
-		// TODO DELLLLLETEEEEE
-		doorDriver.sendDoorPWM();
-		log.info("MOVING DOOR NOW");
-		
 		navQueue = new LinkedList<Point2D.Double>();
 		
 		this.visionSub = node.newSubscriber("rss/VisionMain", "rss_msgs/VisionMsg");
