@@ -20,7 +20,7 @@
   <node name="vid" pkg="gscam" type="gscam" machine="netbook" />
   <node name="vid2" pkg="gscam222" type="gscam222" machine="netbook" />
   <node name="vision" pkg="rosjava_bootstrap" type="run.py" args="Challenge VisualServoSolution.VisionMain" machine="workstation"></node>
-  <node name="vision2" pkg="rosjava_bootstrap" type="run.py" args="Challenge VisualServoSolution.VisionMain2" machine="workstation"></node>
+  <!-- <node name="vision2" pkg="rosjava_bootstrap" type="run.py" args="Challenge VisualServoSolution.VisionMain2" machine="workstation"></node> -->
 
 <!-- ****************************** HARDWARE ****************************** -->
   <node name="pub" pkg="rosjava_bootstrap" type="run.py" args="uorc_publisher Publisher" machine="netbook" />

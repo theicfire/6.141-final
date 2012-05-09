@@ -50,9 +50,15 @@ public class Localizer {
 	public Localizer(Node node, final Pose startPose) {
 		log = node.getLog();
 		this.startPose = startPose;
-		lastRawPose = startPose;
-		lastRealPose = startPose;
-		curRawPose = startPose;
+		if (startPose != null) {
+			lastRawPose = startPose;
+			lastRealPose = startPose;
+			curRawPose = startPose; 
+		} else {
+			lastRawPose = (new Utility()).new Pose(0, 0, 0);
+			lastRealPose = (new Utility()).new Pose(0, 0, 0);
+			curRawPose = (new Utility()).new Pose(0, 0, 0);
+		}
 		master = (startPose != null);
 		//this.totalTicks = new double[2];
 		//this.totalTicks[0] = this.totalTicks[1] = 0.0;

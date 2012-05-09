@@ -365,7 +365,7 @@ public class VisionMain2 implements NodeMain {
 				ConfidencePose newLocation = ICP.computeCorrectedPosition(
 						// bestGuess, ICP.discretizeMap(map.obstacles),
 						bestGuess, pointCloud, visionPoints, log,
-						"/home/rss-student/remap.txt");
+						"/home/rss-student/ICP/points.txt");
 				log.info("confidence " + newLocation.getConfidence()
 						+ " new pose " + newLocation.getX() + ", "
 						+ newLocation.getY() + ", theta "

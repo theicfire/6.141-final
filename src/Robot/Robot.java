@@ -17,6 +17,7 @@ import org.ros.node.topic.Subscriber;
 import org.ros.node.Node;
 
 import Controller.Utility;
+import Door.RosDoorDriver;
 import Grasping.Arm;
 import Grasping.RosArmDriver;
 import Localization.Localizer;
@@ -27,6 +28,7 @@ import VisualServoSolution.VisionMsgWrapper;
 public class Robot {
 	Arm arm;
 	RosArmDriver armDriver;
+	RosDoorDriver doorDriver;
 	// Wheels wheels;
 	// BreakBeamSensor handBreakBeam;
 	// SonarSensor sideSonars[4];
@@ -59,6 +61,11 @@ public class Robot {
 		this.navigationMain = new NavigationMain(node);
 		this.arm = new Arm();
 		this.armDriver = new RosArmDriver(node);
+		this.doorDriver = new RosDoorDriver(node);
+		
+		// TODO DELLLLLETEEEEE
+		doorDriver.sendDoorPWM();
+		log.info("MOVING DOOR NOW");
 		
 		navQueue = new LinkedList<Point2D.Double>();
 		
