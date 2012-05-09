@@ -62,7 +62,7 @@ public class VisionMain2 implements NodeMain {
 	Localizer odom;
 
 	private ArrayList<Point2D.Double> visionPoints;
-	final int TAKE_NUM_AVERAGES = 15;
+	final int TAKE_NUM_AVERAGES = 50;
 	int averageCount;
 	
 	static IplImage imgHsv; // 3 channels
@@ -98,7 +98,6 @@ public class VisionMain2 implements NodeMain {
 	int SLOPE_THRESHOLD = 2;
 	CvMat pixelPointsWhereFloorMeetsWall;  // remember to initialize the third coordinate to 1.0
 	CvMat floorPoints;
-
 
 	// edge detection parameters
 	int edgeThresh = 1;
@@ -354,10 +353,7 @@ public class VisionMain2 implements NodeMain {
 
 			averageCount += 1;
 			// TODO hack to make sure we're not at 0, 0
-			if (averageCount >= TAKE_NUM_AVERAGES
-			// ) {
-					&& odom.getPosition().x != 0 && odom.getPosition().y != 0) {
-				
+			if (averageCount >= TAKE_NUM_AVERAGES && odom.getPosition().x != 0 && odom.getPosition().y != 0) {			
 //				lockPointCloudList.lock();
 //				this.pointCloudList.add(visionPoints);
 //				lockPointCloudList.unlock();
@@ -370,7 +366,7 @@ public class VisionMain2 implements NodeMain {
 						+ " new pose " + newLocation.getX() + ", "
 						+ newLocation.getY() + ", theta "
 						+ newLocation.getTheta());
-				this.odom.updatePosition(newLocation);
+//				this.odom.updatePosition(newLocation);
 				averageCount = 0;
 				visionPoints.clear();// = new ArrayList<Point2D.Double>();
 			}

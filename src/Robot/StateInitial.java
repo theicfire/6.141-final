@@ -28,7 +28,7 @@ public class StateInitial extends RobotState {
 		// robot.armDriver.doMovement(robot.arm);
 		// this.robot.setStateObject(new StateLookingForBlocks(this.robot));
 
-		if (robot.planner.blocksStored >= 0) {
+		if (robot.planner.blocksStored >= 7) {
 			robot.setStateObject(new StateMakingStructure(robot));
 		} else {
 			robot.setStateObject(new StateLookingForBlocks(robot));

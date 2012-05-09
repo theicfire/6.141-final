@@ -17,8 +17,8 @@ import Controller.Utility.Pose;
 
 public class Localizer {
 
-    final double MAX_ODOMETRY_DIFF_MAGNITUDE = 0.1;
-    final double MAX_ODOMETRY_DIFF_THETA = 10.0 * Math.PI / 180.0;    
+    final double MAX_ODOMETRY_DIFF_MAGNITUDE = 0.05;
+    final double MAX_ODOMETRY_DIFF_THETA = 5.0 * Math.PI / 180.0;    
 	
 //	Utility.Pose odometryOffset;
 	private Utility.Pose lastRawPose;
@@ -113,9 +113,9 @@ public class Localizer {
 		
 		 // make the curve of accepting more dramatic
         double confidence = Math.pow(correctLocation.getConfidence(), 2);
-        if (confidence == 0) {
+        if (confidence < 1) {
         	return;
-        }        
+        }
         
         // make the lastRealPose a linear combination of lastRawPose and correctLocation, depending on confidence
         Pose newCorrect = (new Utility()).new Pose(

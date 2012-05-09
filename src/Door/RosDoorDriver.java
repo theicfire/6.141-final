@@ -22,8 +22,7 @@ public class RosDoorDriver {
 		}
 		log.info("More than 0 subscribers");
 
-		sendDoorPWM(828);
-		openDoor();
+		closeDoor();
 		log.info("Door is ready");
 	}
 
