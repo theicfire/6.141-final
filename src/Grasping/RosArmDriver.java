@@ -60,7 +60,7 @@ public class RosArmDriver {
 	public void sendArmPWM(Arm toArm) {
 		ArmMsg msg = new ArmMsg();
 		msg.pwms = toArm.getPwms();
-//		log.info("arm publishing " + Arrays.toString(msg.pwms));
+		log.info("arm publishing " + Arrays.toString(msg.pwms));
 		armPub.publish(msg);
 	}
 

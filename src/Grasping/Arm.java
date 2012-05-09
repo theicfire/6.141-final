@@ -24,7 +24,7 @@ public class Arm implements ArmGymnastics {
 		shoulder = new ArmJoint(SHOULDER_LENGTH, 0, 550, 2000, 1200, 1975);
 		// last two numbers (pwm_theta0, pwm_thetaPiBy2) are wrong for elbow
 		elbow = new ArmJoint(ELBOW_LENGTH, 0, 1080, 1280, 1250, 2100);
-		wrist = new ArmJoint(1.0, 0, 520, 910, 520, 910);
+		wrist = new ArmJoint(1.0, 0, 490, 800, 490, 800);
 	
 		joints = new ArrayList<ArmJoint>();
 		joints.add(elbow);

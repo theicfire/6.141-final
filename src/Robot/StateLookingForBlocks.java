@@ -56,9 +56,12 @@ public class StateLookingForBlocks extends RobotState {
 //				robot.driveToLocation(robot.planner.getCurrentBlockPosition());
 
 				Point2D.Double robotpos = robot.odom.getPosition();
+				Point2D.Double curpos = robot.planner.getCurrentBlockPosition();
+				robot.log.info("looking from " + robotpos);
+				robot.log.info("looking to " + curpos);
 				ArrayList<Point2D.Double> shortestPath = DijkstraGood.getMyDijkstra(
 						robot.navigationMain.getAndPlotVisGraph(robotpos), robotpos, 
-						robot.planner.getCurrentBlockPosition(), robot.log);
+						curpos, robot.log);
 				shortestPath.remove(0); // we should already be at the first waypoint
 				robot.driveToLocations(shortestPath);
 				state = State.MOVING;
