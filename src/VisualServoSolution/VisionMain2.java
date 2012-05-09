@@ -67,6 +67,7 @@ public class VisionMain2 implements NodeMain {
 	static IplImage imgThreshold; // 1 channel
 	static IplImage imgDetectedEdges; // 1 channel
 	static IplImage imgContours; // 1 channel
+	static IplImage rgbIpl; // 3 channels
 
 	CvMemStorage cvStorage;
 	private CvMat pixelToFloorH;
@@ -178,6 +179,11 @@ public class VisionMain2 implements NodeMain {
 						(int) src.height, depth, 1);
 				imgContours = IplImage.create((int) src.width,
 						(int) src.height, depth, 1);
+
+				rgbIpl = IplImage.create((int) src.width,
+						(int) src.height, opencv_core.IPL_DEPTH_8U, 3);
+				
+				
 				visionPoints = new ArrayList<Point2D.Double>((int) src.width);
 				visionPoints.ensureCapacity((int) src.width);
 				
@@ -220,13 +226,14 @@ public class VisionMain2 implements NodeMain {
 	}
 
 	synchronized void processImage(Image src) {
-		IplImage rgbIpl = Utility.rgbImgMsgToRgbIplImg(src, log);
+		Utility.copyFromRgbImgMsgToRgbIplImg(src,rgbIpl);
+//		IplImage rgbIpl = Utility.rgbImgMsgToRgbIplImg(src, log);
 
 		// compute HSV
 		opencv_imgproc.cvCvtColor(rgbIpl, imgHsv, opencv_imgproc.CV_BGR2HSV);
 		opencv_imgproc.cvSmooth(imgHsv, imgHsv, opencv_imgproc.CV_GAUSSIAN, 3);
 
-		opencv_core.cvSplit(imgHsv, imgThreshold, null, null, null);
+//		opencv_core.cvSplit(imgHsv, imgThreshold, null, null, null);
 //		Image dest3;
 //		dest3 = Utility.monoIplImgToRgbImgMsg(imgThreshold, log);
 //		vidPubHue.publish(dest3);
@@ -257,10 +264,6 @@ public class VisionMain2 implements NodeMain {
 		imgContours = imgDetectedEdges;
 
 		// compute contours
-//		cvStorage = null;
-//		if (cvStorage == null) {
-//			cvStorage = opencv_core.cvCreateMemStorage(0);
-//		}
 		CvSeq first_contour = new CvSeq();
 		CvSeq contour = first_contour;
 		int header_size = Loader.sizeof(CvContour.class);
@@ -311,17 +314,7 @@ public class VisionMain2 implements NodeMain {
 
 		Pose bestGuess = odom.getPositionPose();
 //		addJitterToPose(bestGuess);
-		
-		Utility.Pair<ArrayList<Point2D.Double>,
-		ArrayList<Point2D.Double>> lineStartAndLineEnds =
-			calcFacingEdges(
-					new Point2D.Double(bestGuess.getX(),
-							bestGuess.getY()));
-		
-		HashSet<Point2D.Double> pointCloud =
-				discretizeLines(lineStartAndLineEnds.first,
-				lineStartAndLineEnds.second);
-		
+
 		double cos = Math.cos(bestGuess.getTheta());
 		double sin = Math.sin(bestGuess.getTheta());
 
@@ -344,27 +337,33 @@ public class VisionMain2 implements NodeMain {
 			}
 		}
 		
-		averageCount += 1;
 		if (visionPoints.size() > 0) {
+			Utility.Pair<ArrayList<Point2D.Double>, ArrayList<Point2D.Double>> lineStartAndLineEnds = calcFacingEdges(new Point2D.Double(
+					bestGuess.getX(), bestGuess.getY()));
+			HashSet<Point2D.Double> pointCloud = discretizeLines(
+					lineStartAndLineEnds.first, lineStartAndLineEnds.second);
+
+			averageCount += 1;
 			// TODO hack to make sure we're not at 0, 0
 			if (averageCount >= TAKE_NUM_AVERAGES
-					&& odom.getPosition().x != 0
-					&& odom.getPosition().y != 0) {
+			// ) {
+					&& odom.getPosition().x != 0 && odom.getPosition().y != 0) {
 				ConfidencePose newLocation = ICP.computeCorrectedPosition(
-						bestGuess, ICP.discretizeMap(map.obstacles),
-//						bestGuess, pointCloud,
-						visionPoints, log, "/home/rss-student/remap.txt");
+						// bestGuess, ICP.discretizeMap(map.obstacles),
+						bestGuess, pointCloud, visionPoints, log,
+						"/home/rss-student/remap.txt");
 				log.info("confidence " + newLocation.getConfidence()
 						+ " new pose " + newLocation.getX() + ", "
 						+ newLocation.getY() + ", theta "
 						+ newLocation.getTheta());
-				this.odom.updatePosition(newLocation);
+				// this.odom.updatePosition(newLocation);
 				averageCount = 0;
 				visionPoints.clear();// = new ArrayList<Point2D.Double>();
 			}
 		} else {
 			log.info("VisionMain2.java: no contours");
 		}
+
 
 //		double SLOPE_THRESH = 2.0;
 //		if (bestContour != null) {
@@ -482,7 +481,7 @@ public class VisionMain2 implements NodeMain {
 			pointCloud.add(end);
 		}
 
-		return null;
+		return pointCloud;
 	}
 
 	void buildObstacleToNormalsMapping() {
@@ -492,6 +491,18 @@ public class VisionMain2 implements NodeMain {
 			ArrayList<Double> normals = Utility.calcOutwardNormals(obstacle);
 			this.obstacleToNormals.put(obstacle,normals);
 		}
+		
+		// now add the world rect wall
+		java.awt.geom.Rectangle2D.Double worldRect = this.map.getWorldRect();
+		ArrayList<Double> world = new ArrayList<Double>();
+		// add the world in CLOCKWISE order as opposed to CCW order (which is
+		// what you do for objects) so that the normals are reversed
+		world.add(new Double(worldRect.x, worldRect.y+worldRect.height));
+		world.add(new Double(worldRect.x+worldRect.width, worldRect.y+worldRect.height));
+		world.add(new Double(worldRect.x+worldRect.width, worldRect.y));
+		world.add(new Double(worldRect.x, worldRect.y));
+		ArrayList<Double> worldNormals = Utility.calcOutwardNormals(world);
+		this.obstacleToNormals.put(world,worldNormals);
 	}
 	
 	Utility.Pair<ArrayList<Double>, ArrayList<Double>> calcFacingEdges(
@@ -531,19 +542,21 @@ public class VisionMain2 implements NodeMain {
 	
 	void updateMeansAndVariances() {
 		for (int i = 0; i < ewmaFloorX.length; ++i) {
-			double invZ = 1.0/this.floorPoints.get(2, i);
-			double y = this.floorPoints.get(1, i)*invZ;
-			double x = this.floorPoints.get(0, i)*invZ;
-
-			double diffX = x - ewmaFloorX[i];
-			double incrX = ewmaWeightX * diffX;
-			ewmaFloorX[i] = ewmaFloorX[i] + incrX;
-			ewmvFloorX[i] = (1-ewmaWeightX)*(ewmvFloorX[i] + diffX*incrX);
-
-			double diffY = y - ewmaFloorY[i];
-			double incrY = ewmaWeightY * diffY;
-			ewmaFloorY[i] = ewmaFloorY[i] + incrY;
-			ewmvFloorY[i] = (1-ewmaWeightY)*(ewmvFloorY[i] + diffY*incrY);
+			if (this.pixelYIsValid[i]) {
+				double invZ = 1.0/this.floorPoints.get(2, i);
+				double y = this.floorPoints.get(1, i)*invZ;
+				double x = this.floorPoints.get(0, i)*invZ;
+	
+				double diffX = x - ewmaFloorX[i];
+				double incrX = ewmaWeightX * diffX;
+				ewmaFloorX[i] = ewmaFloorX[i] + incrX;
+				ewmvFloorX[i] = (1-ewmaWeightX)*(ewmvFloorX[i] + diffX*incrX);
+	
+				double diffY = y - ewmaFloorY[i];
+				double incrY = ewmaWeightY * diffY;
+				ewmaFloorY[i] = ewmaFloorY[i] + incrY;
+				ewmvFloorY[i] = (1-ewmaWeightY)*(ewmvFloorY[i] + diffY*incrY);
+			}
 		}
 	}
 
@@ -561,8 +574,12 @@ public class VisionMain2 implements NodeMain {
 		CvMat ppwfmw = this.pixelPointsWhereFloorMeetsWall;
 		int[] pywfmw = this.pixelYWhereFloorMeetsWall;
 
-//		int numPoints = 0;
-		if ((pywfmw[0] > HORIZONTAL_Y_THRESHOLD)
+		//Math.max(Math.min(heightMinusOne,y+1),0);
+		int height = imgThreshold.height();
+		if (pywfmw[0] >= height || pywfmw[0] <= 0) {
+			pywfmw[0] = 0;
+			pixelYIsValid[0] = false;
+		} else if ((pywfmw[0] > HORIZONTAL_Y_THRESHOLD)
 				&& Math.abs(pywfmw[1] - pywfmw[0])
 				< SLOPE_THRESHOLD) {
 			ppwfmw.put(0,0,0);
@@ -573,7 +590,10 @@ public class VisionMain2 implements NodeMain {
 		}
 		
 		for (int i = 1; i < pywfmw.length - 1; ++i) {
-			if ((pywfmw[i] > HORIZONTAL_Y_THRESHOLD)
+			if (pywfmw[i] >= height || pywfmw[i] <= 0) {
+				pywfmw[i] = 0;
+				pixelYIsValid[i] = false;
+			} else if ((pywfmw[i] > HORIZONTAL_Y_THRESHOLD)
 					&& (Math.abs(pywfmw[i] - pywfmw[i - 1]) < SLOPE_THRESHOLD)
 					&& (Math.abs(pywfmw[i + 1] - pywfmw[i]) < SLOPE_THRESHOLD)) {
 				ppwfmw.put(0, i, i);
@@ -586,7 +606,10 @@ public class VisionMain2 implements NodeMain {
 		
 
 		int lenMinusOne = pywfmw.length-1;
-		if ((pywfmw[lenMinusOne] > HORIZONTAL_Y_THRESHOLD)
+		if (pywfmw[lenMinusOne] >= height || pywfmw[lenMinusOne] <= 0) {
+			pywfmw[lenMinusOne] = 0;
+			pixelYIsValid[lenMinusOne] = false;
+		} else if ((pywfmw[lenMinusOne] > HORIZONTAL_Y_THRESHOLD)
 				&& Math.abs(
 			pywfmw[lenMinusOne] - pywfmw[lenMinusOne-1])
 				< SLOPE_THRESHOLD) {
@@ -600,7 +623,6 @@ public class VisionMain2 implements NodeMain {
 	}
 
 	private void processThresheldImg(IplImage imgThreshold) {
-		// TODO Auto-generated method stub
 		int width = imgThreshold.width();
 		int height = imgThreshold.height();
 		int widthStep = imgThreshold.widthStep();
@@ -614,11 +636,7 @@ public class VisionMain2 implements NodeMain {
 				index -= widthStep;
 				--y;
 			}
-			pixelYWhereFloorMeetsWall[x] = Math.max(Math.min(heightMinusOne,y+1),0);
-//			while (y >= 0) {
-//				canvasBP.put(index, (byte) 0);
-//				index = (--y) * widthStep + x;
-//			}
+			pixelYWhereFloorMeetsWall[x] = y+1;//Math.max(Math.min(heightMinusOne,y+1),0);
 		}
 	}
 

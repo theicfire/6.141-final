@@ -28,7 +28,7 @@ public class StateInitial extends RobotState {
 //		robot.armDriver.doMovement(robot.arm);
 //		this.robot.setStateObject(new StateLookingForBlocks(this.robot));
 		
-		robot.setStateObject(new StateBumpLookingForBlocks(robot));
+		robot.setStateObject(new StateLookingForBlocks(robot));
 	}
 
 }

@@ -240,7 +240,7 @@ public class Utility {
 		return dest;
 	}
 
-	void copyFromRgbImgMsgToRgbIplImg(
+	public static void copyFromRgbImgMsgToRgbIplImg(
 			org.ros.message.sensor_msgs.Image src,
 			IplImage dest) {
 
