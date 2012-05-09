@@ -68,8 +68,8 @@ public class StateLookingForBlocks extends RobotState {
 				break;
 			case MOVING:
 				if (robot.vision.canSeeBlock()) {
-					robot.log.info("Robot can see block; stopping and going to StateMovingToBlock");
-					robot.stopMoving();
+					robot.log.info("Robot can see block; immediate transition to StateMovingToBlock");
+					//robot.stopMoving();
 					// TODO clearly long; we should get the block location from the vision system
 					robot.setStateObject(new StateMovingToBlock(robot));
 					return;
