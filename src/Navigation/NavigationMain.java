@@ -147,7 +147,7 @@ public class NavigationMain {
 		// -robotSquareSideLength,-robotSquareSideLength,robotSquareSideLength,robotSquareSideLength);
 
 		
-		cspace = new CSpace(polygons, robotSquareSideLength);
+//		cspace = new CSpace(polygons, robotSquareSideLength);
 		// CSpace cspace = new CSpace(wsPolyObstacles, createOldSquareRobot(),
 		// new Point2D.Double(0.0,0.0));
 		// Rectangle2D.Double rsRobotRect =
@@ -265,10 +265,10 @@ public class NavigationMain {
 //
 //		double width = 2 * b;
 //		double height = width;
-		double height = .39;
+		double height = .58;
 		double yMetersToFarCorner = height / 2; // symetrical
-		double xMetersToFarCorner = 0.314325;
-		double width = 0.44;
+		double xMetersToFarCorner = 0.33;
+		double width = 0.57;
 		return new Rectangle2D.Double(-xMetersToFarCorner, -yMetersToFarCorner, width, height);
 	}
 

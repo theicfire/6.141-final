@@ -85,12 +85,14 @@ public class BlobTracking2 {
 	public double targetBearing = 0.0; // set in blobFix()
 	public Log log;
 
-	BlockMapper blockMapper;
+//	BlockMapper blockMapper;
 	Blob lastBlob;
+	IplImage rgbIpl;
 	IplImage imgHSV;
 	IplImage imgBlobMaskBlue;
 	IplImage imgBlobMaskGreen;
 	IplImage imgBlobMaskRedLo; // only Lo hue values
+	IplImage imgBlobMaskRedHi; // both Lo and Hi values
 	IplImage imgBlobMaskRed; // both Lo and Hi values
 	IplImage imgBlobMaskYellow;
 
@@ -134,12 +136,15 @@ public class BlobTracking2 {
 		CvSize size = new CvSize();
 		size.width(width);
 		size.height(height);
+		rgbIpl = opencv_core.cvCreateImage(size, opencv_core.IPL_DEPTH_8U, 3);
 		imgHSV = opencv_core.cvCreateImage(size, opencv_core.IPL_DEPTH_8U, 3);
 		imgBlobMaskBlue = opencv_core.cvCreateImage(size,
 				opencv_core.IPL_DEPTH_8U, 1);
 		imgBlobMaskGreen = opencv_core.cvCreateImage(size,
 				opencv_core.IPL_DEPTH_8U, 1);
 		imgBlobMaskRedLo = opencv_core.cvCreateImage(size,
+				opencv_core.IPL_DEPTH_8U, 1);
+		imgBlobMaskRedHi = opencv_core.cvCreateImage(size,
 				opencv_core.IPL_DEPTH_8U, 1);
 		imgBlobMaskRed = opencv_core.cvCreateImage(size,
 				opencv_core.IPL_DEPTH_8U, 1);
@@ -149,68 +154,12 @@ public class BlobTracking2 {
 		imgCanny = opencv_core.cvCreateImage(size,
 				opencv_core.IPL_DEPTH_8U, 1);
 
+
 		cvStorage = opencv_core.cvCreateMemStorage(0);
 
-		blockMapper = new BlockMapper(width, height);
+		//blockMapper = new BlockMapper(width, height);
 	}
 
-	// (Solution)
-	// (Solution)
-	/**
-	 * // (Solution)
-	 * <p>
-	 * Apply connected components analysis to pick out the largest blob. Then //
-	 * (Solution) build stats on this blob.
-	 * </p>
-	 * // (Solution)
-	 **/
-	// (Solution)
-	protected void blobPresent(int[] threshIm, int[] connIm, int[] blobIm) { // (Solution)
-		// (Solution)
-		try {
-			connComp.doLabel(threshIm, connIm, width, height); // (Solution)
-		} catch (Exception e) {
-			log.info("OH NO; EXCEPTION!!!");
-			log.info(e.getStackTrace());
-			// log.info("labeling; sizes are " + threshIm.length + " " +
-			// connIm.length);
-			// log.info("and width/height are " + width + " " + height);
-		}
-		// (Solution)
-		int colorMax = connComp.getColorMax(); // (Solution)
-		int countMax = connComp.getCountMax(); // (Solution)
-		// XXX System.out.println("Count max -- num pixels is :  " +
-		// countMax);// (Solution)
-		// XXX System.out.println("Fraction of num pixels is  " +
-		// ((float)countMax) / (width*height));// (Solution)
-		// (Solution)
-		if (countMax > blobSizeThreshold * height * width) { // (Solution)
-			int sx = 0; // (Solution)
-			int sy = 0; // (Solution)
-			targetArea = countMax; // (Solution)
-			int destIndex = 0; // (Solution)
-			for (int y = 0; y < height; y++) { // (Solution)
-				for (int x = 0; x < width; x++) { // (Solution)
-					if (connIm[destIndex] == colorMax) { // (Solution)
-						sx += x; // (Solution)
-						sy += y; // (Solution)
-						blobIm[destIndex++] = 255; // (Solution)
-					} else { // (Solution)
-						blobIm[destIndex++] = 0; // (Solution)
-					} // (Solution)
-				} // (Solution)
-			} // (Solution)
-			centroidX = sx / (double) countMax; // (Solution)
-			centroidY = sy / (double) countMax; // (Solution)
-			targetDetected = true; // (Solution)
-		} // (Solution)
-		else { // (Solution)
-			targetDetected = false; // (Solution)
-		} // (Solution)
-	} // (Solution)
-
-	// (Solution)
-	// (Solution)
 
 	/**
 	 * //(Solution)
@@ -345,97 +294,11 @@ public class BlobTracking2 {
 		}
 	}
 
-	// (Solution)
-
-	/**
-	 * // (Solution)
-	 * <p>
-	 * Highlight the blob in the given image, while setting all // (Solution)
-	 * background pixels to grayscale<\p> // (Solution) // (Solution)
-	 * 
-	 * @param source
-	 *            image // (Solution)
-	 * @param destination
-	 *            image // (Solution)
-	 */
-	// (Solution)
-	protected void markBlob(Image src, Image dest) { // (Solution)
-		int maskIndex = 0; // (Solution)
-		// (Solution)
-		for (int y = 0; y < height; y++) { // (Solution)
-			for (int x = 0; x < width; x++) { // (Solution)
-				// (Solution)
-				Pixel pix = src.getPixel(x, y); // (Solution)
-				// (Solution)
-				if (targetDetected && blobMask[maskIndex++] > 0) { // (Solution)
-					dest.setPixel(x, y, new Pixel(0, 255, 0)); // (Solution)
-				} else { // (Solution)
-					int av = (pix.getRed() + pix.getGreen() + pix.getBlue()) / 3; // (Solution)
-					dest.setPixel(x, y, new Pixel(av, av, av));// (Solution)
-				} // (Solution)
-			} // (Solution)
-		} // (Solution)
-	} // (Solution)
-
-	// (Solution)
-
-	/**
-	 * //(Solution)
-	 * <p>
-	 * BallPixel pixel-level classifier. Threshold HSB image //(Solution) based
-	 * on hue distance to target hue and saturation level, //(Solution) and
-	 * build binary mask.
-	 * </p>
-	 * //(Solution) //(Solution)
-	 * 
-	 * @param source
-	 *            image (float) //(Solution)
-	 * @param dest
-	 *            image (int) //(Solution)
-	 **/
-	// (Solution)
-	protected void blobPixel(Image src, int[] mask) { // (Solution)
-		// (Solution)
-		int maskIndex = 0; // (Solution)
-		// (Solution)
-		// use to accumulate for avg hue and saturation (Solution)
-		double avg_h = 0.0; // (Solution)
-		double avg_s = 0.0; // (Solution)
-		// (Solution)
-		for (int y = 0; y < height; y++) { // (Solution)
-			for (int x = 0; x < width; x++) { // (Solution)
-				Pixel pix = src.getPixel(x, y); // (Solution)
-				// (Solution)
-				avg_h += pix.getHue(); // (Solution)
-				avg_s += pix.getSaturation(); // (Solution)
-				// (Solution)
-				double hdist = Math.abs(pix.getHue() - targetHueLevel); // (Solution)
-				// handle colorspace wraparound (Solution)
-				if (hdist > 0.5) { // (Solution)
-					hdist = 1.0 - hdist; // (Solution)
-				} // (Solution)
-				// (Solution)
-				// classify pixel based on saturation level (Solution)
-				// and hue distance (Solution)
-				if (pix.getSaturation() > saturationLevel
-						&& hdist < hueThreshold) { // (Solution)
-					mask[maskIndex++] = 255; // (Solution)
-				} else { // (Solution)
-					mask[maskIndex++] = 0; // (Solution)
-				} // (Solution)
-			} // (Solution)
-		} // (Solution)
-		// (Solution)
-		// avg_h /= width * height; // (Solution)
-		// avg_s /= width * height; // (Solution)
-		// System.err.println("Total Avgerage Hue, Sat: "+avg_h+" "+avg_s);
-		// // (Solution)
-	} // (Solution)
-
+	
 	int blueLower = 100;
 	int blueUpper = 150;
 	int blueSatLower = 150; // 160
-	int blueValLower = 15; // 30
+	int blueValLower = 30;//15; // 30
 
 	int greenLower = 50;
 	int greenUpper = 80;
@@ -453,8 +316,8 @@ public class BlobTracking2 {
 
 	int yellowLower = 22;
 	int yellowUpper = 35;
-	int yellowSatLower = 170;
-	int yellowValLower = 83;
+	int yellowSatLower = 170;//170;
+	int yellowValLower = 83;//83;
 
 	synchronized public void apply(Image src, Image dest) {
 		stepTiming(); // monitors the frame rate
@@ -462,7 +325,9 @@ public class BlobTracking2 {
 		// Begin Student Code
 
 		// convert the image to ipl
-		IplImage rgbIpl = Utility.rgbImgToRgbIplImg(src, log);
+//		Utility.cop
+//		IplImage rgbIpl = Utility.rgbImgToRgbIplImg(src, log);
+		Utility.copyFromBgrImgToRgbIplImg(src, rgbIpl, log);
 		opencv_imgproc.cvCvtColor(rgbIpl, imgHSV, opencv_imgproc.CV_RGB2HSV);
 		opencv_imgproc.cvSmooth(imgHSV, imgHSV, opencv_imgproc.CV_GAUSSIAN, 3);
 
@@ -487,8 +352,10 @@ public class BlobTracking2 {
 			ImageAnalyzer.getBlobs(imgHSV, redLoLower, redLoUpper,
 					redLoSatLower, redLoValLower, imgBlobMaskRedLo);
 			ImageAnalyzer.getBlobs(imgHSV, redHiLower, redHiUpper,
-					redHiSatLower, redHiValLower, imgBlobMaskRed);
-			opencv_core.cvOr(imgBlobMaskRedLo, imgBlobMaskRed, imgBlobMaskRed,
+					redHiSatLower, redHiValLower, imgBlobMaskRedHi);
+//			opencv_core.cvSet(imgBlobMaskRedHi, opencv_core.cvScalar(255, 255, 255, 255),
+//					imgBlobMaskRedLo);
+			opencv_core.cvOr(imgBlobMaskRedLo, imgBlobMaskRedHi, imgBlobMaskRed,
 					null);
 			// YELLOW
 			ImageAnalyzer.getBlobs(imgHSV, yellowLower, yellowUpper,
@@ -498,6 +365,10 @@ public class BlobTracking2 {
 					imgBlobMaskBlue);
 			opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(255, 0, 0, 0),
 					imgBlobMaskGreen);
+//			opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(0, 255, 0, 0),
+//					imgBlobMaskRedLo);
+//			opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(0, 255, 0, 0),
+//					imgBlobMaskRedHi);
 			opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(0, 255, 0, 0),
 					imgBlobMaskRed);
 			opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(0, 255, 255, 0),
@@ -592,6 +463,8 @@ public class BlobTracking2 {
 		}
 		// End Student Code
 
+//		opencv_core.cvReleaseImage(rgbIpl);
+		
 	}
 
 	Blob pickBlobClosestToLast(Blob.BlobColor blobColor) {
@@ -678,8 +551,10 @@ public class BlobTracking2 {
 			ImageAnalyzer.getBlobs(imgHSV, redLoLower, redLoUpper,
 					redLoSatLower, redLoValLower, imgBlobMaskRedLo);
 			ImageAnalyzer.getBlobs(imgHSV, redHiLower, redHiUpper,
-					redHiSatLower, redHiValLower, imgBlobMaskRed);
-			opencv_core.cvOr(imgBlobMaskRedLo, imgBlobMaskRed, imgBlobMaskRed,
+					redHiSatLower, redHiValLower, imgBlobMaskRedHi);
+//			opencv_core.cvSet(imgBlobMaskRedHi, opencv_core.cvScalar(255, 255, 255, 255),
+//					imgBlobMaskRedLo);
+			opencv_core.cvOr(imgBlobMaskRedLo, imgBlobMaskRedHi, imgBlobMaskRed,
 					null);
 			imgMask = imgBlobMaskRed;
 			break;

@@ -21,9 +21,9 @@ public class Arm implements ArmGymnastics {
 	public Arm() {
 		final double SHOULDER_LENGTH = .25;
 		final double ELBOW_LENGTH = .18;
-		shoulder = new ArmJoint(SHOULDER_LENGTH, 0, 550, 2000, 1200, 1975);
+		shoulder = new ArmJoint(SHOULDER_LENGTH, 0, 550, 2300, 1200, 1975);
 		// last two numbers (pwm_theta0, pwm_thetaPiBy2) are wrong for elbow
-		elbow = new ArmJoint(ELBOW_LENGTH, 0, 1080, 1280, 1250, 2100);
+		elbow = new ArmJoint(ELBOW_LENGTH, 0, 1280, 1880, 1250, 2100);
 		wrist = new ArmJoint(1.0, 0, 490, 800, 490, 800);
 	
 		joints = new ArrayList<ArmJoint>();
@@ -76,13 +76,13 @@ public class Arm implements ArmGymnastics {
 
 	@Override
 	public void lowerArm() {
-		elbow.setDesiredPWM(elbow.MAX_PWM);
+		elbow.setDesiredPWM(elbow.MIN_PWM);
 		shoulder.setDesiredPWM(shoulder.MIN_PWM);
 	}
 
 	@Override
 	public void raiseArm() {
-		elbow.setDesiredPWM(elbow.MIN_PWM);
+		elbow.setDesiredPWM(elbow.MAX_PWM);
 		shoulder.setDesiredPWM(shoulder.MAX_PWM);
 	}
 
@@ -104,12 +104,14 @@ public class Arm implements ArmGymnastics {
 		// for all joints, get closer to desired..
 		int countDone = 0;
 		// Order of movement: shoulder > elbow > wrist
-		if (discreteMoveJoint(getShoulder()) &&
-				discreteMoveJoint(getElbow()) &&
-				discreteMoveJoint(getWrist())) {
-			return true;
-		}
-		return false;		
+		boolean a =  discreteMoveJoint(getShoulder());
+		boolean b =  discreteMoveJoint(getElbow());
+		boolean c =  discreteMoveJoint(getWrist());
+		return a && b && c;
+//		if (a  && b && c) {
+//			return true;
+//		}
+//		return false;		
 	}	
 	
 	/*

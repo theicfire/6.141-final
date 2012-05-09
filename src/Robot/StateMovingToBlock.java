@@ -17,7 +17,7 @@ import Robot.StateLookingForBlocks.State;
  */
 public class StateMovingToBlock extends RobotState {
 
-	private static final double STANDOFF_ANGLE = 0.05;
+	private static final double STANDOFF_ANGLE = 0.1;
 	private static final double STANDOFF_DISTANCE = 1.0; // should 0.75
 	private static final double STANDOFF_EPSILON = .02; // should 0.75
 

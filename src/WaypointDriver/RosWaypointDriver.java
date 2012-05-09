@@ -34,7 +34,7 @@ public class RosWaypointDriver implements NodeMain {
 	final double MAX_ROTATIONAL_VELOCITY = .3;
 	final double epsilon2 = .02; // in m
 	final long ENOUGH_TIME = 400;
-
+    
 	private Node globalNode;
 	private Log log;
 	private Publisher<MotionMsg> movePub;
@@ -78,10 +78,10 @@ public class RosWaypointDriver implements NodeMain {
 		public void onNewMessage(org.ros.message.rss_msgs.OdometryMsg om) {
 			forceStop = false;
 			if (om.type.startsWith("forward")) {
-				log.info("MOVE FORWARD BY THETA: " + om.theta);
+				//log.info("MOVE FORWARD BY THETA: " + om.theta);
 				sendMotorMessage(0.15, om.theta);
 			} else if (om.type.startsWith("backward")) {
-				log.info("MOVE BACKWARD BY THETA: " + om.theta);
+				//log.info("MOVE BACKWARD BY THETA: " + om.theta);
 				sendMotorMessage(-0.15, om.theta);
 			} else {
 				driveToPoint(new Point2D.Double(om.x, om.y));
@@ -117,7 +117,7 @@ public class RosWaypointDriver implements NodeMain {
 		this.globalNode = node;
 		this.log = node.getLog();
 		
-		odom = new Localizer(globalNode, false);
+		odom = new Localizer(globalNode);
 	}
 
 	void robotMoveAlongPath(List<Point2D.Double> verts) {
@@ -186,7 +186,7 @@ public class RosWaypointDriver implements NodeMain {
 			e1.printStackTrace();
 		}
 
-	this.stopMoving();
+		this.stopMoving();
 	}
 //	public void rotateToPoint(double theta) {		
 //		double desired = theta + odom.getAngle();		
@@ -229,6 +229,12 @@ public class RosWaypointDriver implements NodeMain {
 
 		Point2D.Double start = odom.getPosition();
 		rotateToPoint(vert);
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		PositionController p = new PositionController(PROPORTIONAL_GAIN,
 				INTEGRAL_GAIN, new Point2D.Double(start.x, start.y),

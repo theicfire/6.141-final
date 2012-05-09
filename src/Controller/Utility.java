@@ -290,29 +290,54 @@ public class Utility {
 		return rgbIpl;
 	}
 
-	public static IplImage rgbImgToRgbIplImg(VisualServoSolution.Image rgbImg,
+//	public static IplImage bgrImgToRgbIplImg(VisualServoSolution.Image rgbImg,
+//			org.apache.commons.logging.Log log) {
+//		final int numChannels = 3;
+//		IplImage rgbIpl = IplImage.create(rgbImg.getWidth(),
+//				rgbImg.getHeight(), opencv_core.IPL_DEPTH_8U, numChannels);
+//		ByteBuffer iplBytePointer = rgbIpl.getByteBuffer();
+//		int width = rgbImg.getWidth();
+//		int height = rgbImg.getHeight();
+//		int widthStep = rgbIpl.widthStep();
+//		int i = 0;
+//		for (int y = 0; y < height; ++y) {
+//			for (int x = 0; x < width; ++x) {
+//				Image.Pixel p = rgbImg.pixels.get(i);
+//				iplBytePointer.put(y * widthStep + x * 3 + 0,
+//						(byte) p.getBlue());
+//				iplBytePointer.put(y * widthStep + x * 3 + 1,
+//						(byte) p.getGreen());
+//				iplBytePointer.put(y * widthStep + x * 3 + 2,
+//						(byte) p.getRed());
+//				++i;
+//			}
+//		}
+//		return rgbIpl;
+//	}
+	
+	public static void copyFromBgrImgToRgbIplImg(VisualServoSolution.Image bgrImg,
+			IplImage dest,
 			org.apache.commons.logging.Log log) {
 		final int numChannels = 3;
-		IplImage rgbIpl = IplImage.create(rgbImg.getWidth(),
-				rgbImg.getHeight(), opencv_core.IPL_DEPTH_8U, numChannels);
-		ByteBuffer iplBytePointer = rgbIpl.getByteBuffer();
-		int width = rgbImg.getWidth();
-		int height = rgbImg.getHeight();
-		int widthStep = rgbIpl.widthStep();
+//		IplImage rgbIpl = IplImage.create(rgbImg.getWidth(),
+//				rgbImg.getHeight(), opencv_core.IPL_DEPTH_8U, numChannels);
+		ByteBuffer iplBytePointer = dest.getByteBuffer();
+		int width = bgrImg.getWidth();
+		int height = bgrImg.getHeight();
+		int widthStep = dest.widthStep();
 		int i = 0;
 		for (int y = 0; y < height; ++y) {
 			for (int x = 0; x < width; ++x) {
-				Image.Pixel p = rgbImg.pixels.get(i);
+				Image.Pixel p = bgrImg.pixels.get(i);
 				iplBytePointer.put(y * widthStep + x * 3 + 0,
 						(byte) p.getBlue());
 				iplBytePointer.put(y * widthStep + x * 3 + 1,
 						(byte) p.getGreen());
-				iplBytePointer
-						.put(y * widthStep + x * 3 + 2, (byte) p.getRed());
+				iplBytePointer.put(y * widthStep + x * 3 + 2,
+						(byte) p.getRed());
 				++i;
 			}
 		}
-		return rgbIpl;
 	}
 
 	public static void copyFromRgbIplImgToRgbImg(IplImage rgbIpl, Image dest,
@@ -356,7 +381,8 @@ public class Utility {
 		CvMat matH2 = opencv_core.cvCreateMat(3,3,opencv_core.CV_32FC1);
 		int result2 = opencv_calib3d.cvFindHomography(matSrc,matDst,matH2,
 			opencv_calib3d.CV_RANSAC, ransacReprojThreshold, mask);
-
+		opencv_core.cvReleaseMat(matSrc);
+		opencv_core.cvReleaseMat(matDst);
 		return matH2;
     }
 	

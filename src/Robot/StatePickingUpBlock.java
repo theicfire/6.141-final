@@ -59,9 +59,9 @@ public class StatePickingUpBlock extends RobotState {
 		
 		blockPose.x -= DIST_FROM_BLOCK_TO_ROBOT * Math.cos(newTheta );
 		blockPose.y -= DIST_FROM_BLOCK_TO_ROBOT * Math.sin(newTheta );
-		robot.odom.updatePosition((new Utility()).new Pose(blockPose,
-				newTheta));
-		robot.planner.markCurrentBlockDone();
+//		robot.odom.updatePosition((new Utility()).new Pose(blockPose,
+//				newTheta));
+//		robot.planner.markCurrentBlockDone();
 
 		while (!done) {
 			switch (state) {
@@ -112,7 +112,7 @@ public class StatePickingUpBlock extends RobotState {
 
 				robot.log.info("done storing block");
 				done = true;
-				robot.planner.nextClosestBlock();
+//				robot.planner.nextClosestBlock();
 				break;
 			}
 			case CHECK_HOLDING_PEN: {

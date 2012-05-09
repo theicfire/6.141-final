@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.Random;
 
 import org.apache.commons.logging.Log;
@@ -60,7 +62,7 @@ public class VisionMain2 implements NodeMain {
 	Localizer odom;
 
 	private ArrayList<Point2D.Double> visionPoints;
-	final int TAKE_NUM_AVERAGES = 5;
+	final int TAKE_NUM_AVERAGES = 15;
 	int averageCount;
 	
 	static IplImage imgHsv; // 3 channels
@@ -72,6 +74,8 @@ public class VisionMain2 implements NodeMain {
 	CvMemStorage cvStorage;
 	private CvMat pixelToFloorH;
 
+	ArrayList<HashSet<Point2D.Double>> pointCloudList;
+	final Lock lockPointCloudList = new ReentrantLock();
 
 	// exponentially weighted moving mean and variances
 	// of the floor points
@@ -110,9 +114,10 @@ public class VisionMain2 implements NodeMain {
 	@Override
 	public void onStart(Node node) {
 		log = node.getLog();
-		this.odom = new Localizer(node, true);
+		
 		map = Utility.getChallengeMap();
-
+		this.odom = new Localizer(node, (new Utility()).new Pose(map.robotStart.x, map.robotStart.y, 0));
+		
 		obstacleToNormals =
 				new Hashtable<ArrayList<Point2D.Double>,
 				ArrayList<Point2D.Double>>();
@@ -148,7 +153,11 @@ public class VisionMain2 implements NodeMain {
 				.newSubscriber("rss/video2", "sensor_msgs/Image");
 		rawVidSub.addMessageListener(new InterpRawVid());
 		rawVidSub = node.newSubscriber("rss/video2", "sensor_msgs/Image");
-		
+
+		pointCloudList = new ArrayList<HashSet<Point2D.Double>>();
+//		IcpRunnable icpRunnable = new IcpRunnable(node);
+//		Thread icpThread = new Thread(icpRunnable);
+//		icpThread.run();
 	}
 
 	public class InterpRawVid implements
@@ -348,6 +357,11 @@ public class VisionMain2 implements NodeMain {
 			if (averageCount >= TAKE_NUM_AVERAGES
 			// ) {
 					&& odom.getPosition().x != 0 && odom.getPosition().y != 0) {
+				
+//				lockPointCloudList.lock();
+//				this.pointCloudList.add(visionPoints);
+//				lockPointCloudList.unlock();
+				
 				ConfidencePose newLocation = ICP.computeCorrectedPosition(
 						// bestGuess, ICP.discretizeMap(map.obstacles),
 						bestGuess, pointCloud, visionPoints, log,

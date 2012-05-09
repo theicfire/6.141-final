@@ -2,6 +2,7 @@ package Planner;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 
@@ -41,7 +42,11 @@ public class Planner {
 		for (ConstructionObject c : map.constructionObjects) {
 			if (VisibilityGraph.getReachablePoints(navigationMain.cspace.getObstacles(), null,
 					c.getPosition(), navigationMain.cWorldRect).size() > 0) {
-				blocks.add(c);
+				ConstructionObject ob = new ConstructionObject();
+				ob.setPosition(new Point2D.Double(c.getPosition().getX(), c.getPosition().getY()));
+				ob.setColor(c.getColor());
+				ob.setSize(c.getSize());
+				blocks.add(ob);
 				log.info("block at " + c.getPosition());
 			}
 		}
@@ -91,7 +96,11 @@ public class Planner {
 
 	public Point2D.Double getCurrentBlockPosition() {
 		log.info("asking for block position; returning" + currentBlock.getPosition());
-		return currentBlock.getPosition();
+		log.info("All blocks: " + blocks);
+		for (ConstructionObject block : blocks) {
+			log.info("a block is: " + block.getPosition());
+		}
+		return new Point2D.Double(currentBlock.getPosition().getX(), currentBlock.getPosition().getY());
 	}
 
 	public void markCurrentBlockDone() {

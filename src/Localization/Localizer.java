@@ -17,37 +17,43 @@ import Controller.Utility.Pose;
 
 public class Localizer {
 
+    final double MAX_ODOMETRY_DIFF_MAGNITUDE = 0.1;
+    final double MAX_ODOMETRY_DIFF_THETA = 10.0 * Math.PI / 180.0;    
+	
 //	Utility.Pose odometryOffset;
-	Utility.Pose lastRawPose;
-	Utility.Pose lastRealPose;
-	Utility.Pose curRawPose;
+	private Utility.Pose lastRawPose;
+	private Utility.Pose lastRealPose;
+	private Utility.Pose curRawPose;
 	//private double[] totalTicks;
 //	private double[] odomXY;
 //	private double odomTheta;
 	private Log log;
 	Subscriber<OdometryMsg> odomSub;
 	Publisher<OdometryMsg> odomAdjustPub;
+	private final Pose startPose;
 	private boolean init = true;
 	private boolean master;
-	/**
-	 * For testing
-	 */
-	public Localizer() {
-		lastRawPose = (new Utility()).new Pose(0, 0, 0);
-		lastRealPose = (new Utility()).new Pose(0, 0, 0);
-		curRawPose = (new Utility()).new Pose(0, 0, 0);
-	}
+//	/**
+//	 * For testing
+//	 */
+//	public Localizer() {
+//		lastRawPose = (new Utility()).new Pose(0, 0, 0);
+//		lastRealPose = (new Utility()).new Pose(0, 0, 0);
+//		curRawPose = (new Utility()).new Pose(0, 0, 0);
+//	}
+	
 	/**
 	 * 
 	 * @param node
-	 * @param master only one master localizer; synchronizes all the others
+	 * @param startPose Only the master node provides a start pose. Slave nodes provide null.
 	 */
-	public Localizer(Node node, boolean isMaster) {
+	public Localizer(Node node, final Pose startPose) {
 		log = node.getLog();
-		lastRawPose = (new Utility()).new Pose(0, 0, 0);
-		lastRealPose = (new Utility()).new Pose(0, 0, 0);
-		curRawPose = (new Utility()).new Pose(0, 0, 0);
-		master = isMaster;
+		this.startPose = startPose;
+		lastRawPose = startPose;
+		lastRealPose = startPose;
+		curRawPose = startPose;
+		master = (startPose != null);
 		//this.totalTicks = new double[2];
 		//this.totalTicks[0] = this.totalTicks[1] = 0.0;
 		//this.odomXY = new double[2];
@@ -65,8 +71,7 @@ public class Localizer {
 					curRawPose = (new Utility()).new Pose(message.x, message.y,
 							message.theta);
 					if (init) {
-						GrandChallengeMap map = Utility.getChallengeMap();
-						updatePosition(map.robotStart.x, map.robotStart.y, 0.0);
+						updatePosition(startPose);
 						init = false;
 					}
 					OdometryMsg newOdomMsg = getPositionPose().getOdomMsg();
@@ -87,15 +92,44 @@ public class Localizer {
 		}
 	}
 
-	public void updatePosition(double x, double y, double theta) {
-		updatePosition((new Utility()).new Pose(x, y, theta));
+	public Localizer(Node node) {
+		this(node, null);
 	}
 	
-	// update this by getting the difference between your current position and getPosition()
-	public void updatePosition(Utility.Pose correctLocation) {
+//	public void updatePosition(double x, double y, double theta) {
+//		updatePosition((new Utility()).new Pose(x, y, theta));
+//	}
+
+	public void updatePosition(Utility.ConfidencePose correctLocation) {
 		if (! master) {
 			throw new RuntimeException("non master node attempted to update Position");
 		}
+		
+		 // make the curve of accepting more dramatic
+        double confidence = Math.pow(correctLocation.getConfidence(), 2);
+        if (confidence == 0) {
+        	return;
+        }        
+        
+        // make the lastRealPose a linear combination of lastRawPose and correctLocation, depending on confidence
+        Pose newCorrect = (new Utility()).new Pose(
+	        correctLocation.getX() * confidence + curRawPose.getX() * (1 - confidence),
+	        correctLocation.getY() * confidence + curRawPose.getY() * (1 - confidence),
+	        correctLocation.getTheta() * confidence + curRawPose.getTheta() * (1 - confidence));
+        
+        // ensure that the new position is within odometry error of the old position
+        if (Utility.getMagnitude(curRawPose.getPoint(), newCorrect.getPoint()) < MAX_ODOMETRY_DIFF_MAGNITUDE && 
+        		Utility.inRangeNegPiToPi(curRawPose.getTheta() - newCorrect.getTheta()) < MAX_ODOMETRY_DIFF_THETA) {
+        	updatePosition(newCorrect);	
+        } else {
+        	// outer edge... that is MAX_MAGNITUDE along the curRawPose -> newCorrect vector
+        	// TODO
+        }
+        
+	}
+	
+	// update this by getting the difference between your current position and getPosition()
+	private void updatePosition(Utility.Pose correctLocation) {
 		log.info("updating position to" + correctLocation);
 //		log.info("Update position to " + correctLocation);
 		lastRawPose = (new Utility()).new Pose(curRawPose.getX(), curRawPose.getY(), curRawPose.getTheta());
@@ -103,20 +137,6 @@ public class Localizer {
 //		this.odometryOffset.setX(odomXY[0] - correctLocation.getX());
 //		this.odometryOffset.setY(odomXY[1] - correctLocation.getY());
 //		this.odometryOffset.setTheta(odomTheta - correctLocation.getTheta());
-	}
-
-	public void updatePosition(Utility.ConfidencePose correctLocation) {
-		 // make the curve of accepting more dramatic
-        double confidence = Math.pow(correctLocation.getConfidence(), 2);
-        if (confidence == 0) {
-        	return;
-        }
-        // make the lastRealPose a linear combination of lastRawPose and correctLocation, depending on confidence
-        Pose newCorrect = (new Utility()).new Pose(
-	        correctLocation.getX() * confidence + curRawPose.getX() * (1 - confidence),
-	        correctLocation.getY() * confidence + curRawPose.getY() * (1 - confidence),
-	        correctLocation.getTheta() * confidence + curRawPose.getTheta() * (1 - confidence));
-	    updatePosition(newCorrect);
 	}
 	
 //	public double getTicksLeft() {
@@ -154,16 +174,16 @@ public class Localizer {
 		return this.getPositionPose().getY();
 	}
 	
-	public static void main(String[] args) {
-		System.out.println("hello");
-		Localizer loc = new Localizer();
-		loc.updatePosition(1, 0, Math.PI / 2.0);
-		loc.curRawPose = (new Utility()).new Pose(1, .5, 0);
-		System.out.println(loc.getPositionPose());
+//	public static void main(String[] args) {
+//		System.out.println("hello");
+//		Localizer loc = new Localizer();
+//		loc.updatePosition(1, 0, Math.PI / 2.0);
+//		loc.curRawPose = (new Utility()).new Pose(1, .5, 0);
+//		System.out.println(loc.getPositionPose());
 //		loc.updatePosition(1, 1, 0);
 //		System.out.println(loc.getPositionPose());
 //		loc.curRawPose = (new Utility()).new Pose(2, 2, 0);
 //		System.out.println(loc.getPositionPose());
-	}
+//	}
 
 }
