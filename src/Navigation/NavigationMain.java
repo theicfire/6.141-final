@@ -195,7 +195,7 @@ public class NavigationMain {
 		// shortestPath.add(new Point2D.Double(0, 0));
 	}
 
-	double robotSquareSideLength = .25 * Math.sqrt(2);
+	double robotSquareSideLength = .1;
 
 	PolygonObstacle createOldSquareRobot() {
 		ArrayList<Point2D.Double> testPoints = new ArrayList<Point2D.Double>();
@@ -252,20 +252,24 @@ public class NavigationMain {
 		return new Rectangle2D.Double(left, bottom, width, height);
 	}
 
-	double xMetersToFarCorner = 0.314325;
-	double yMetersToFarCorner = 0.187325;
+//	double xMetersToFarCorner = 0.314325;
+	
 
 	Rectangle2D.Double createCorrectSquareRobot() {
-		double xD = xMetersToFarCorner;
-		double yD = yMetersToFarCorner;
-		double b = Math.sqrt(xD * xD + yD * yD) * 0.9;
-
-		double left = -b;
-		double bottom = -b;
-
-		double width = 2 * b;
-		double height = width;
-		return new Rectangle2D.Double(left, bottom, width, height);
+//		double xD = xMetersToFarCorner;
+//		double yD = yMetersToFarCorner;
+//		double b = Math.sqrt(xD * xD + yD * yD) * 0.9;
+//
+//		double left = -b;
+//		double bottom = -b;
+//
+//		double width = 2 * b;
+//		double height = width;
+		double height = .39;
+		double yMetersToFarCorner = height / 2; // symetrical
+		double xMetersToFarCorner = 0.314325;
+		double width = 0.44;
+		return new Rectangle2D.Double(-xMetersToFarCorner, -yMetersToFarCorner, width, height);
 	}
 
 	PolygonObstacle rectToPoly(Rectangle2D.Double rect) {

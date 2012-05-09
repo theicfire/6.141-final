@@ -356,7 +356,7 @@ public class VisionMain2 implements NodeMain {
 						+ " new pose " + newLocation.getX() + ", "
 						+ newLocation.getY() + ", theta "
 						+ newLocation.getTheta());
-				// this.odom.updatePosition(newLocation);
+				this.odom.updatePosition(newLocation);
 				averageCount = 0;
 				visionPoints.clear();// = new ArrayList<Point2D.Double>();
 			}
@@ -474,7 +474,7 @@ public class VisionMain2 implements NodeMain {
 		int len = lineStarts.size();
 		for (int i = 0; i < len; ++i) {
 			Point2D.Double start = lineStarts.get(i);
-			Point2D.Double end = lineStarts.get(i);
+			Point2D.Double end = lineEnds.get(i);
 			ArrayList<Point2D.Double> discrLine = VisualLocalization.discretizeLineSegment(
 					start, end, 0.005);
 			pointCloud.addAll(discrLine);

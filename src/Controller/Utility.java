@@ -363,7 +363,7 @@ public class Utility {
 	public static GrandChallengeMap getChallengeMap() {
 		GrandChallengeMap map = new GrandChallengeMap();
 		try {
-			String mapfilename = "/home/rss-student/RSS-I-group/Challenge/src/construction_map_2012.txt";
+			String mapfilename = "/home/rss-student/RSS-I-group/Challenge/src/construction_map_2012Chase.txt";
 			map = GrandChallengeMap.parseFile(mapfilename);
 		} catch (Exception e) {
 			throw new RuntimeException(
