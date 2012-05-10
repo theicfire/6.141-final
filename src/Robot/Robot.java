@@ -23,12 +23,14 @@ import Grasping.RosArmDriver;
 import Localization.Localizer;
 import Navigation.NavigationMain;
 import Planner.Planner;
+import Sound.RosSpeak;
 import VisualServoSolution.VisionMsgWrapper;
 
 public class Robot {
 	Arm arm;
 	RosArmDriver armDriver;
 	RosDoorDriver doorDriver;
+	RosSpeak speaker;
 	// Wheels wheels;
 	// BreakBeamSensor handBreakBeam;
 	// SonarSensor sideSonars[4];
@@ -58,10 +60,15 @@ public class Robot {
 
 	public Robot(Node node) {
 		this.log = node.getLog();
+
+		this.speaker = new RosSpeak(node);
+		speaker.speak("Sound initialized");
 		this.navigationMain = new NavigationMain(node);
 		this.arm = new Arm();
 		this.armDriver = new RosArmDriver(node);
 		this.doorDriver = new RosDoorDriver(node);
+
+		
 		
 		navQueue = new LinkedList<Point2D.Double>();
 		

@@ -10,6 +10,7 @@ public class StateEnd extends RobotState {
 
 	@Override
 	public void perform() {
+		robot.speaker.speak("friday");
 		// robot.arm.raiseArm();
 		// robot.armDriver.doMovement(robot.arm);
 		// this.robot.setStateObject(new StateLookingForBlocks(this.robot));

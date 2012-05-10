@@ -1,6 +1,7 @@
 package Planner;
 
 import java.awt.geom.Point2D;
+import java.io.IOException;
 
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
@@ -15,7 +16,7 @@ public class Main implements NodeMain {
 
 	// ENTRY POINT IS HERE
 	@Override
-	public void onStart(Node node) {		
+	public void onStart(Node node) {
 		Robot robot = new Robot(node);
 		StateInitial startState = new StateInitial(robot);
 		robot.setStateObject(startState);
@@ -31,6 +32,8 @@ public class Main implements NodeMain {
 //		robot.odom.updatePosition((new Utility()).new Pose(blockPose,
 //				robot.odom.getTheta()));
 //		robot.planner.markCurrentBlockDone();
+		
+		
 		
 		while (actuallyWork) {
 			// make states represent atomic actions
@@ -55,5 +58,4 @@ public class Main implements NodeMain {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }
