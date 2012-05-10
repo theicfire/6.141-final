@@ -32,6 +32,7 @@ public class StateLookingForBlocks extends RobotState {
 	public void perform() {
 		// for safety!
 		robot.stopMoving();
+		robot.speaker.speak("block search engaged");
 
 		State state = State.INIT;
 		while (true) {

@@ -15,6 +15,7 @@ public class StateMakingStructure extends RobotState {
 	@Override
 	public void perform() {
 		State state = State.INIT;
+		robot.speaker.speak("making structure");
 		boolean done = false;
 		while (!done) {
 			switch (state) {

@@ -38,7 +38,7 @@ public class StatePickingUpBlock extends RobotState {
 	@Override
 	public void perform() {
 		robot.stopMoving();
-		
+		robot.speaker.speak("this block is mine");
 		State state = State.APPROACHING_BLOCK;
 		boolean done = false;
 
