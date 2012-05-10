@@ -64,6 +64,10 @@ public class StateLookingForBlocks extends RobotState {
 						robot.navigationMain.getAndPlotVisGraph(robotpos), robotpos, 
 						curpos, robot.log);
 				shortestPath.remove(0); // we should already be at the first waypoint
+				if (shortestPath.size() == 0) {
+					// draw a direct line from current pos to block
+					shortestPath.add(curpos);
+				}
 				robot.driveToLocations(shortestPath);
 				state = State.MOVING;
 				break;
