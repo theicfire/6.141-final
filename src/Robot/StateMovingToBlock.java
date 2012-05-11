@@ -34,9 +34,7 @@ public class StateMovingToBlock extends RobotState {
 		robot.log.info("IN STATE MOVING TO BLOCK");
 		robot.speaker.speak("i am getting that block");
 		//robot.stopMoving(); // safety
-		
-		
-		
+				
 		int noBlockTicks = 0;
 		State state = State.INIT;			
 		boolean lowered = false;
@@ -46,19 +44,23 @@ public class StateMovingToBlock extends RobotState {
 		while (true) {
 			switch (state) {
 			case INIT:
-				if (! robot.vision.canSeeBlock()) {
+				if (! robot.vision.canSeeBlock()) { 				
 					noBlockTicks += 1;
+				} else {
+					noBlockTicks = 0;
+				}
+				if (noBlockTicks > 15) {
 					// tuned to 20ms; do not change
 					Utility.sleepFor20ms();
 					// sweep left for 100 ticks (2 sec), then right for 200 ticks (4 sec), then 
 					// give up
-					if (noBlockTicks > 300) {
+					if (noBlockTicks > 310) {
 						// give up after 6 seconds
 						robot.log.info("no block...giving up");
 						robot.stopMoving();
 						robot.setStateObject(new StateInitial(robot));
 						return;
-					} else if (noBlockTicks > 100) {
+					} else if (noBlockTicks > 110) {
 						robot.log.info("no block...moving other way");
 						robot.sendMotorMessage(0, 0.1);
 					} else if (noBlockTicks > 0) {
@@ -66,8 +68,6 @@ public class StateMovingToBlock extends RobotState {
 						robot.sendMotorMessage(0, -0.1);
 					}
 					break;
-				} else {
-					noBlockTicks = 0;
 				}
 				
 				double dist = robot.vision.getBlockDistance();

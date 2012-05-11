@@ -39,7 +39,7 @@ public class NavigationMain {
 	private Log log;
 	private VisibilityGraph vis;
 
-	private GrandChallengeMap map;
+	private final GrandChallengeMap map;
 //	
 
 	private static ColorMsg COLOR_MSG_RED;
@@ -88,7 +88,6 @@ public class NavigationMain {
 		// String mapFileName =
 		// "/home/rss-student/RSS-I-group/lab6/src/practice-maze-02.map";
 
-		map = new GrandChallengeMap();
 //		map.makeLogger(node);
 		log.info("~~~~~~~~~~parsing map file");
 		map = Utility.getChallengeMap();
@@ -276,10 +275,10 @@ public class NavigationMain {
 		return new Rectangle2D.Double(-xMetersToFarCorner, -yMetersToFarCorner, width, height);
 	}
 
-	double furthestDistanceFromRobotOrigin = 0.41;
+	double furthestDistanceFromRobotOrigin = 0.44; // was 0.41
 	PolygonObstacle createCircleRobot() {
 		double radius = furthestDistanceFromRobotOrigin;
-		int numSides = 20;
+		int numSides = 30;
 		PolygonObstacle circle = new PolygonObstacle();
 		double dTheta = (2*Math.PI) / numSides;
 		for (int i = 0; i < numSides; ++i) {

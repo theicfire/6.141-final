@@ -370,10 +370,10 @@ public class VisionMain2 implements NodeMain {
 						// bestGuess, ICP.discretizeMap(map.obstacles),
 						bestGuess, pointCloud, accumulatedVisionPoints, log,
 						"/home/rss-student/ICP/points.txt");
-				log.info("confidence " + newLocation.getConfidence()
-						+ " new pose " + newLocation.getX() + ", "
-						+ newLocation.getY() + ", theta "
-						+ newLocation.getTheta());
+//				log.info("confidence " + newLocation.getConfidence()
+//						+ " new pose " + newLocation.getX() + ", "
+//						+ newLocation.getY() + ", theta "
+//						+ newLocation.getTheta());
 //				this.odom.updatePosition(newLocation);
 				averageCount = 0;
 				accumulatedVisionPoints.clear();// = new ArrayList<Point2D.Double>();

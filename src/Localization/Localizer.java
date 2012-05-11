@@ -59,9 +59,10 @@ public class Localizer {
 			lastRealPose = startPose;
 			curRawPose = startPose;
 		} else {
-			lastRawPose = (new Utility()).new Pose(0, 0, 0);
-			lastRealPose = (new Utility()).new Pose(0, 0, 0);
-			curRawPose = (new Utility()).new Pose(0, 0, 0);
+			// TODO HARDCODED POSITION!!!!
+			lastRawPose = (new Utility()).new Pose(0.6, 0.6, 0);
+			lastRealPose = (new Utility()).new Pose(0.6, 0.6, 0);
+			curRawPose = (new Utility()).new Pose(0.6, 0.6, 0);
 		}
 		master = (startPose != null);
 		// this.totalTicks = new double[2];

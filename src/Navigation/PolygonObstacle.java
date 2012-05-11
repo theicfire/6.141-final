@@ -29,7 +29,7 @@ public class PolygonObstacle {
   /**
    * <p>Whether this polygon has been closed.</p>
    **/
-  protected boolean closed = false;
+  public boolean closed = false;
 
   public Color color = null;
 

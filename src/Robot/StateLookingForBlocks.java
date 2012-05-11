@@ -55,29 +55,37 @@ public class StateLookingForBlocks extends RobotState {
 //				waypoint = tmpPoints.get(tmpCount);
 		
 //				robot.driveToLocation(robot.planner.getCurrentBlockPosition());
-
-				Point2D.Double robotpos = robot.odom.getPosition();
-				Point2D.Double curpos = robot.planner.getCurrentBlockPosition();
-				robot.log.info("looking from " + robotpos);
-				robot.log.info("looking to " + curpos);
-				ArrayList<Point2D.Double> shortestPath = DijkstraGood.getMyDijkstra(
-						robot.navigationMain.getAndPlotVisGraph(robotpos), robotpos, 
-						curpos, robot.log);
-				robot.log.info("DIJKSTRA COMPLETE");
-				if (shortestPath == null) {
-					// there is no route to this block. get the next block.
-					robot.log.info("NO ROUTE TO THIS BLOCK");
-					robot.planner.markCurrentBlockDone();
+				Point2D.Double curpos;
+				Point2D.Double robotpos;
+				ArrayList<Point2D.Double> shortestPath;
+				do {
+					robotpos = robot.odom.getPosition();
 					robot.planner.nextClosestBlock();
-				} else {
-					shortestPath.remove(0); // we should already be at the first waypoint
-					if (shortestPath.size() == 0) {
-						// draw a direct line from current pos to block
-						shortestPath.add(curpos);
+					curpos = robot.planner.getCurrentBlockPosition();
+					robot.log.info("looking from " + robotpos);
+					robot.log.info("looking to " + curpos);
+
+					shortestPath = DijkstraGood.getMyDijkstra(
+							robot.navigationMain.getAndPlotVisGraph(robotpos), robotpos, 
+							curpos, robot.log);
+					robot.log.info("DIJKSTRA COMPLETE");
+					// there is no route to this block. get the next block.
+					if (shortestPath == null) {
+						robot.log.info("NO ROUTE TO THIS BLOCK");
+						robot.log.info("looking from " + robotpos);
+						robot.log.info("looking to " + curpos);
+						robot.planner.markCurrentBlockDone();
+						robot.planner.nextClosestBlock();
 					}
-					robot.driveToLocations(shortestPath);
-					state = State.MOVING;
+				} while (shortestPath == null);
+				
+				shortestPath.remove(0); // we should already be at the first waypoint
+				if (shortestPath.size() == 0) {
+					// draw a direct line from current pos to block
+					shortestPath.add(curpos);
 				}
+				robot.driveToLocations(shortestPath);
+				state = State.MOVING;
 				break;
 			case MOVING:
 				if (robot.vision.canSeeBlock()) {
@@ -88,11 +96,12 @@ public class StateLookingForBlocks extends RobotState {
 					return;
 				} else if (robot.doneMoving()) {
 					// TODO stopMoving; security measure
-					robot.log.info("Done moving");
+					robot.log.info("Done moving; MARKING CURRENT BLOCK AS DONE");
 					robot.stopMoving();
 					state = State.INIT;
 					// normally the block retrival code calls this. but if we got here,
 					// we didn't find a block. just go to the next one. it's ok.
+					robot.planner.markCurrentBlockDone();
 					robot.planner.nextClosestBlock();
 //					tmpCount += 1;
 //					tmpCount = tmpCount % 4;

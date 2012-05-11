@@ -85,6 +85,37 @@ PositionController.VelocityPair,Double // integral: in, out, gain
 		double angleToGoal = Math.atan2(error.errorY,error.errorX);
 		double errorAngleToGoal = bringIntoRangeNegPiToPi(angleToGoal - this.odom.getTheta());
 		
+		
+		/////////////////////////////////
+//		if (errorAngleToGoal < -Math.PI/2) {
+//			
+//			errorAngleToGoal = - bringIntoRangeNegPiToPi(errorAngleToGoal+Math.PI);
+//			rotationalVelocity = errorAngleToGoal * this.propGain;
+//			
+//			double distanceToGoal =
+//					Math.sqrt(error.errorX*error.errorX+error.errorY*error.errorY);
+//			
+//			double translationalSpeed = distanceToGoal * this.propGain;
+//			translationalSpeed = Math.max(Math.min(,MAX_SPEED), b);
+//				if (maxTranslationalSpeed > MAX_SPEED) {
+//					maxTranslationalSpeed = MAX_SPEED;
+//				}
+//				if (maxTranslationalSpeed < MIN_SPEED) {
+//					maxTranslationalSpeed = MIN_SPEED;
+//				}
+//				translationalVelocity = maxTranslationalSpeed;
+//			
+//			VelocityPair result = new VelocityPair(translationalVelocity,rotationalVelocity);
+//			return result;
+//		} else if (errorAngleToGoal > Math.PI/2) {
+//			
+//		}
+//		
+		
+		//////////////////////////
+		
+		
+		
 		if (errorAngleToGoal < Math.PI/3 && errorAngleToGoal > -Math.PI/3) {
 				// we can drive forward
 				double distanceToGoal =

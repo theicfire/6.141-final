@@ -91,6 +91,9 @@ public class Planner {
 				min = dist;
 			}
 		}
+		if (choice == null) {
+			throw new RuntimeException("no reachable blocks left :P");
+		}
 		currentBlock = choice;
 //		log.info("Next block at index" + counter);
 //		currentBlock = blocks.get(counter);

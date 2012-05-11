@@ -113,7 +113,8 @@ public class Robot {
 		public void onNewMessage(org.ros.message.rss_msgs.BreakBeamMsg bb) {
 			log.info("Done moving message received");
 			driveToNextLocation(bb.beamBroken);
-			planner.markCurrentBlockDone();
+//			planner.markCurrentBlockDone();
+//			planner.nextClosestBlock();
 		}
 	}
 	

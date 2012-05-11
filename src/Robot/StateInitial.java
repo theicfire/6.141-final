@@ -16,6 +16,9 @@ import org.ros.message.lab5_msgs.GUISegmentMsg;
 import org.ros.message.lab6_msgs.GUIRectMsg;
 import org.ros.node.parameter.ParameterTree;
 
+import Controller.Utility;
+import Navigation.PolygonObstacle;
+
 public class StateInitial extends RobotState {
 
 	public StateInitial(Robot ri) {
@@ -28,10 +31,39 @@ public class StateInitial extends RobotState {
 		// robot.armDriver.doMovement(robot.arm);
 		// this.robot.setStateObject(new StateLookingForBlocks(this.robot));
 
+		// if we are in c-space, get out
+		PolygonObstacle[] cSpaceObstacles = this.robot.navigationMain.cspace.getObstacles();
+		boolean didCSpaceEscape = false;
+		while (isInCSpace(robot.odom.getPosition(), cSpaceObstacles) && robot.planner.getVisualServoStartPoint() != null) {
+			didCSpaceEscape = true;
+			robot.log.info("i am in cspace and driving back to start location: " + robot.planner.getVisualServoStartPoint());
+			//robot.driveToLocation(robot.planner.getVisualServoStartPoint());
+			robot.driveBackward(0);
+			Utility.sleepFor250ms();
+		} 
+		if (didCSpaceEscape) {
+			robot.stopMoving();
+			Utility.sleepFor5Seconds();
+			robot.planner.nextClosestBlock();
+		}
+		robot.planner.setVisualServoStartPoint(null);
+		
 		if (robot.planner.blocksStored >= 7) {
 			robot.setStateObject(new StateMakingStructure(robot));
 		} else {
 			robot.setStateObject(new StateLookingForBlocks(robot));
 		}
+	}
+	
+	private boolean isInCSpace(Point2D.Double currentPosition, PolygonObstacle[] cSpaceObstacles) {
+		for (PolygonObstacle o: cSpaceObstacles) {
+			robot.log.info("closed?: " + o.closed);
+			robot.log.info("curpos " + currentPosition);
+			if (o.contains(currentPosition)) {
+				robot.log.info("I am inside obstacle " + o);
+				return true;
+			}
+		}
+		return false;
 	}
 }
