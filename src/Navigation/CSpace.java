@@ -1,6 +1,7 @@
 package Navigation;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,36 +12,73 @@ public class CSpace {
 	private double robotRadius;
 	private PolygonObstacle robot; // robot in robotSpace
 	private Point2D.Double robotReferencePoint;
-	
-	public CSpace(PolygonObstacle[] realObstacles, double robotRadius) {
-		this.worldSpaceObstacles = realObstacles;
-		this.robotRadius = robotRadius;
-		this.robot = null;
-		this.robotReferencePoint = null;
-	}
+	private PolygonObstacle[] worldRectEdges;
 
-	public CSpace(PolygonObstacle[] realObstacles, PolygonObstacle robot, Point2D.Double robotReferencePoint) {
+//	public CSpace(PolygonObstacle[] realObstacles, double robotRadius) {
+//		this.worldSpaceObstacles = realObstacles;
+//		this.robotRadius = robotRadius;
+//		this.robot = null;
+//		this.robotReferencePoint = null;
+//	}
+
+	public CSpace(PolygonObstacle[] realObstacles,
+			PolygonObstacle robot,
+			Point2D.Double robotReferencePoint,
+			Rectangle2D.Double worldRect) {
 		this.worldSpaceObstacles = realObstacles;
 		this.robotRadius = 0;
 		this.robot = robot;
 
+		this.worldRectEdges = new PolygonObstacle[4];
+		createWorldRectEdges(worldRect);
+
 		this.robotReferencePoint = new Point2D.Double(robotReferencePoint.x,robotReferencePoint.y);
 	}
 	
-	public PolygonObstacle[] getObstacles() {
-		ArrayList<PolygonObstacle> ret = new ArrayList<PolygonObstacle>();
+	void createWorldRectEdges(Rectangle2D.Double worldRect) {
+		double x = worldRect.x;
+		double y = worldRect.y;
+		double width = worldRect.width;
+		double height = worldRect.height;
 
-		if (robot == null) {
-			for (PolygonObstacle poly : worldSpaceObstacles) {
-				ret.add(sumAndConvexHull(poly, getRobotPoly()));
-			}
-		} else {
-			PolygonObstacle reflected = reflectPolygonAboutPoint(this.robot, robotReferencePoint);
-			for (PolygonObstacle wsObstacle : worldSpaceObstacles) {
-				ArrayList<Point2D.Double> sum = minkowskiSum(reflected,wsObstacle);
-				ret.add(GeomUtils.convexHull(sum));
-			}
+		PolygonObstacle left = new PolygonObstacle();
+		PolygonObstacle right = new PolygonObstacle();
+		PolygonObstacle bot = new PolygonObstacle();
+		PolygonObstacle top = new PolygonObstacle();
+		left.addVertex(x,y);
+		left.addVertex(x,y+height);
+		right.addVertex(x+width,y);
+		right.addVertex(x+width,y+height);
+		bot.addVertex(x,y);
+		bot.addVertex(x+width,y);
+		top.addVertex(x,y+height);
+		top.addVertex(x+width,y+height);
+
+		worldRectEdges[0] = left;
+		worldRectEdges[1] = right;
+		worldRectEdges[2] = bot;
+		worldRectEdges[3] = top;
+	}
+	
+	public PolygonObstacle[] getObstacles() {
+		ArrayList<PolygonObstacle> ret =
+				new ArrayList<PolygonObstacle>();
+
+		PolygonObstacle reflected =
+			reflectPolygonAboutPoint(this.robot, robotReferencePoint);
+		for (PolygonObstacle wsObstacle : worldSpaceObstacles) {
+			ArrayList<Point2D.Double> sum =
+				minkowskiSum(reflected,wsObstacle);
+			ret.add(GeomUtils.convexHull(sum));
 		}
+
+		// now add the cspace imposed by the world rectangle
+		for (PolygonObstacle wsObstacle : worldRectEdges) {
+			ArrayList<Point2D.Double> sum =
+				minkowskiSum(reflected,wsObstacle);
+			ret.add(GeomUtils.convexHull(sum));
+		}
+
 		return ret.toArray(new PolygonObstacle[ret.size()]);
 	}
 

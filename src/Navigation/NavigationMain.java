@@ -152,15 +152,19 @@ public class NavigationMain {
 		// new Point2D.Double(0.0,0.0));
 		// Rectangle2D.Double rsRobotRect =
 		// this.createOverEstimatedSquareRobot();
+		
+		log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~NavigationMain.java: herer");
+		Rectangle2D.Double wsWorldRect = map.getWorldRect();
 		Rectangle2D.Double rsRobotRect = this.createCorrectSquareRobot();
-		PolygonObstacle robotPoly = this.rectToPoly(rsRobotRect);
+//		PolygonObstacle robotPoly = this.rectToPoly(rsRobotRect);
+		PolygonObstacle robotPoly = this.createCircleRobot();
 		cspace = new CSpace(polygons, robotPoly, new Point2D.Double(0.0,
-				0.0));
+				0.0),wsWorldRect);
 
 		PolygonObstacle[] configObstacles = cspace.getObstacles();
 		plotObstacles(configObstacles, COLOR_MSG_YELLOW);
 
-		Rectangle2D.Double wsWorldRect = map.getWorldRect();
+		
 		PolygonObstacle polyRect = new PolygonObstacle();
 		polyRect.addVertex(new Point2D.Double(wsWorldRect.x, wsWorldRect.y));
 		polyRect.addVertex(new Point2D.Double(
@@ -272,6 +276,21 @@ public class NavigationMain {
 		return new Rectangle2D.Double(-xMetersToFarCorner, -yMetersToFarCorner, width, height);
 	}
 
+	double furthestDistanceFromRobotOrigin = 0.41;
+	PolygonObstacle createCircleRobot() {
+		double radius = furthestDistanceFromRobotOrigin;
+		int numSides = 80;
+		PolygonObstacle circle = new PolygonObstacle();
+		double dTheta = (2*Math.PI) / numSides;
+		for (int i = 0; i < numSides; ++i) {
+			double theta = i*dTheta;
+			double cos = Math.cos(theta);
+			double sin = Math.sin(theta);
+			circle.addVertex(radius*cos, radius*sin);
+		}
+		return circle;
+	}
+	
 	PolygonObstacle rectToPoly(Rectangle2D.Double rect) {
 		double left = rect.x;
 		double bottom = rect.y;

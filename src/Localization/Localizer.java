@@ -108,11 +108,12 @@ public class Localizer {
 
 	public void updatePosition(Utility.ConfidencePose correctLocation) {
 		if (! master) {
-			throw new RuntimeException("non master node attempted to update Position");
+			throw new RuntimeException("non-master node attempted to update Position");
 		}
 		
-		 // make the curve of accepting more dramatic
-        double confidence = Math.pow(correctLocation.getConfidence(), 2);
+		// make the curve of accepting more dramatic
+        //double confidence = Math.pow(correctLocation.getConfidence(), 2);
+		double confidence = correctLocation.getConfidence();
         if (confidence < 1) {
         	return;
         }
@@ -123,9 +124,11 @@ public class Localizer {
 	        correctLocation.getY() * confidence + curRawPose.getY() * (1 - confidence),
 	        correctLocation.getTheta() * confidence + curRawPose.getTheta() * (1 - confidence));
         
+        // curRawPose should be the raw odometry point
         // ensure that the new position is within odometry error of the old position
         if (Utility.getMagnitude(curRawPose.getPoint(), newCorrect.getPoint()) < MAX_ODOMETRY_DIFF_MAGNITUDE && 
         		Utility.inRangeNegPiToPi(curRawPose.getTheta() - newCorrect.getTheta()) < MAX_ODOMETRY_DIFF_THETA) {
+        	log.info("new pose " + newCorrect + " is within odom error of + " + curRawPose);
         	updatePosition(newCorrect);	
         } else {
         	// outer edge... that is MAX_MAGNITUDE along the curRawPose -> newCorrect vector

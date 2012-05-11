@@ -67,10 +67,25 @@ public class ImageAnalyzer {
 			int hueUpperBound,
 			int satLowerBound,
 			int valLowerBound,
+			int valUpperBound,
 			IplImage dstImgBlobMask) {
 		opencv_core.cvInRangeS(imgHSV,
         		opencv_core.cvScalar(hueLowerBound, satLowerBound, valLowerBound, 0),
-        		opencv_core.cvScalar(hueUpperBound, 255, 255, 0),
+        		opencv_core.cvScalar(hueUpperBound, 255, valUpperBound, 0),
+        		dstImgBlobMask);
+	}
+	
+	static void smoothMask(IplImage dstImgBlobMask, int lowThreshold,
+			int kernelSize) {
+
+		opencv_imgproc.cvSmooth(dstImgBlobMask, dstImgBlobMask,
+				opencv_imgproc.CV_GAUSSIAN, kernelSize);
+//		opencv_imgproc.GaussianBlur(dstImgBlobMask, dstImgBlobMask,
+//				new CvSize(5), arg3, arg4, arg5)
+
+		opencv_core.cvInRangeS(dstImgBlobMask,
+        		opencv_core.cvScalar(lowThreshold, 0, 0, 0),
+        		opencv_core.cvScalar(255, 255, 255, 0),
         		dstImgBlobMask);
 	}
 	

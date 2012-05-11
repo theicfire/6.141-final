@@ -28,6 +28,7 @@ public class StateInitial extends RobotState {
 		// robot.armDriver.doMovement(robot.arm);
 		// this.robot.setStateObject(new StateLookingForBlocks(this.robot));
 
+		robot.speaker.speak("friday");
 		if (robot.planner.blocksStored >= 7) {
 			robot.setStateObject(new StateMakingStructure(robot));
 		} else {

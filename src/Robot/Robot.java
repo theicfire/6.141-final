@@ -61,14 +61,12 @@ public class Robot {
 	public Robot(Node node) {
 		this.log = node.getLog();
 
+		this.navigationMain = new NavigationMain(node);
 		this.speaker = new RosSpeak(node);
 		speaker.speak("Sound initialized");
-		this.navigationMain = new NavigationMain(node);
 		this.arm = new Arm();
 		this.armDriver = new RosArmDriver(node);
-		this.doorDriver = new RosDoorDriver(node);
-
-		
+		this.doorDriver = new RosDoorDriver(node);		
 		
 		navQueue = new LinkedList<Point2D.Double>();
 		

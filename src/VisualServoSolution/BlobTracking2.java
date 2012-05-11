@@ -296,28 +296,41 @@ public class BlobTracking2 {
 
 	
 	int blueLower = 100;
-	int blueUpper = 150;
+	int blueUpper = 130;
 	int blueSatLower = 150; // 160
 	int blueValLower = 30;//15; // 30
+	int blueValUpper = 250;
+	int blueSmoothThresh = 128;
+	int blueSmoothKernel = 5;
 
 	int greenLower = 50;
 	int greenUpper = 80;
 	int greenSatLower = 160;
 	int greenValLower = 40;
+	int greenValUpper = 255;
+	int greenSmoothThresh = 128;
+	int greenSmoothKernel = 5;
 
 	int redLoLower = 0;
 	int redLoUpper = 10;
 	int redLoSatLower = 160;
 	int redLoValLower = 75;
+	int redLoValUpper = 255;
 	int redHiLower = 175;
 	int redHiUpper = 180;
 	int redHiSatLower = 160;
 	int redHiValLower = 75;
+	int redHiValUpper = 255;
+	int redSmoothThresh = 50;
+	int redSmoothKernel = 9;
 
 	int yellowLower = 22;
 	int yellowUpper = 35;
 	int yellowSatLower = 170;//170;
 	int yellowValLower = 83;//83;
+	int yellowValUpper = 255;
+	int yellowSmoothThresh = 128;
+	int yellowSmoothKernel = 5;
 
 	synchronized public void apply(Image src, Image dest) {
 		stepTiming(); // monitors the frame rate
@@ -344,26 +357,32 @@ public class BlobTracking2 {
 		if (true) {
 			// BLUE
 			ImageAnalyzer.getBlobs(imgHSV, blueLower, blueUpper, blueSatLower,
-					blueValLower, imgBlobMaskBlue);
+					blueValLower, blueValUpper, imgBlobMaskBlue);
+			ImageAnalyzer.smoothMask(imgBlobMaskBlue, this.blueSmoothThresh,
+					this.blueSmoothKernel);
 			// GREEN
 			ImageAnalyzer.getBlobs(imgHSV, greenLower, greenUpper,
-					greenSatLower, greenValLower, imgBlobMaskGreen);
+					greenSatLower, greenValLower, greenValUpper, imgBlobMaskGreen);
+			ImageAnalyzer.smoothMask(imgBlobMaskGreen, this.greenSmoothThresh,
+					this.greenSmoothKernel);
 			// RED
 			ImageAnalyzer.getBlobs(imgHSV, redLoLower, redLoUpper,
-					redLoSatLower, redLoValLower, imgBlobMaskRedLo);
+					redLoSatLower, redLoValLower, redLoValUpper, imgBlobMaskRedLo);
 			ImageAnalyzer.getBlobs(imgHSV, redHiLower, redHiUpper,
-					redHiSatLower, redHiValLower, imgBlobMaskRedHi);
-//			opencv_core.cvSet(imgBlobMaskRedHi, opencv_core.cvScalar(255, 255, 255, 255),
-//					imgBlobMaskRedLo);
+					redHiSatLower, redHiValLower, redHiValUpper, imgBlobMaskRedHi);
 			opencv_core.cvOr(imgBlobMaskRedLo, imgBlobMaskRedHi, imgBlobMaskRed,
 					null);
+			ImageAnalyzer.smoothMask(imgBlobMaskRed, this.redSmoothThresh,
+					this.redSmoothKernel);
 			// YELLOW
 			ImageAnalyzer.getBlobs(imgHSV, yellowLower, yellowUpper,
-					yellowSatLower, yellowValLower, imgBlobMaskYellow);
+					yellowSatLower, yellowValLower, yellowValUpper, imgBlobMaskYellow);
+			ImageAnalyzer.smoothMask(imgBlobMaskYellow, this.yellowSmoothThresh,
+					this.yellowSmoothKernel);
 
 			opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(255, 255, 0, 0),
 					imgBlobMaskBlue);
-			opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(255, 0, 0, 0),
+			opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(255, 0, 255, 0),
 					imgBlobMaskGreen);
 //			opencv_core.cvSet(rgbIpl, opencv_core.cvScalar(0, 255, 0, 0),
 //					imgBlobMaskRedLo);
@@ -376,55 +395,6 @@ public class BlobTracking2 {
 		}
 		// log.info("~~~~~~~~~~~~~~~~~here");
 		Utility.copyFromRgbIplImgToRgbImg(rgbIpl, dest, log);
-
-		// ArrayList<Blob> blobList =
-		// this.blockMapper.getBlobList(src,log);
-		// ArrayList<Blob> blobListBlue = this.getBlobList(
-		// imgBlobMaskBlue,Blob.BlobColor.BLUE,
-		// MIN_BLOB_AREA, MAX_BLOB_AREA,
-		// LOW_THRESHOLD, RATIO, KERNEL_SIZE);
-		// ArrayList<Blob> blobListGreen = this.getBlobList(
-		// imgBlobMaskGreen,Blob.BlobColor.GREEN,
-		// MIN_BLOB_AREA, MAX_BLOB_AREA,
-		// LOW_THRESHOLD, RATIO, KERNEL_SIZE);
-//		ArrayList<Blob> blobList = this.getBlobList(imgBlobMaskRed,
-//				Blob.BlobColor.RED, MIN_BLOB_AREA, MAX_BLOB_AREA,
-//				LOW_THRESHOLD, RATIO, KERNEL_SIZE);
-		// ArrayList<Blob> blobListYellow = this.getBlobList(
-		// imgBlobMaskYellow,Blob.BlobColor.YELLOW,
-		// MIN_BLOB_AREA, MAX_BLOB_AREA,
-		// LOW_THRESHOLD, RATIO, KERNEL_SIZE);
-
-		// log.info("numBlobs: " + blobList.size());
-
-//		if (blobList.size() > 0) {
-//			if (lastBlob != null) {
-//				// pick the blob that is closest to the last blob
-//				int closeEnough = 300;
-//				int closestDistSqr = Integer.MAX_VALUE;
-//				for (Blob blob : blobList) {
-//					if (blob.color == lastBlob.color) {
-//						int deltaX = lastBlob.px_x - blob.px_x;
-//						int deltaY = lastBlob.px_y - blob.px_y;
-//						int distSqr = deltaX * deltaX + deltaY * deltaY;
-//						if (distSqr < closeEnough && distSqr < closestDistSqr) {
-//							// log.info("distSqr: " + distSqr);
-//							pickedBlob = blob;
-//							closestDistSqr = distSqr;
-//						}
-//					}
-//				}
-//			}
-//
-//			if (pickedBlob == null) {
-//				// experimental - TODO - may stick too closely to a blob
-//				// if (lastBlob != null) {
-//				// pickedBlob = lastBlob;
-//				// } else {
-//				pickedBlob = blobList.get(0);
-//				// }
-//			}
-//		}
 
 		lastBlob = pickedBlob;
 
@@ -539,28 +509,36 @@ public class BlobTracking2 {
 		switch (blobColor) {
 		case BLUE:
 			ImageAnalyzer.getBlobs(imgHSV, blueLower, blueUpper, blueSatLower,
-					blueValLower, imgBlobMaskBlue);
+					blueValLower, blueValUpper, imgBlobMaskBlue);
+			ImageAnalyzer.smoothMask(imgBlobMaskBlue,
+					this.blueSmoothThresh, this.blueSmoothKernel);
 			imgMask = imgBlobMaskBlue;
 			break;
 		case GREEN:
 			ImageAnalyzer.getBlobs(imgHSV, greenLower, greenUpper,
-					greenSatLower, greenValLower, imgBlobMaskGreen);
+					greenSatLower, greenValLower, greenValUpper, imgBlobMaskGreen);
+			ImageAnalyzer.smoothMask(imgBlobMaskGreen,
+					this.greenSmoothThresh, this.greenSmoothKernel);
 			imgMask = imgBlobMaskGreen;
 			break;
 		case RED:
 			ImageAnalyzer.getBlobs(imgHSV, redLoLower, redLoUpper,
-					redLoSatLower, redLoValLower, imgBlobMaskRedLo);
+					redLoSatLower, redLoValLower, redLoValUpper, imgBlobMaskRedLo);
 			ImageAnalyzer.getBlobs(imgHSV, redHiLower, redHiUpper,
-					redHiSatLower, redHiValLower, imgBlobMaskRedHi);
+					redHiSatLower, redHiValLower, redHiValUpper, imgBlobMaskRedHi);
 //			opencv_core.cvSet(imgBlobMaskRedHi, opencv_core.cvScalar(255, 255, 255, 255),
 //					imgBlobMaskRedLo);
 			opencv_core.cvOr(imgBlobMaskRedLo, imgBlobMaskRedHi, imgBlobMaskRed,
 					null);
+			ImageAnalyzer.smoothMask(imgBlobMaskRed,
+					this.redSmoothThresh, this.redSmoothKernel);
 			imgMask = imgBlobMaskRed;
 			break;
 		case YELLOW:
 			ImageAnalyzer.getBlobs(imgHSV, yellowLower, yellowUpper,
-					yellowSatLower, yellowValLower, imgBlobMaskYellow);
+					yellowSatLower, yellowValLower, yellowValUpper, imgBlobMaskYellow);
+			ImageAnalyzer.smoothMask(imgBlobMaskYellow,
+					this.yellowSmoothThresh, this.yellowSmoothKernel);
 			imgMask = imgBlobMaskYellow;
 			break;
 		}

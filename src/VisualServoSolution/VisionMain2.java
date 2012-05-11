@@ -50,6 +50,7 @@ import VisualServoSolution.VisionMain.InterpRawVid;
 
 public class VisionMain2 implements NodeMain {
 
+	private static final int VISION_IMAGE_WIDTH = 320;
 	Node globalNode;
 	GrandChallengeMap map;
 	Publisher<org.ros.message.sensor_msgs.Image> vidPub;
@@ -61,8 +62,10 @@ public class VisionMain2 implements NodeMain {
 	Log log;
 	Localizer odom;
 
-	private ArrayList<Point2D.Double> visionPoints;
-	final int TAKE_NUM_AVERAGES = 50;
+	// must have at least NUM_VISION_POINTS to perform ICP
+	final int NUM_VISION_POINTS_THRESHOLD = 75;
+	private ArrayList<Point2D.Double> accumulatedVisionPoints;
+	final int TAKE_NUM_AVERAGES = 10;
 	int averageCount;
 	
 	static IplImage imgHsv; // 3 channels
@@ -84,8 +87,8 @@ public class VisionMain2 implements NodeMain {
 	// var(n) = (1-alpha) * (var(n-1) + alpha * (s(n)-mean(n-1))^2)
 	double ewmaWeightX = 1.0/8;
 	double ewmaWeightY = 1.0/8;
-	double VAR_THRESHOLD_X = 0.1;//0.5;
-	double VAR_THRESHOLD_Y = 0.1;//0.5;
+	double VAR_THRESHOLD_X = 0.08;//0.5;
+	double VAR_THRESHOLD_Y = 0.08;//0.5;
 	double ewmaFloorX[];
 	double ewmaFloorY[];
 	double ewmvFloorX[];
@@ -117,15 +120,31 @@ public class VisionMain2 implements NodeMain {
 		map = Utility.getChallengeMap();
 		this.odom = new Localizer(node, (new Utility()).new Pose(map.robotStart.x, map.robotStart.y, 0));
 		
+		accumulatedVisionPoints = new ArrayList<Point2D.Double>((int) VISION_IMAGE_WIDTH * TAKE_NUM_AVERAGES);
+		accumulatedVisionPoints.ensureCapacity((int) VISION_IMAGE_WIDTH * TAKE_NUM_AVERAGES);	
+		
 		obstacleToNormals =
 				new Hashtable<ArrayList<Point2D.Double>,
 				ArrayList<Point2D.Double>>();
 		buildObstacleToNormalsMapping();
-
+		// homography
+		String homographyData = "/home/rss-student/RSS-I-group/Challenge/calibration4.txt";
+		ArrayList<HomographySrcDstPoint> homoPoints = HomographySrcDstPoint
+				.loadHomographyDataTextFile(homographyData);
+		double FEET_TO_METERS = 0.3048;
+		for (int i = 0; i < homoPoints.size(); ++i) {
+			homoPoints.get(i).dst_x *= FEET_TO_METERS;
+			homoPoints.get(i).dst_y *= FEET_TO_METERS;
+		}
+		pointCloudList = new ArrayList<HashSet<Point2D.Double>>();
+//		IcpRunnable icpRunnable = new IcpRunnable(node);
+//		Thread icpThread = new Thread(icpRunnable);
+//		icpThread.run();
+		
 		erasePub = node.newPublisher("gui/Erase", "lab5_msgs/GUIEraseMsg");
 		
 		// TODO Auto-generated method stub
-		vidPub = node.newPublisher("/rss/blobVideo2", "sensor_msgs/Image");
+//		vidPub = node.newPublisher("/rss/blobVideo2", "sensor_msgs/Image");
 		vidPubThreshold = node.newPublisher("/rss/blobVideo2B",
 				"sensor_msgs/Image");
 		vidPubHue = node.newPublisher("/rss/blobVideo2C", "sensor_msgs/Image");
@@ -134,29 +153,13 @@ public class VisionMain2 implements NodeMain {
 
 		// image processing initialization
 		cvStorage = opencv_core.cvCreateMemStorage(0);
-
-		// homography
-		String homographyData = "/home/rss-student/RSS-I-group/Challenge/calibration4.txt";
-		ArrayList<HomographySrcDstPoint> homoPoints = HomographySrcDstPoint
-				.loadHomographyDataTextFile(homographyData);
-
-		double FEET_TO_METERS = 0.3048;
-		for (int i = 0; i < homoPoints.size(); ++i) {
-			homoPoints.get(i).dst_x *= FEET_TO_METERS;
-			homoPoints.get(i).dst_y *= FEET_TO_METERS;
-		}
-
 		pixelToFloorH = Utility.computeHomography(homoPoints);
 
 		Subscriber<org.ros.message.sensor_msgs.Image> rawVidSub = node
 				.newSubscriber("rss/video2", "sensor_msgs/Image");
 		rawVidSub.addMessageListener(new InterpRawVid());
-		rawVidSub = node.newSubscriber("rss/video2", "sensor_msgs/Image");
+//		rawVidSub = node.newSubscriber("rss/video2", "sensor_msgs/Image");
 
-		pointCloudList = new ArrayList<HashSet<Point2D.Double>>();
-//		IcpRunnable icpRunnable = new IcpRunnable(node);
-//		Thread icpThread = new Thread(icpRunnable);
-//		icpThread.run();
 	}
 
 	public class InterpRawVid implements
@@ -172,6 +175,11 @@ public class VisionMain2 implements NodeMain {
 			// src.height);
 //			log.info("visionmain2.java: here");
 			counter += 1;
+			
+			if (VISION_IMAGE_WIDTH != src.width) {
+				throw new RuntimeException ("Constant VISION_IMAGE_WIDTH does not match actual vision width of " + src.width);
+			}
+			
 			if (firstMessage) {
 				log.info("VisionMain2.java: firstmsg," + src.width + " "
 						+ src.height);
@@ -189,12 +197,8 @@ public class VisionMain2 implements NodeMain {
 						(int) src.height, depth, 1);
 
 				rgbIpl = IplImage.create((int) src.width,
-						(int) src.height, opencv_core.IPL_DEPTH_8U, 3);
-				
-				
-				visionPoints = new ArrayList<Point2D.Double>((int) src.width);
-				visionPoints.ensureCapacity((int) src.width);
-				
+						(int) src.height, opencv_core.IPL_DEPTH_8U, 3);				
+					
 				// initialize matrices here
 				ewmaFloorX = new double[(int) src.width];
 				ewmaFloorY = new double[(int) src.width];
@@ -326,6 +330,9 @@ public class VisionMain2 implements NodeMain {
 		double cos = Math.cos(bestGuess.getTheta());
 		double sin = Math.sin(bestGuess.getTheta());
 
+		ArrayList<Point2D.Double> visionPoints =
+				new ArrayList<Point2D.Double>((int) src.width);
+
 		for (int i = 0; i < ewmaFloorX.length; ++i) {
 			
 			if (this.pixelYIsValid[i]
@@ -345,12 +352,14 @@ public class VisionMain2 implements NodeMain {
 			}
 		}
 		
-		if (visionPoints.size() > 0) {
+		if (visionPoints.size() > NUM_VISION_POINTS_THRESHOLD) {
 			Utility.Pair<ArrayList<Point2D.Double>, ArrayList<Point2D.Double>> lineStartAndLineEnds = calcFacingEdges(new Point2D.Double(
 					bestGuess.getX(), bestGuess.getY()));
 			HashSet<Point2D.Double> pointCloud = discretizeLines(
 					lineStartAndLineEnds.first, lineStartAndLineEnds.second);
-
+			
+			accumulatedVisionPoints.addAll(visionPoints);
+			
 			averageCount += 1;
 			// TODO hack to make sure we're not at 0, 0
 			if (averageCount >= TAKE_NUM_AVERAGES && odom.getPosition().x != 0 && odom.getPosition().y != 0) {			
@@ -360,7 +369,7 @@ public class VisionMain2 implements NodeMain {
 				
 				ConfidencePose newLocation = ICP.computeCorrectedPosition(
 						// bestGuess, ICP.discretizeMap(map.obstacles),
-						bestGuess, pointCloud, visionPoints, log,
+						bestGuess, pointCloud, accumulatedVisionPoints, log,
 						"/home/rss-student/ICP/points.txt");
 				log.info("confidence " + newLocation.getConfidence()
 						+ " new pose " + newLocation.getX() + ", "
@@ -368,12 +377,11 @@ public class VisionMain2 implements NodeMain {
 						+ newLocation.getTheta());
 //				this.odom.updatePosition(newLocation);
 				averageCount = 0;
-				visionPoints.clear();// = new ArrayList<Point2D.Double>();
+				accumulatedVisionPoints.clear();// = new ArrayList<Point2D.Double>();
 			}
 		} else {
 			log.info("VisionMain2.java: no contours");
 		}
-
 
 //		double SLOPE_THRESH = 2.0;
 //		if (bestContour != null) {

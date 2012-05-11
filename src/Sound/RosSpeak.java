@@ -17,7 +17,7 @@ public class RosSpeak {
 		String[] args = {"hello"};
 		log.info("Waiting for subscribers FOR SOUND");
 			while (soundPub.getNumberOfSubscribers() == 0) {
-			 log.info("num sub FOR SOUND is 0");
+//			 log.info("num sub FOR SOUND is 0");
 		}
 		log.info("More than 0 subscribers");
 	}
