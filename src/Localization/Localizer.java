@@ -16,8 +16,8 @@ import Controller.Utility.Pose;
 
 public class Localizer {
 
-	final double MAX_ODOMETRY_DIFF_MAGNITUDE = 0.10;
-	final double MAX_ODOMETRY_DIFF_THETA = 5.0 * Math.PI / 180.0;
+	final double MAX_ODOMETRY_DIFF_MAGNITUDE = 0.075;
+	final double MAX_ODOMETRY_DIFF_THETA = 4.0 * Math.PI / 180.0;
     final double startTime;
 
 	// Utility.Pose odometryOffset;
