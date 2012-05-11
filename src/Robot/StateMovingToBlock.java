@@ -35,29 +35,35 @@ public class StateMovingToBlock extends RobotState {
 		robot.speaker.speak("i am getting that block");
 		//robot.stopMoving(); // safety
 		
+		
+		
 		int noBlockTicks = 0;
 		State state = State.INIT;			
 		boolean lowered = false;
 		Point2D.Double startPoint = robot.odom.getPosition();
+		robot.planner.setVisualServoStartPoint(startPoint);
 		
 		while (true) {
 			switch (state) {
 			case INIT:
 				if (! robot.vision.canSeeBlock()) {
-					robot.log.info("no block...:P");
 					noBlockTicks += 1;
 					// tuned to 20ms; do not change
 					Utility.sleepFor20ms();
 					// sweep left for 100 ticks (2 sec), then right for 200 ticks (4 sec), then 
 					// give up
-					if (noBlockTicks > 360) {
+					if (noBlockTicks > 300) {
 						// give up after 6 seconds
-						robot.setStateObject(new StateLookingForBlocks(robot));
+						robot.log.info("no block...giving up");
+						robot.stopMoving();
+						robot.setStateObject(new StateInitial(robot));
 						return;
 					} else if (noBlockTicks > 100) {
-						robot.sendMotorMessage(0, 0.25);
+						robot.log.info("no block...moving other way");
+						robot.sendMotorMessage(0, 0.1);
 					} else if (noBlockTicks > 0) {
-						robot.sendMotorMessage(0, -0.25);
+						robot.log.info("no block...moving one way");
+						robot.sendMotorMessage(0, -0.1);
 					}
 					break;
 				} else {

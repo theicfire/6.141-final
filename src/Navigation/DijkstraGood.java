@@ -99,8 +99,9 @@ public class DijkstraGood {
 
 	public static List<Vertex> getShortestPathTo(Vertex target) {
 		List<Vertex> path = new ArrayList<Vertex>();
-		for (Vertex vertex = target; vertex != null; vertex = vertex.previous)
+		for (Vertex vertex = target; vertex != null; vertex = vertex.previous) {
 			path.add(vertex);
+		}
 
 		Collections.reverse(path);
 		return path;
@@ -169,6 +170,9 @@ public class DijkstraGood {
 		List<Vertex> path = DijkstraGood.getShortestPathTo(endV);
 		ArrayList<Point2D.Double> fin = new ArrayList<Point2D.Double>();
 		for (Vertex v : path) {
+			if (v.minDistance == Double.POSITIVE_INFINITY) {
+				return null;
+			}
 			fin.add(v.myPoint);
 			log.info("FINAL PATH TO " + v.myPoint);
 		}

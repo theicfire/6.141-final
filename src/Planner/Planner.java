@@ -29,6 +29,7 @@ public class Planner {
 	private Log log;
 	NavigationMain navigationMain;
 	public int blocksStored = 0;
+	private Point2D.Double visualServoStartPoint;
 
 	public Planner(Localizer ourOdom, Log log, NavigationMain navigationMain) {
 		this.log = log;
@@ -108,5 +109,13 @@ public class Planner {
 		blocks.remove(currentBlock);
 //		counter = (counter + 1) % blocks.size();
 	}
+
+	public void setVisualServoStartPoint(Point2D.Double startPoint) {
+		visualServoStartPoint = startPoint;	
+	}
 	
+	public Point2D.Double getVisualServoStartPoint() {
+		return visualServoStartPoint;	
+	}
+
 }

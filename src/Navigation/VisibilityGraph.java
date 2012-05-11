@@ -48,7 +48,15 @@ public class VisibilityGraph {
 		
 		ArrayList<Point2D.Double> otherPoints = new ArrayList<Point2D.Double>();
 		for (ConstructionObject block : blocks) {
-			otherPoints.add(block.getPosition());
+			for (PolygonObstacle obstacle : configObstacles) {
+				if (! obstacle.contains(block.getPosition())) {
+					otherPoints.add(block.getPosition());
+				}
+			}
+			
+		}
+		for (Point2D.Double blockPoint : otherPoints) {
+			ret.put(blockPoint, getReachablePoints(configObstacles, otherPoints, blockPoint, cworldRect));
 		}
 		otherPoints.add(start);
 		otherPoints.add(goal);
@@ -57,9 +65,7 @@ public class VisibilityGraph {
 		ret.put(start, getReachablePoints(configObstacles, otherPoints, start, cworldRect));
 //		log.info("put point " + start);
 		ret.put(goal, getReachablePoints(configObstacles, otherPoints, goal, cworldRect));
-		for (ConstructionObject block : blocks) {
-			ret.put(block.getPosition(), getReachablePoints(configObstacles, otherPoints, block.getPosition(), cworldRect));
-		}
+		
 
 		// CONSTRUCT VISIBILITY GRAPH
 		
@@ -161,7 +167,7 @@ public class VisibilityGraph {
 	 */
 	public static boolean edgeIntersects(Line2D edge, PolygonObstacle[] configObstacles) {
 //		log.info("checking intersect");
-		double epsilon = .01;
+		double epsilon = java.lang.Double.MIN_VALUE;
 		for (PolygonObstacle poly3 : configObstacles) {
 //			log.info("go through poly");
 			List<Point2D.Double> verts = poly3.getVertices();

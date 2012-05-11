@@ -145,8 +145,7 @@ public class VisionMain2 implements NodeMain {
 		
 		// TODO Auto-generated method stub
 //		vidPub = node.newPublisher("/rss/blobVideo2", "sensor_msgs/Image");
-		vidPubThreshold = node.newPublisher("/rss/blobVideo2B",
-				"sensor_msgs/Image");
+		vidPubThreshold = node.newPublisher("/rss/blobVideo2B", "sensor_msgs/Image");
 		vidPubHue = node.newPublisher("/rss/blobVideo2C", "sensor_msgs/Image");
 
 		pointPub = node.newPublisher("gui/Point", "lab5_msgs/GUIPointMsg");
@@ -380,7 +379,7 @@ public class VisionMain2 implements NodeMain {
 				accumulatedVisionPoints.clear();// = new ArrayList<Point2D.Double>();
 			}
 		} else {
-			log.info("VisionMain2.java: no contours");
+			//log.info("VisionMain2.java: no contours");
 		}
 
 //		double SLOPE_THRESH = 2.0;

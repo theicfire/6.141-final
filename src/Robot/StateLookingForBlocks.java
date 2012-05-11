@@ -63,13 +63,21 @@ public class StateLookingForBlocks extends RobotState {
 				ArrayList<Point2D.Double> shortestPath = DijkstraGood.getMyDijkstra(
 						robot.navigationMain.getAndPlotVisGraph(robotpos), robotpos, 
 						curpos, robot.log);
-				shortestPath.remove(0); // we should already be at the first waypoint
-				if (shortestPath.size() == 0) {
-					// draw a direct line from current pos to block
-					shortestPath.add(curpos);
+				log.info("DIJKSTRA COMPLETE");
+				if (shortestPath == null) {
+					// there is no route to this block. get the next block.
+					robot.log.info("NO ROUTE TO THIS BLOCK");
+					robot.planner.markCurrentBlockDone();
+					robot.planner.nextClosestBlock();
+				} else {
+					shortestPath.remove(0); // we should already be at the first waypoint
+					if (shortestPath.size() == 0) {
+						// draw a direct line from current pos to block
+						shortestPath.add(curpos);
+					}
+					robot.driveToLocations(shortestPath);
+					state = State.MOVING;
 				}
-				robot.driveToLocations(shortestPath);
-				state = State.MOVING;
 				break;
 			case MOVING:
 				if (robot.vision.canSeeBlock()) {

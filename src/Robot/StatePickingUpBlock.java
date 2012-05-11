@@ -21,6 +21,7 @@ import Controller.AngleController;
 import Controller.Utility;
 import Controller.Utility.Pose;
 import Grasping.Arm;
+import Navigation.PolygonObstacle;
 import Planner.Planner;
 
 public class StatePickingUpBlock extends RobotState {
@@ -127,11 +128,25 @@ public class StatePickingUpBlock extends RobotState {
 			} // end switch
 		} // end while
 
-
-		
+		// if we are in c-space, get out
+		PolygonObstacle[] cSpaceObstacles = this.robot.navigationMain.cspace.getObstacles();
+		while (isInCSpace(robot.odom.getPosition(), cSpaceObstacles)) {
+			robot.driveToLocation(robot.planner.getVisualServoStartPoint());
+			Utility.sleepFor20ms();
+		}
 		// state transition
 		this.robot.setStateObject(new StateInitial(this.robot));
 
+	}
+	
+	
+	boolean isInCSpace(Point2D.Double currentPosition, PolygonObstacle[] cSpaceObstacles) {
+		for (PolygonObstacle o: cSpaceObstacles) {
+			if (o.contains(currentPosition)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

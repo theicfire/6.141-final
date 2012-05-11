@@ -14,7 +14,7 @@
   <node name="view2" pkg="image_view" type="image_view" args="image:=/rss/video2" machine="workstation" />
 
   <node name="blobview" pkg="image_view" type="image_view" args="image:=/rss/blobVideo" machine="workstation" />
-  <node name="blobview2" pkg="image_view" type="image_view" args="image:=/rss/blobVideo2" machine="workstation" />
+<!--  <node name="blobview2" pkg="image_view" type="image_view" args="image:=/rss/blobVideo2" machine="workstation" />-->
   <node name="blobview2B" pkg="image_view" type="image_view" args="image:=/rss/blobVideo2B" machine="workstation" />
   <node name="blobview2C" pkg="image_view" type="image_view" args="image:=/rss/blobVideo2C" machine="workstation" />
   <node name="vid" pkg="gscam" type="gscam" machine="netbook" />

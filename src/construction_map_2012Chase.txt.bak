@@ -40,15 +40,15 @@ map {
 
 	    3 {
 	        position { 4.64 0.09 } 
-		    top_color yellow
-		    bottom_color orange
+		    top_color blue
+		    bottom_color blue
 		    top_radius 0.055 #in meters
 		    bottom_radius 0.055 #in meters
 	    }
 
 	    4 {
 	        position { 4.64 3.05 } 
-		    top_color yellow
+		    top_color blue
 		    bottom_color green
 		    top_radius 0.055 #in meters
 		    bottom_radius 0.055 #in meters
@@ -56,7 +56,7 @@ map {
 
 	    5 {
 	        position { 2.44 3.05 } 
-		    top_color red
+		    top_color green
 		    bottom_color green
 		    top_radius 0.055 #in meters
 		    bottom_radius 0.055 #in meters
@@ -64,7 +64,7 @@ map {
 
 	    6 {
 	        position { 1.25 3.05 } 
-		    top_color yellow
+		    top_color green
 		    bottom_color blue
 		    top_radius 0.055 #in meters
 		    bottom_radius 0.055 #in meters
@@ -75,24 +75,23 @@ map {
     #outside of the bounding box
 
     construction_objects {
-    	num_construction_objects 17
-        0 { position { 0.87 0.87 } color red }
+    	num_construction_objects 16
+        0 { position { 1.00 1.00 } color red }
         1 { position { 2.00 1.00 } color blue }
         2 { position { 3.00 1.00 } color yellow }
         3 { position { 4.00 1.00 } color red }
-        4 { position { 1.00 2.00 } color green }
+        4 { position { 1.00 2.00 } color blue }
         5 { position { 2.00 2.00 } color yellow }
         6 { position { 3.00 2.00 } color red }
-	7 { position { 0.69 2.80 } color red }
-	8 { position { 1.00 2.70 } color green }
+	7 { position { 0.70 2.80 } color red }
+	8 { position { 1.00 2.70 } color blue }
 	9 { position { 1.75 2.97 } color yellow }
-	10 { position { 0.42 1.00 } color green }
+	10 { position { 0.40 1.00 } color green }
 	11 { position { 1.00 0.60 } color blue }
-	12 { position { 4.40 1.80 } color red }
+	12 { position { 4.40 1.80 } color blue }
 	13 { position { 4.30 2.60 } color blue }
 	14 { position { 2.70 2.55 } color blue }
 	15 { position { 3.50 0.55 } color blue } 
-	16 { position { 3.72 1.86 } color blue }	
     }
 
 	#Recall that obstacle points must be specified in CCW order
@@ -183,8 +182,6 @@ map {
 		    2 { 1.47 1.67 }
 		    3 { 1.26 1.67 }
 		}
-	
-	}
 	
 	}
 }
