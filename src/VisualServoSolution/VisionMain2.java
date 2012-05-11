@@ -352,16 +352,17 @@ public class VisionMain2 implements NodeMain {
 		}
 		
 		if (visionPoints.size() > NUM_VISION_POINTS_THRESHOLD) {
-			Utility.Pair<ArrayList<Point2D.Double>, ArrayList<Point2D.Double>> lineStartAndLineEnds = calcFacingEdges(new Point2D.Double(
-					bestGuess.getX(), bestGuess.getY()));
-			HashSet<Point2D.Double> pointCloud = discretizeLines(
-					lineStartAndLineEnds.first, lineStartAndLineEnds.second);
 			
 			accumulatedVisionPoints.addAll(visionPoints);
 			
 			averageCount += 1;
 			// TODO hack to make sure we're not at 0, 0
 			if (averageCount >= TAKE_NUM_AVERAGES && odom.getPosition().x != 0 && odom.getPosition().y != 0) {			
+				Utility.Pair<ArrayList<Point2D.Double>, ArrayList<Point2D.Double>> lineStartAndLineEnds = calcFacingEdges(new Point2D.Double(
+						bestGuess.getX(), bestGuess.getY()));
+				HashSet<Point2D.Double> pointCloud = discretizeLines(
+						lineStartAndLineEnds.first, lineStartAndLineEnds.second);
+				
 //				lockPointCloudList.lock();
 //				this.pointCloudList.add(visionPoints);
 //				lockPointCloudList.unlock();
