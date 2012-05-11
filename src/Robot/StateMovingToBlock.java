@@ -32,7 +32,6 @@ public class StateMovingToBlock extends RobotState {
 	@Override
 	public void perform() {
 		robot.log.info("IN STATE MOVING TO BLOCK");
-		robot.speaker.speak("i am getting that block");
 		//robot.stopMoving(); // safety
 				
 		int noBlockTicks = 0;

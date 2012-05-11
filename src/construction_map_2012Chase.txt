@@ -86,7 +86,7 @@ map {
 	7 { position { 0.69 2.80 } color red }
 	8 { position { 1.00 2.70 } color green }
 	9 { position { 1.75 2.97 } color yellow }
-	10 { position { 0.44 1.00 } color green }
+	10 { position { 0.48 1.00 } color green }
 	11 { position { 1.00 0.60 } color blue }
 	12 { position { 4.40 1.80 } color red }
 	13 { position { 4.30 2.60 } color blue }

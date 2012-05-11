@@ -63,7 +63,7 @@ public class Robot {
 
 		this.navigationMain = new NavigationMain(node);
 		this.speaker = new RosSpeak(node);
-		speaker.speak("Sound initialized");
+		//speaker.speak("Sound initialized");
 		this.arm = new Arm();
 		this.armDriver = new RosArmDriver(node);
 		this.doorDriver = new RosDoorDriver(node);		

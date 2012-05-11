@@ -39,7 +39,20 @@ public class StatePickingUpBlock extends RobotState {
 	@Override
 	public void perform() {
 		robot.stopMoving();
-		robot.speaker.speak("this block is mine");
+		int count = robot.planner.blocksStored; 
+		String[] words = {
+				"The first block is for building the shelter",
+				"The second block is for my Martian home",
+				"The third block is a souvenir",
+				"The fourth block is for Professor Roose",
+				"The fifth block is for Professor Teller",
+				"The sixth block is for Jon the T A",
+				"The last one is for me. Can I have civil rights now?" };
+		if (count < words.length) {
+			robot.speaker.speak("i am getting the " + words[count] + " block");
+		} else {
+			robot.speaker.speak("this block is mine");
+		}
 		State state = State.APPROACHING_BLOCK;
 		boolean done = false;
 
