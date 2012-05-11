@@ -17,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
 import org.ros.message.lab5_msgs.GUIEraseMsg;
 import org.ros.message.lab5_msgs.GUIPointMsg;
+import org.ros.message.rss_msgs.BreakBeamMsg;
 import org.ros.message.rss_msgs.VisionMsg;
 import org.ros.message.sensor_msgs.Image;
 import org.ros.namespace.GraphName;
@@ -50,6 +51,8 @@ import VisualServoSolution.VisionMain.InterpRawVid;
 
 public class VisionMain2 implements NodeMain {
 
+	private boolean globalEnable = false;
+	
 	private static final int VISION_IMAGE_WIDTH = 320;
 	Node globalNode;
 	GrandChallengeMap map;
@@ -65,7 +68,7 @@ public class VisionMain2 implements NodeMain {
 	// must have at least NUM_VISION_POINTS to perform ICP
 	final int NUM_VISION_POINTS_THRESHOLD = 75;
 	private ArrayList<Point2D.Double> accumulatedVisionPoints;
-	final int TAKE_NUM_AVERAGES = 10;
+	final int TAKE_NUM_AVERAGES = 15;
 	int averageCount;
 	
 	static IplImage imgHsv; // 3 channels
@@ -97,7 +100,7 @@ public class VisionMain2 implements NodeMain {
 	boolean pixelYIsValid[];
 
 	// y increases from top to bottom
-	int HORIZONTAL_Y_THRESHOLD = 120; // pixels with y value less than this are not considered
+	int HORIZONTAL_Y_THRESHOLD = 100; // pixels with y value less than this are not considered
 	int SLOPE_THRESHOLD = 2;
 	CvMat pixelPointsWhereFloorMeetsWall;  // remember to initialize the third coordinate to 1.0
 	CvMat floorPoints;
@@ -128,7 +131,7 @@ public class VisionMain2 implements NodeMain {
 				ArrayList<Point2D.Double>>();
 		buildObstacleToNormalsMapping();
 		// homography
-		String homographyData = "/home/rss-student/RSS-I-group/Challenge/calibration4.txt";
+		String homographyData = "/home/rss-student/RSS-I-group/Challenge/calibration5.txt";
 		ArrayList<HomographySrcDstPoint> homoPoints = HomographySrcDstPoint
 				.loadHomographyDataTextFile(homographyData);
 		double FEET_TO_METERS = 0.3048;
@@ -154,25 +157,48 @@ public class VisionMain2 implements NodeMain {
 		cvStorage = opencv_core.cvCreateMemStorage(0);
 		pixelToFloorH = Utility.computeHomography(homoPoints);
 
+		Subscriber<BreakBeamMsg> enableVisionUpdates = 
+				node.newSubscriber("/rss/updateVisionLocalization", "rss_msgs/BreakBeamMsg");
+		enableVisionUpdates.addMessageListener(new ToggleVision());
 		Subscriber<org.ros.message.sensor_msgs.Image> rawVidSub = node
 				.newSubscriber("rss/video2", "sensor_msgs/Image");
 		rawVidSub.addMessageListener(new InterpRawVid());
 //		rawVidSub = node.newSubscriber("rss/video2", "sensor_msgs/Image");
+		Utility.sleepFor5Seconds();
 
 	}
+	
+	public class ToggleVision implements MessageListener<BreakBeamMsg> {
+//		private boolean lastBeam = true;
+
+		@Override
+		public void onNewMessage(BreakBeamMsg arg0) {
+			log.info("VISION SYSTEM ACK");
+			if (arg0.beamBroken = true) { // && lastBeam  == false) {
+				averageCount = 0;
+				accumulatedVisionPoints.clear();
+				globalEnable = true;				
+			} else {
+				globalEnable = false;
+			}
+//			lastBeam = arg0.beamBroken;
+		}
+	}
+
 
 	public class InterpRawVid implements
 			MessageListener<org.ros.message.sensor_msgs.Image> {
-
+		
 		boolean firstMessage = true;
 		int counter = 0;
 
 		@Override
 		synchronized public void onNewMessage(
 				org.ros.message.sensor_msgs.Image src) {
+
 			// log.info("VisionMain2.java: gotmsg," + src.width + " " +
 			// src.height);
-//			log.info("visionmain2.java: here");
+//			log.info("visionmain2.java: here");						
 			counter += 1;
 			
 			if (VISION_IMAGE_WIDTH != src.width) {
@@ -236,7 +262,7 @@ public class VisionMain2 implements NodeMain {
 		}
 	}
 
-	synchronized void processImage(Image src) {
+	private synchronized void processImage(Image src) {
 		Utility.copyFromRgbImgMsgToRgbIplImg(src,rgbIpl);
 //		IplImage rgbIpl = Utility.rgbImgMsgToRgbIplImg(src, log);
 
@@ -267,40 +293,6 @@ public class VisionMain2 implements NodeMain {
 		Image dest2;
 		dest2 = Utility.monoIplImgToRgbImgMsg(imgThreshold, log);
 		vidPubThreshold.publish(dest2);
-/*
-		// compute Detected Edge
-		opencv_imgproc.cvCanny(imgThreshold, imgDetectedEdges, lowThreshold,
-				lowThreshold * ratio, kernel_size);
-
-		imgContours = imgDetectedEdges;
-
-		// compute contours
-		CvSeq first_contour = new CvSeq();
-		CvSeq contour = first_contour;
-		int header_size = Loader.sizeof(CvContour.class);
-		int result;
-		int findCountoursresult = opencv_imgproc.cvFindContours(imgContours,
-				cvStorage, first_contour, header_size,
-				// src_gray,cvStorage,first_contour,header_size,
-				opencv_imgproc.CV_RETR_LIST,
-				// opencv_imgproc.CV_RETR_TREE,
-				opencv_imgproc.CV_CHAIN_APPROX_SIMPLE);
-
-		ArrayList<ArrayList<Point>> contourList = new ArrayList<ArrayList<Point>>();
-		while (contour != null && !contour.isNull()) {
-			ArrayList<Point> points = new ArrayList<Point>();
-			for (int i = 0; i < contour.total(); ++i) {
-				Pointer ptrPoint = opencv_core.cvGetSeqElem(contour, i);
-				CvPoint point = new CvPoint(ptrPoint);
-				points.add(new Point(point.x(), point.y()));
-			}
-			contourList.add(points);
-			contour = contour.h_next();
-		}
-
-		ArrayList<Point> bestContour = VisualLocalization.findBestContour(
-				contourList, 100, .75);
-*/
 		
 		preparePixelPointsForHomographicTransform();
 		doHomographicTransform();
@@ -351,6 +343,8 @@ public class VisionMain2 implements NodeMain {
 			}
 		}
 		
+//		log.info("vision points: found cloud with size " + visionPoints.size());
+		
 		if (visionPoints.size() > NUM_VISION_POINTS_THRESHOLD) {
 			
 			accumulatedVisionPoints.addAll(visionPoints);
@@ -366,16 +360,18 @@ public class VisionMain2 implements NodeMain {
 //				lockPointCloudList.lock();
 //				this.pointCloudList.add(visionPoints);
 //				lockPointCloudList.unlock();
-				
-				ConfidencePose newLocation = ICP.computeCorrectedPosition(
-						// bestGuess, ICP.discretizeMap(map.obstacles),
-						bestGuess, pointCloud, accumulatedVisionPoints, log,
-						"/home/rss-student/ICP/points.txt");
-//				log.info("confidence " + newLocation.getConfidence()
-//						+ " new pose " + newLocation.getX() + ", "
-//						+ newLocation.getY() + ", theta "
-//						+ newLocation.getTheta());
-//				this.odom.updatePosition(newLocation);
+				if (globalEnable) {
+					ConfidencePose newLocation = ICP.computeCorrectedPosition(
+							// bestGuess, ICP.discretizeMap(map.obstacles),
+							bestGuess, pointCloud, accumulatedVisionPoints, log,
+							"/home/rss-student/ICP/points.txt");
+					log.info("confidence " + newLocation.getConfidence()
+							+ " new pose " + newLocation.getX() + ", "
+							+ newLocation.getY() + ", theta "
+							+ newLocation.getTheta());
+					this.odom.updatePosition(newLocation);
+				}
+				globalEnable = false;
 				averageCount = 0;
 				accumulatedVisionPoints.clear();// = new ArrayList<Point2D.Double>();
 			}
@@ -502,7 +498,7 @@ public class VisionMain2 implements NodeMain {
 		return pointCloud;
 	}
 
-	void buildObstacleToNormalsMapping() {
+	private void buildObstacleToNormalsMapping() {
 		for (PolygonObstacle o: this.map.obstacles) {
 			ArrayList<Double> obstacle = new ArrayList<Point2D.Double>();
 			o.getVertices(obstacle);
@@ -558,7 +554,7 @@ public class VisionMain2 implements NodeMain {
 				lineStartPoints, lineEndPoints);
 	}
 	
-	void updateMeansAndVariances() {
+	private void updateMeansAndVariances() {
 		for (int i = 0; i < ewmaFloorX.length; ++i) {
 			if (this.pixelYIsValid[i]) {
 				double invZ = 1.0/this.floorPoints.get(2, i);
@@ -578,7 +574,7 @@ public class VisionMain2 implements NodeMain {
 		}
 	}
 
-	void doHomographicTransform() {
+	private void doHomographicTransform() {
 		opencv_core.cvMatMul(this.pixelToFloorH,
 				this.pixelPointsWhereFloorMeetsWall,this.floorPoints);
 	}
@@ -587,7 +583,7 @@ public class VisionMain2 implements NodeMain {
 	// that are valid in pixelPointsWhereFloorMeetsWall
 	// if return N, the first N points of are
 	// pixelPointsWhereFloorMeetsWall valid
-	void preparePixelPointsForHomographicTransform() {
+	private void preparePixelPointsForHomographicTransform() {
 		
 		CvMat ppwfmw = this.pixelPointsWhereFloorMeetsWall;
 		int[] pywfmw = this.pixelYWhereFloorMeetsWall;

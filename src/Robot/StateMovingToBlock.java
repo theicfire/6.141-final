@@ -61,10 +61,10 @@ public class StateMovingToBlock extends RobotState {
 						return;
 					} else if (noBlockTicks > 110) {
 						robot.log.info("no block...moving other way");
-						robot.sendMotorMessage(0, 0.1);
+						robot.sendMotorMessage(0.05, 0.1);
 					} else if (noBlockTicks > 0) {
 						robot.log.info("no block...moving one way");
-						robot.sendMotorMessage(0, -0.1);
+						robot.sendMotorMessage(0.05, -0.1);
 					}
 					break;
 				}

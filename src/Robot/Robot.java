@@ -54,6 +54,8 @@ public class Robot {
 	private Publisher<OdometryMsg> angleCommandPub;
 	private Publisher<MotionMsg> movePub;
 	private Publisher<BreakBeamMsg> stopPub;
+	private Publisher<BreakBeamMsg> enableVisionUpdates; 
+
 	public Log log;
 	
 	private LinkedList<Point2D.Double> navQueue;
@@ -63,7 +65,7 @@ public class Robot {
 
 		this.navigationMain = new NavigationMain(node);
 		this.speaker = new RosSpeak(node);
-		//speaker.speak("Sound initialized");
+		speaker.speak("dramatic");
 		this.arm = new Arm();
 		this.armDriver = new RosArmDriver(node);
 		this.doorDriver = new RosDoorDriver(node);		
@@ -80,6 +82,7 @@ public class Robot {
 
 		this.stopPub = node.newPublisher("rss/stopcommand",
 				"rss_msgs/BreakBeamMsg");
+		this.enableVisionUpdates = node.newPublisher("/rss/updateVisionLocalization", "rss_msgs/BreakBeamMsg");
 		this.movePub = node.newPublisher("rss/waypointMovecommand", "rss_msgs/MotionMsg");
 
 		log.info("Waiting for movePub");
@@ -136,6 +139,19 @@ public class Robot {
 	public void setStateObject(RobotState newRobotState) {
 		log.info("Setting new state" + newRobotState.getClass());
 		robotState = newRobotState;
+	}
+	
+	public void pollVisionLocalization() {
+		BreakBeamMsg bbm = new BreakBeamMsg();
+		bbm.beamBroken = true;
+		this.enableVisionUpdates.publish(bbm);
+	}
+	
+
+	public void stopPollVisionLocalization() {
+		BreakBeamMsg bbm = new BreakBeamMsg();
+		bbm.beamBroken = false;
+		this.enableVisionUpdates.publish(bbm);		
 	}
 
 	public RobotState getRobotState() {
@@ -245,6 +261,7 @@ public class Robot {
 	public boolean isRightBump() {
 		return rightBump;
 	}
+
 
 	// NO MORE METHODS HERE!!!! NO MORE METHODS HERE!!!!
 	// instead of doing robot.resetArm()

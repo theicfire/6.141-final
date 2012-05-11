@@ -57,8 +57,8 @@ public class StateInitial extends RobotState {
 	
 	private boolean isInCSpace(Point2D.Double currentPosition, PolygonObstacle[] cSpaceObstacles) {
 		for (PolygonObstacle o: cSpaceObstacles) {
-			robot.log.info("closed?: " + o.closed);
-			robot.log.info("curpos " + currentPosition);
+//			robot.log.info("closed?: " + o.closed);
+//			robot.log.info("curpos " + currentPosition);
 			if (o.contains(currentPosition)) {
 				robot.log.info("I am inside obstacle " + o);
 				return true;

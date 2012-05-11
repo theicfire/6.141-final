@@ -39,7 +39,16 @@ public class StatePickingUpBlock extends RobotState {
 	@Override
 	public void perform() {
 		robot.stopMoving();
-		int count = robot.planner.blocksStored; 
+		int count = robot.planner.blocksStored;
+		
+		if (true || count == 2 || count == 4) {
+			robot.log.info("performing update from vision system");
+			robot.pollVisionLocalization();
+			Utility.sleepFor5Seconds();
+			Utility.sleepFor5Seconds();
+//			robot.stopPollVisionLocalization();
+		}
+		
 		String[] words = {
 				"The first block is for building the shelter",
 				"The second block is for my Martian home",
@@ -49,7 +58,7 @@ public class StatePickingUpBlock extends RobotState {
 				"The sixth block is for Jon the T A",
 				"The last one is for me. Can I have civil rights now?" };
 		if (count < words.length) {
-			robot.speaker.speak("i am getting the " + words[count] + " block");
+			robot.speaker.speak(words[count]);
 		} else {
 			robot.speaker.speak("this block is mine");
 		}

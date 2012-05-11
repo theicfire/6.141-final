@@ -16,9 +16,9 @@ import Controller.Utility.Pose;
 
 public class Localizer {
 
-	final double MAX_ODOMETRY_DIFF_MAGNITUDE = 0.05;
+	final double MAX_ODOMETRY_DIFF_MAGNITUDE = 0.10;
 	final double MAX_ODOMETRY_DIFF_THETA = 5.0 * Math.PI / 180.0;
-        final double startTime;
+    final double startTime;
 
 	// Utility.Pose odometryOffset;
 	private Utility.Pose lastRawPose;
@@ -113,7 +113,7 @@ public class Localizer {
 	// updatePosition((new Utility()).new Pose(x, y, theta));
 	// }
 
-	public void updatePosition(Utility.ConfidencePose correctLocation) {
+	public boolean updatePosition(Utility.ConfidencePose correctLocation) {
 		if (!master) {
 			throw new RuntimeException(
 					"non-master node attempted to update Position");
@@ -122,8 +122,9 @@ public class Localizer {
 		// make the curve of accepting more dramatic
 		// double confidence = Math.pow(correctLocation.getConfidence(), 2);
 		double confidence = correctLocation.getConfidence();
-		if (confidence < 1) {
-			return;
+		if (confidence <= 0) {
+			log.info("rejected update as confidence was 0");
+			return false;
 		}
 
 		// make the lastRealPose a linear combination of lastRawPose and
@@ -138,22 +139,31 @@ public class Localizer {
 		// ensure that the new position is within odometry error of the old
 		// position
 
-		double secondsSinceStart = (Math.abs(System.currentTimeMillis() - startTime) / 1000.0);
+		//double secondsSinceStart = (Math.abs(System.currentTimeMillis() - startTime) / 1000.0);
 		// increase multiplier one every sixty seconds
-		double odomErrorTimeMultiplier = 1.0 * secondsSinceStart / 60.0;
+		double odomErrorTimeMultiplier = 1.0; // * secondsSinceStart / 60.0;
 
-		if (Utility.getMagnitude(curRawPose.getPoint(), newCorrect.getPoint()) < MAX_ODOMETRY_DIFF_MAGNITUDE * odomErrorTimeMultiplier
-				&& Utility.inRangeNegPiToPi(curRawPose.getTheta()
-						- newCorrect.getTheta()) < MAX_ODOMETRY_DIFF_THETA * odomErrorTimeMultiplier) {
-			log.info("new pose " + newCorrect + " is within odom error (*" + odomErrorTimeMultiplier + ") of +"
-					+ curRawPose);
+		Pose offsetOdomLocation = (new Utility()).new Pose(curRawPose.getX() + startPose.getX(), 
+														   curRawPose.getY() + startPose.getY(),
+														   curRawPose.getTheta() + startPose.getTheta());
+		
+		if (Utility.getMagnitude(offsetOdomLocation.getPoint(), newCorrect.getPoint()) 
+				< MAX_ODOMETRY_DIFF_MAGNITUDE * odomErrorTimeMultiplier
+				&& Utility.inRangeNegPiToPi(offsetOdomLocation.getTheta() - newCorrect.getTheta())
+				< MAX_ODOMETRY_DIFF_THETA * odomErrorTimeMultiplier) {
+			log.info("~~~~~~~~~~~~~~~ ACCEPTED pose " + newCorrect
+					+ " is within odom error (*" + odomErrorTimeMultiplier
+					+ ") of +" + offsetOdomLocation);
 			updatePosition(newCorrect);
+			return true;
 		} else {
 			// outer edge... that is MAX_MAGNITUDE along the curRawPose ->
 			// newCorrect vector
 			// TODO
+			log.info("~~~~~~~~~~~~~~~ REJECTED new pose " + newCorrect
+					+ ", too far from odom " + offsetOdomLocation);
+		return false;
 		}
-
 	}
 
 	// update this by getting the difference between your current position and

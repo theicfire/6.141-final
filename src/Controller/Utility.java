@@ -108,6 +108,7 @@ public class Utility {
 
 		public void setTheta(double _theta) {
 			this._theta = _theta;
+			this._theta = Utility.inRangeNegPiToPi(this._theta);
 		}
 
 		public double getX() {
@@ -391,9 +392,6 @@ public class Utility {
 		try {
 			String mapfilename = "/home/rss-student/RSS-I-group/Challenge/src/construction_map_2012Chase.txt";
 			map = GrandChallengeMap.parseFile(mapfilename);
-			
-			
-			
 		} catch (Exception e) {
 			throw new RuntimeException(
 					"DIE DIE DIE DIE DIE DIE couldn't load map");
