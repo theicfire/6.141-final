@@ -18,7 +18,7 @@ import Robot.StateLookingForBlocks.State;
 public class StateMovingToBlock extends RobotState {
 
 	private static final double STANDOFF_ANGLE = 0.1;
-	private static final double STANDOFF_DISTANCE = 1.0; // should 0.75
+	private static final double STANDOFF_DISTANCE = 0.8; // should 0.75
 	private static final double STANDOFF_EPSILON = .02; // should 0.75
 
 	public StateMovingToBlock(Robot ri) {
@@ -50,14 +50,14 @@ public class StateMovingToBlock extends RobotState {
 					Utility.sleepFor20ms();
 					// sweep left for 100 ticks (2 sec), then right for 200 ticks (4 sec), then 
 					// give up
-					if (noBlockTicks > 300) {
+					if (noBlockTicks > 360) {
 						// give up after 6 seconds
 						robot.setStateObject(new StateLookingForBlocks(robot));
 						return;
 					} else if (noBlockTicks > 100) {
-						robot.sendMotorMessage(0, 0.5);
+						robot.sendMotorMessage(0, 0.25);
 					} else if (noBlockTicks > 0) {
-						robot.sendMotorMessage(0, -0.5);
+						robot.sendMotorMessage(0, -0.25);
 					}
 					break;
 				} else {
