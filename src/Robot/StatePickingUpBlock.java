@@ -131,6 +131,7 @@ public class StatePickingUpBlock extends RobotState {
 		// if we are in c-space, get out
 		PolygonObstacle[] cSpaceObstacles = this.robot.navigationMain.cspace.getObstacles();
 		while (isInCSpace(robot.odom.getPosition(), cSpaceObstacles)) {
+			robot.log.info("i am in cspace and driving back to start location: " + robot.planner.getVisualServoStartPoint());
 			robot.driveToLocation(robot.planner.getVisualServoStartPoint());
 			Utility.sleepFor20ms();
 		}
@@ -138,11 +139,11 @@ public class StatePickingUpBlock extends RobotState {
 		this.robot.setStateObject(new StateInitial(this.robot));
 
 	}
-	
-	
+		
 	boolean isInCSpace(Point2D.Double currentPosition, PolygonObstacle[] cSpaceObstacles) {
 		for (PolygonObstacle o: cSpaceObstacles) {
 			if (o.contains(currentPosition)) {
+				robot.log.info("I am inside obstacle " + o);
 				return true;
 			}
 		}

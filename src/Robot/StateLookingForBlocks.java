@@ -63,7 +63,7 @@ public class StateLookingForBlocks extends RobotState {
 				ArrayList<Point2D.Double> shortestPath = DijkstraGood.getMyDijkstra(
 						robot.navigationMain.getAndPlotVisGraph(robotpos), robotpos, 
 						curpos, robot.log);
-				log.info("DIJKSTRA COMPLETE");
+				robot.log.info("DIJKSTRA COMPLETE");
 				if (shortestPath == null) {
 					// there is no route to this block. get the next block.
 					robot.log.info("NO ROUTE TO THIS BLOCK");

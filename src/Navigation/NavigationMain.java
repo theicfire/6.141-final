@@ -279,7 +279,7 @@ public class NavigationMain {
 	double furthestDistanceFromRobotOrigin = 0.41;
 	PolygonObstacle createCircleRobot() {
 		double radius = furthestDistanceFromRobotOrigin;
-		int numSides = 80;
+		int numSides = 20;
 		PolygonObstacle circle = new PolygonObstacle();
 		double dTheta = (2*Math.PI) / numSides;
 		for (int i = 0; i < numSides; ++i) {

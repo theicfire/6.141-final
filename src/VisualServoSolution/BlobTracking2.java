@@ -105,8 +105,8 @@ public class BlobTracking2 {
 	static int RATIO = 5;
 	static int KERNEL_SIZE = 5;
 	// blob thresholds
-	int MIN_BLOB_AREA = 176;
-	int MAX_BLOB_AREA = 1024;
+	int MIN_BLOB_AREA = 128; // was 176
+	int MAX_BLOB_AREA = 900; // was 1024
 
 	/**
 	 * <p>
